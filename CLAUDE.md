@@ -233,7 +233,6 @@ nutorch/
 │
 ├── cargo/                       # ⭐ Main Rust plugin implementation
 │   ├── Cargo.toml               # Package: "nutorch", Binary: "nu_plugin_torch"
-│   ├── CLAUDE.md                # Old version (now superseded by root)
 │   ├── README.md                # Build/development instructions
 │   │
 │   ├── src/
