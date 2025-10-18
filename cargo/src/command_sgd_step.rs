@@ -28,8 +28,7 @@ impl PluginCommand for CommandSgdStep {
     }
 
     fn description(&self) -> &str {
-        "Vanilla stochastic-gradient-descene step: p -= lr * p.grad (in-place) \
-         and p.grad is zeroed."
+        "Perform an in-place SGD optimizer step: p -= lr * p.grad for each parameter. (similar to optimizer.step() in PyTorch SGD)"
     }
 
     fn signature(&self) -> Signature {
@@ -88,9 +87,8 @@ torch sgd_step [$w1, $w2] --lr 0.05
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        //--------------------------------------------------------------
-        // 1. Collect parameter IDs
-        //--------------------------------------------------------------
+        // ── dual input: pipeline OR argument (not both) ───────────────
+        // Supports: [$params] | torch sgd_step   OR   torch sgd_step [$params]
         let list_from_pipe: Option<Value> = match &input {
             PipelineData::Value(v, _) => Some(v.clone()),
             PipelineData::Empty => None,
@@ -104,6 +102,7 @@ torch sgd_step [$w1, $w2] --lr 0.05
 
         let list_from_arg: Option<Value> = call.nth(0);
 
+        // ── validate exactly one input source ─────────────────────────
         match (&list_from_pipe, &list_from_arg) {
             (None, None) => {
                 return Err(LabeledError::new("Missing input")
@@ -118,6 +117,7 @@ torch sgd_step [$w1, $w2] --lr 0.05
             _ => {}
         };
 
+        // ── extract parameter IDs from list ───────────────────────────
         let list_val = list_from_pipe.or(list_from_arg).unwrap();
 
         let param_ids: Vec<String> = list_val
@@ -136,14 +136,10 @@ torch sgd_step [$w1, $w2] --lr 0.05
             );
         }
 
-        //--------------------------------------------------------------
-        // 2. Learning-rate flag (default 0.01)
-        //--------------------------------------------------------------
+        // ── extract learning rate (default 0.01) ──────────────────────
         let lr: f64 = call.get_flag("lr")?.unwrap_or(0.01);
 
-        //--------------------------------------------------------------
-        // 3. Fetch tensors and perform in-place update under no_grad
-        //--------------------------------------------------------------
+        // ── fetch tensors from registry ───────────────────────────────
         let registry = TENSOR_REGISTRY.lock().unwrap();
         let mut tensors: Vec<Tensor> = Vec::new();
         for id in &param_ids {
@@ -155,21 +151,22 @@ torch sgd_step [$w1, $w2] --lr 0.05
                 }
             }
         }
-        // disable grad-mode for the duration of the update
+
+        // ── perform in-place SGD update: p -= lr * grad ───────────────
+        // Use no_grad to disable gradient tracking during parameter updates
         tch::no_grad(|| {
             for mut p in tensors {
                 let g = p.grad();
                 if g.defined() {
+                    // In-place subtraction: p -= lr * grad
                     let before_ptr = p.data_ptr();
                     let r = p.f_sub_(&(g * lr)).unwrap();
-                    assert_eq!(before_ptr, r.data_ptr()); // same memory
+                    assert_eq!(before_ptr, r.data_ptr()); // verify in-place operation
                 }
             }
         });
 
-        //--------------------------------------------------------------
-        // 4. Return the (still the same) list of parameter IDs
-        //--------------------------------------------------------------
+        // ── return same parameter IDs for chaining ────────────────────
         let out_vals: Vec<Value> = param_ids
             .iter()
             .map(|id| Value::string(id, call.head))
