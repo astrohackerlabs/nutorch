@@ -562,11 +562,25 @@ cargo build --release
 
 ### Testing
 
+**Important**: Tests must be run from the `cargo/test` directory using the `test.nu` framework.
+
 ```bash
 cd cargo/test
-pnpm install  # First time only
-nu -c "use node_modules/test.nu; test run-tests"
+pnpm install  # First time only - installs test.nu framework
+
+# Then from within Nushell:
+use node_modules/test.nu
+test run-tests  # Runs all test_*.nu files
 ```
+
+**Step-by-step**:
+1. `cd cargo/test` - Navigate to test directory
+2. `pnpm install` - Install test.nu (one time only)
+3. `nu` - Start Nushell
+4. `use node_modules/test.nu` - Load testing framework
+5. `test run-tests` - Execute all tests
+
+This will run all `test_*.nu` files in the directory.
 
 ### Installing Locally
 

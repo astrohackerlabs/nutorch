@@ -23,7 +23,7 @@ impl PluginCommand for CommandTensor {
     }
 
     fn description(&self) -> &str {
-        "Convert a Nushell Value (nested list structure) to a tensor"
+        "Convert a Nushell Value (nested list structure) to a tensor (similar to torch.tensor)"
     }
 
     fn signature(&self) -> Signature {
@@ -75,6 +75,16 @@ impl PluginCommand for CommandTensor {
             Example {
                 description: "Convert a 2D nested list to a tensor with specific device via argument",
                 example: "torch tensor [[0.0, 1.0], [2.0, 3.0]] --device cpu",
+                result: None,
+            },
+            Example {
+                description: "Create a tensor with gradient tracking enabled",
+                example: "[1.0, 2.0, 3.0] | torch tensor --requires_grad true",
+                result: None,
+            },
+            Example {
+                description: "Create a tensor with specific dtype",
+                example: "torch tensor [1, 2, 3] --dtype int64",
                 result: None,
             }
         ]
