@@ -73,7 +73,7 @@ For each method, we track:
 
 - **Total Methods Implemented**: 39
 - **Methods with Tests**: 34 (87%)
-- **Methods Meeting All Quality Criteria**: 22 (56%)
+- **Methods Meeting All Quality Criteria**: 23 (59%)
 
 ---
 
@@ -367,13 +367,13 @@ For each method, we track:
 
 **Command**: `torch reshape`
 
-- [x] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
-- [x] Dual Input
+- [x] Test Coverage (20 tests: 16 functionality + 4 error)
+- [x] Error Tests
+- [x] Helper Usage (N/A - shape ops don't need creation helpers)
+- [x] Dual Input (Pipeline-only by design)
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation (comprehensive pre-validation to prevent tch-rs panics)
+- [x] Documentation
 
 ### `tensor.repeat(*sizes)`
 
