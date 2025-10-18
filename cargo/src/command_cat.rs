@@ -64,7 +64,8 @@ impl PluginCommand for CommandCat {
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // Check for pipeline input
+        // ── dual input: pipeline OR argument (not both) ───────────────
+        // Supports: [$t1 $t2] | torch cat   OR   torch cat [$t1 $t2]
         let pipeline_input = match input {
             PipelineData::Empty => None,
             PipelineData::Value(val, _) => Some(val),
@@ -74,10 +75,10 @@ impl PluginCommand for CommandCat {
             }
         };
 
-        // Check for positional argument input
         let arg_input = call.nth(0);
 
-        // Validate that exactly one data source is provided
+        // ── extract tensor IDs from exactly one source ────────────────
+        // Validate that exactly one data source is provided (not both, not neither)
         let tensor_ids: Vec<String> = match (pipeline_input, arg_input) {
             (None, None) => {
                 return Err(LabeledError::new("Missing input").with_label(
@@ -111,7 +112,7 @@ impl PluginCommand for CommandCat {
                 .collect::<Result<Vec<String>, _>>()?,
         };
 
-        // Validate that at least two tensors are provided
+        // ── validate minimum tensor count ─────────────────────────────
         if tensor_ids.len() < 2 {
             return Err(LabeledError::new("Invalid input").with_label(
                 "At least two tensor IDs must be provided for concatenation",
@@ -119,7 +120,7 @@ impl PluginCommand for CommandCat {
             ));
         }
 
-        // Get the dimension to concatenate along (default to 0)
+        // ── get concatenation dimension (default: 0) ──────────────────
         let dim: i64 = match call.get_flag::<i64>("dim")? {
             Some(d) => {
                 if d < 0 {
@@ -131,7 +132,7 @@ impl PluginCommand for CommandCat {
             None => 0,
         };
 
-        // Look up tensors in registry
+        // ── fetch all tensors from registry ───────────────────────────
         let mut registry = TENSOR_REGISTRY.lock().unwrap();
         let mut tensors: Vec<Tensor> = Vec::new();
         for id in &tensor_ids {
@@ -144,12 +145,15 @@ impl PluginCommand for CommandCat {
             }
         }
 
-        // Check if tensors have compatible shapes for concatenation
+        // ── validate shape compatibility for concatenation ────────────
+        // All tensors must have same number of dims and matching sizes (except along cat dim)
         if tensors.is_empty() {
             return Err(LabeledError::new("Invalid input")
                 .with_label("No tensors provided for concatenation", call.head));
         }
         let first_shape = tensors[0].size();
+
+        // Check dimension is valid for first tensor
         if first_shape.len() as i64 <= dim {
             return Err(LabeledError::new("Invalid dimension").with_label(
                 format!(
@@ -160,8 +164,12 @@ impl PluginCommand for CommandCat {
                 call.head,
             ));
         }
+
+        // Check all subsequent tensors match shape requirements
         for (i, tensor) in tensors.iter().enumerate().skip(1) {
             let shape = tensor.size();
+
+            // Must have same number of dimensions
             if shape.len() != first_shape.len() {
                 return Err(LabeledError::new("Shape mismatch").with_label(
                     format!(
@@ -173,6 +181,8 @@ impl PluginCommand for CommandCat {
                     call.head,
                 ));
             }
+
+            // All dimensions except cat dimension must match
             for (d, (&s1, &s2)) in first_shape.iter().zip(shape.iter()).enumerate() {
                 if d as i64 != dim && s1 != s2 {
                     return Err(LabeledError::new("Shape mismatch").with_label(
@@ -186,16 +196,13 @@ impl PluginCommand for CommandCat {
             }
         }
 
-        // Create references to tensors for cat
+        // ── perform concatenation ─────────────────────────────────────
         let tensor_refs: Vec<&Tensor> = tensors.iter().collect();
-
-        // Perform concatenation using tch-rs
         let result_tensor = Tensor::cat(&tensor_refs, dim);
 
-        // Store result in registry with new ID
+        // ── store & return ────────────────────────────────────────────
         let new_id = Uuid::new_v4().to_string();
         registry.insert(new_id.clone(), result_tensor);
-        // Return new ID wrapped in PipelineData
         Ok(PipelineData::Value(Value::string(new_id, call.head), None))
     }
 }
