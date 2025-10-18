@@ -73,7 +73,7 @@ For each method, we track:
 
 - **Total Methods Implemented**: 39
 - **Methods with Tests**: 29 (74%)
-- **Methods Meeting All Quality Criteria**: 6 (15%)
+- **Methods Meeting All Quality Criteria**: 7 (18%)
 
 ---
 
@@ -160,12 +160,12 @@ For each method, we track:
 **Command**: `torch sub`
 
 - [x] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
+- [x] Error Tests
+- [x] Helper Usage (N/A - binary ops don't need creation helpers)
 - [x] Dual Input
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation
+- [x] Documentation
 
 ### `tensor.mul(other)`
 
