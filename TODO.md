@@ -72,8 +72,8 @@ For each method, we track:
 ## Status Summary
 
 - **Total Methods Implemented**: 39
-- **Methods with Tests**: 34 (87%)
-- **Methods Meeting All Quality Criteria**: 35 (90%)
+- **Methods with Tests**: 35 (90%)
+- **Methods Meeting All Quality Criteria**: 36 (92%)
 
 ---
 
@@ -544,13 +544,13 @@ or `tensor.grad.zero_()`
 **Command**: `torch value` **PyTorch Equivalent**: `tensor.tolist()` or
 `tensor.numpy()`
 
-- [ ] Test Coverage
-- [ ] Error Tests
+- [x] Test Coverage (13 tests: 10 functionality + 3 error)
+- [x] Error Tests
 - [x] Helper Usage (uses `tensor_to_value`)
-- [ ] Dual Input
+- [x] Dual Input (supports both pipeline and argument forms)
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation (tensor ID validation, CPU transfer before data access)
+- [x] Documentation
 
 ### Custom: Free Tensor from Registry
 
