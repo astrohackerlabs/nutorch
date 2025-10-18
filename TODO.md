@@ -72,8 +72,8 @@ For each method, we track:
 ## Status Summary
 
 - **Total Methods Implemented**: 39
-- **Methods with Tests**: 33 (85%)
-- **Methods Meeting All Quality Criteria**: 19 (49%)
+- **Methods with Tests**: 34 (87%)
+- **Methods Meeting All Quality Criteria**: 20 (51%)
 
 ---
 
@@ -331,13 +331,13 @@ For each method, we track:
 
 **Command**: `torch shape`
 
-- [ ] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
-- [ ] Dual Input
+- [x] Test Coverage
+- [x] Error Tests
+- [x] Helper Usage (N/A - shape ops don't need creation helpers)
+- [x] Dual Input
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation
+- [x] Documentation
 
 ### `tensor.squeeze(dim=None)`
 
