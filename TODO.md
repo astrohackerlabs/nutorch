@@ -72,8 +72,8 @@ For each method, we track:
 ## Status Summary
 
 - **Total Methods Implemented**: 39
-- **Methods with Tests**: 31 (79%)
-- **Methods Meeting All Quality Criteria**: 14 (36%)
+- **Methods with Tests**: 32 (82%)
+- **Methods Meeting All Quality Criteria**: 15 (38%)
 
 ---
 
@@ -263,13 +263,13 @@ For each method, we track:
 
 **Command**: `torch mean`
 
-- [ ] Test Coverage
-- [ ] Error Tests
+- [x] Test Coverage
+- [x] Error Tests
 - [x] Helper Usage (dtype)
-- [ ] Dual Input (pipeline only)
+- [x] Dual Input
 - [x] Examples
 - [x] Validation (dimension)
-- [ ] Documentation
+- [x] Documentation
 
 ### `tensor.max(dim=None, keepdim=False)`
 

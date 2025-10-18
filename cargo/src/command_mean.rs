@@ -9,7 +9,11 @@ use crate::get_kind_from_call;
 use crate::NutorchPlugin;
 use crate::TENSOR_REGISTRY;
 
-
+// torch mean  ---------------------------------------------------------------
+//
+// Compute the mean value of a tensor along specified dimensions or over all elements.
+// Accept the tensor ID either from the pipeline or as a single argument.
+// -------------------------------------------------------------------------
 pub struct CommandMean;
 
 impl PluginCommand for CommandMean {
@@ -20,16 +24,24 @@ impl PluginCommand for CommandMean {
     }
 
     fn description(&self) -> &str {
-        "Compute the mean value of a tensor (similar to torch.mean single tensor mode)"
+        "Compute the mean value of a tensor (similar to torch.mean)"
     }
 
     fn signature(&self) -> Signature {
         Signature::build("torch mean")
-            .input_output_types(vec![(Type::String, Type::String)])
+            .input_output_types(vec![
+                (Type::String, Type::String),  // pipeline-in
+                (Type::Nothing, Type::String), // arg-in
+            ])
+            .optional(
+                "tensor_id",
+                SyntaxShape::String,
+                "ID of the tensor (if not provided via pipeline)",
+            )
             .named(
                 "dtype",
                 SyntaxShape::String,
-                "Data type of the tensor (default: 'float32')",
+                "Data type of the result tensor (default: 'float32')",
                 None,
             )
             .named(
@@ -50,13 +62,18 @@ impl PluginCommand for CommandMean {
     fn examples(&self) -> Vec<Example> {
         vec![
             Example {
-                description: "Compute mean value over all elements of a tensor",
-                example: "let t1 = (torch full 5 2 3); $t1 | torch mean | torch value",
+                description: "Compute mean value over all elements via pipeline",
+                example: "let t = (torch full 5 2 3); $t | torch mean | torch value",
+                result: None,
+            },
+            Example {
+                description: "Compute mean value over all elements via argument",
+                example: "let t = (torch full 5 2 3); torch mean $t | torch value",
                 result: None,
             },
             Example {
                 description: "Compute mean along a specific dimension with keepdim",
-                example: "let t1 = (torch full 5 2 3); $t1 | torch mean --dim 1 --keepdim true | torch value",
+                example: "let t = (torch full 5 2 3); $t | torch mean --dim 1 --keepdim true | torch value",
                 result: None,
             }
         ]
@@ -69,30 +86,58 @@ impl PluginCommand for CommandMean {
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // Get tensor1 ID from input (pipeline)
-        let input_value = input.into_value(call.head)?;
-        let tensor1_id = input_value.as_str().map(|s| s.to_string()).map_err(|_| {
-            LabeledError::new("Invalid input")
-                .with_label("Unable to parse tensor1 ID from input", call.head)
-        })?;
+        // -------- figure out where the tensor ID comes from ----------------
+        let piped = match input {
+            PipelineData::Empty => None,
+            PipelineData::Value(v, _span) => Some(v),
+            _ => {
+                return Err(LabeledError::new("Unsupported input")
+                    .with_label("Only Empty or single Value inputs are supported", call.head))
+            }
+        };
+        let arg0 = call.nth(0);
 
-        // Look up tensor in registry
-        let mut registry = TENSOR_REGISTRY.lock().unwrap();
-        let tensor1 = registry
-            .get(&tensor1_id)
+        let tensor_id = match (piped, arg0) {
+            (Some(_), Some(_)) => {
+                return Err(LabeledError::new("Conflicting input").with_label(
+                    "Provide tensor ID either via pipeline OR argument, not both",
+                    call.head,
+                ))
+            }
+            (None, None) => {
+                return Err(LabeledError::new("Missing input").with_label(
+                    "Tensor ID must be supplied via pipeline or argument",
+                    call.head,
+                ))
+            }
+            (Some(v), None) => v.as_str().map(|s| s.to_string()).map_err(|_| {
+                LabeledError::new("Invalid input")
+                    .with_label("Pipeline input must be a tensor ID (string)", call.head)
+            })?,
+            (None, Some(a)) => a.as_str().map(|s| s.to_string()).map_err(|_| {
+                LabeledError::new("Invalid input")
+                    .with_label("Argument must be a tensor ID (string)", call.head)
+            })?,
+        };
+
+        // -------- fetch tensor from registry -------------------------------
+        let mut reg = TENSOR_REGISTRY.lock().unwrap();
+        let tensor = reg
+            .get(&tensor_id)
             .ok_or_else(|| {
-                LabeledError::new("Tensor not found").with_label("Invalid tensor1 ID", call.head)
+                LabeledError::new("Tensor not found").with_label("Invalid tensor ID", call.head)
             })?
             .shallow_clone();
 
+        // -------- get dtype for result -------------------------------------
         let kind = get_kind_from_call(call)?;
 
-        // Single tensor mode (mean over dimension or entire tensor)
+        // -------- compute mean ---------------------------------------------
         let dim_opt: Option<i64> = call.get_flag("dim")?;
         let keepdim = call.get_flag::<bool>("keepdim")?.unwrap_or(false);
         let result_tensor: Tensor = match dim_opt {
             Some(dim) => {
-                let num_dims = tensor1.size().len() as i64;
+                let num_dims = tensor.size().len() as i64;
                 if dim < 0 || dim >= num_dims {
                     return Err(LabeledError::new("Invalid dimension").with_label(
                         format!(
@@ -102,15 +147,14 @@ impl PluginCommand for CommandMean {
                     ));
                 }
                 // Use mean_dim for dimension-specific mean
-                tensor1.mean_dim(dim, keepdim, kind)
+                tensor.mean_dim(dim, keepdim, kind)
             }
-            None => tensor1.mean(kind), // Meanimum over all elements
+            None => tensor.mean(kind), // Mean over all elements
         };
 
-        // Store result in registry with new ID
+        // -------- store & return -------------------------------------------
         let new_id = Uuid::new_v4().to_string();
-        registry.insert(new_id.clone(), result_tensor);
-        // Return new ID wrapped in PipelineData
+        reg.insert(new_id.clone(), result_tensor);
         Ok(PipelineData::Value(Value::string(new_id, call.head), None))
     }
 }
