@@ -72,8 +72,8 @@ For each method, we track:
 ## Status Summary
 
 - **Total Methods Implemented**: 39
-- **Methods with Tests**: 35 (90%)
-- **Methods Meeting All Quality Criteria**: 36 (92%)
+- **Methods with Tests**: 36 (92%)
+- **Methods Meeting All Quality Criteria**: 37 (95%)
 
 ---
 

@@ -28,8 +28,7 @@ impl PluginCommand for CommandFree {
     }
 
     fn description(&self) -> &str {
-        "Remove tensor(s) from the internal registry, freeing their memory \
-         when no other references exist."
+        "Remove tensor(s) from the internal registry, freeing their memory. (similar to del tensor in Python)"
     }
 
     fn signature(&self) -> Signature {
@@ -81,7 +80,9 @@ torch free [$a $b]
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // ── gather IDs from pipeline or argument ───────────────────────
+        // ── dual input: pipeline OR argument (not both) ───────────────
+        // Supports: $t | torch free   OR   [$ts] | torch free
+        //       OR  torch free $t     OR   torch free [$ts]
         let piped: Option<Value> = match &input {
             PipelineData::Value(v, _) => Some(v.clone()),
             PipelineData::Empty => None,
@@ -92,6 +93,7 @@ torch free [$a $b]
         };
         let arg0: Option<Value> = call.nth(0);
 
+        // ── validate exactly one input source ─────────────────────────
         match (&piped, &arg0) {
             (None, None) => {
                 return Err(LabeledError::new("Missing input")
@@ -104,9 +106,10 @@ torch free [$a $b]
             _ => {}
         }
 
+        // ── extract tensor IDs (single or list) ───────────────────────
         let ids_val = piped.or(arg0).unwrap();
 
-        // accept single string or list-of-strings
+        // Accept single string or list-of-strings
         let ids: Vec<String> = if let Ok(list) = ids_val.as_list() {
             list.iter()
                 .map(|v| v.as_str().map(|s| s.to_string()))
@@ -121,13 +124,13 @@ torch free [$a $b]
             );
         }
 
-        // ── remove from registry ───────────────────────────────────────
+        // ── remove tensors from registry ──────────────────────────────
         let mut reg = TENSOR_REGISTRY.lock().unwrap();
         let mut freed: Vec<Value> = Vec::new();
 
         for id in ids {
             if reg.remove(&id).is_some() {
-                // entry removed; push to return list
+                // Entry removed successfully; add to return list
                 freed.push(Value::string(id, call.head));
             } else {
                 return Err(LabeledError::new("Tensor not found")
@@ -135,7 +138,7 @@ torch free [$a $b]
             }
         }
 
-        // returning list of IDs that were freed
+        // ── return list of freed tensor IDs ───────────────────────────
         Ok(PipelineData::Value(Value::list(freed, call.head), None))
     }
 }
