@@ -28,7 +28,7 @@ impl PluginCommand for CommandGrad {
     }
 
     fn description(&self) -> &str {
-        "Fetch the .grad of a tensor. Returns null if no gradient is defined."
+        "Fetch the gradient tensor of a parameter. Returns null if no gradient is defined. (similar to tensor.grad in PyTorch)"
     }
 
     fn signature(&self) -> Signature {
@@ -77,7 +77,8 @@ torch grad $w              # → null
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        //---------------- obtain tensor ID ------------------------------
+        // ── dual input: pipeline OR argument (not both) ───────────────
+        // Supports: $t | torch grad   OR   torch grad $t
         let piped = match &input {
             PipelineData::Value(v, _) => Some(v.clone()),
             PipelineData::Empty => None,
@@ -88,6 +89,7 @@ torch grad $w              # → null
         };
         let arg0 = call.nth(0);
 
+        // ── validate exactly one input source ─────────────────────────
         match (&piped, &arg0) {
             (None, None) => {
                 return Err(LabeledError::new("Missing input")
@@ -101,10 +103,12 @@ torch grad $w              # → null
             }
             _ => {}
         }
+
+        // ── extract tensor ID ─────────────────────────────────────────
         let id_val = piped.or(arg0).unwrap();
         let tensor_id = id_val.as_str()?.to_string();
 
-        //---------------- fetch tensor & its grad -----------------------
+        // ── fetch tensor from registry ────────────────────────────────
         let mut reg = TENSOR_REGISTRY.lock().unwrap();
         let t = reg
             .get(&tensor_id)
@@ -113,13 +117,15 @@ torch grad $w              # → null
             })?
             .shallow_clone();
 
-        let g = t.grad(); // always returns Tensor
+        // ── fetch gradient tensor ─────────────────────────────────────
+        // t.grad() returns a Tensor; use .defined() to check if gradient exists
+        let g = t.grad();
         if !g.defined() {
-            // Return null to Nushell
+            // No gradient accumulated yet → return Nushell null
             return Ok(PipelineData::Value(Value::nothing(call.head), None));
         }
 
-        //---------------- store grad in registry ------------------------
+        // ── store gradient tensor & return ID ─────────────────────────
         let gid = Uuid::new_v4().to_string();
         reg.insert(gid.clone(), g);
 

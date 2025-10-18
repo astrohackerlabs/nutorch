@@ -73,7 +73,7 @@ For each method, we track:
 
 - **Total Methods Implemented**: 39
 - **Methods with Tests**: 34 (87%)
-- **Methods Meeting All Quality Criteria**: 32 (82%)
+- **Methods Meeting All Quality Criteria**: 33 (85%)
 
 ---
 
@@ -487,13 +487,13 @@ For each method, we track:
 
 **Command**: `torch grad`
 
-- [x] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
-- [x] Dual Input
+- [x] Test Coverage (11 tests: 8 functionality + 3 error)
+- [x] Error Tests
+- [x] Helper Usage (N/A - autograd ops don't need creation helpers)
+- [x] Dual Input (supports both pipeline and argument forms)
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation (tensor ID validation, returns null for undefined gradients)
+- [x] Documentation
 
 ### `tensor.detach()`
 
