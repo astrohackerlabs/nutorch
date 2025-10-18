@@ -15,7 +15,7 @@ impl PluginCommand for CommandManualSeed {
     }
 
     fn description(&self) -> &str {
-        "Set the random seed for PyTorch operations to ensure reproducibility"
+        "Set the random seed for PyTorch operations to ensure reproducibility. (similar to torch.manual_seed() in PyTorch)"
     }
 
     fn signature(&self) -> Signature {
@@ -44,11 +44,13 @@ impl PluginCommand for CommandManualSeed {
         call: &nu_plugin::EvaluatedCall,
         _input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // Get the seed value from the first argument
+        // ── get seed value from required argument ────────────────────────────
         let seed: i64 = call.nth(0).unwrap().as_int()?;
-        // Set the random seed using tch-rs
+
+        // ── set the global random seed ────────────────────────────────────────
         tch::manual_seed(seed);
-        // Return nothing (Type::Nothing) as the operation modifies global state
+
+        // ── return empty (operation modifies global state) ────────────────────
         Ok(PipelineData::Empty)
     }
 }
