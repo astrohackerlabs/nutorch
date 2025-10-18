@@ -72,8 +72,8 @@ For each method, we track:
 ## Status Summary
 
 - **Total Methods Implemented**: 39
-- **Methods with Tests**: 26 (67%)
-- **Methods Meeting All Quality Criteria**: 1 (3%)
+- **Methods with Tests**: 27 (69%)
+- **Methods Meeting All Quality Criteria**: 2 (5%)
 
 ---
 
@@ -95,13 +95,13 @@ For each method, we track:
 
 **Command**: `torch full`
 
-- [ ] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
-- [ ] Dual Input
+- [x] Test Coverage
+- [x] Error Tests
+- [x] Helper Usage
+- [x] Dual Input
 - [x] Examples
-- [ ] Validation
-- [ ] Documentation
+- [x] Validation
+- [x] Documentation
 
 ### `torch.randn(*size, dtype=None, device=None, requires_grad=False)`
 

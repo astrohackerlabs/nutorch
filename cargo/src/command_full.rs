@@ -72,6 +72,16 @@ impl PluginCommand for CommandFull {
                 example: "torch full [2, 3] 0.5 --dtype float64 --device cpu | torch value",
                 result: None,
             },
+            Example {
+                description: "Create a tensor with gradient tracking enabled",
+                example: "torch full [2, 2] 1.0 --requires_grad true",
+                result: None,
+            },
+            Example {
+                description: "Create a 3D tensor with integer fill value",
+                example: "torch full [2, 2, 2] 5 --dtype int64 | torch value",
+                result: None,
+            },
         ]
     }
 
