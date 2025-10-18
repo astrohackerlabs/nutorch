@@ -24,7 +24,7 @@ impl PluginCommand for CommandBackward {
     }
 
     fn description(&self) -> &str {
-        "Run back-propagation from a scalar loss tensor (loss.backward())."
+        "Run back-propagation from a scalar loss tensor. (similar to tensor.backward() in PyTorch)"
     }
 
     fn signature(&self) -> Signature {
@@ -73,7 +73,8 @@ torch backward $loss
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // ───── collect loss tensor-id either from pipeline or arg ─────
+        // ── dual input: pipeline OR argument (not both) ───────────────
+        // Supports: $loss | torch backward   OR   torch backward $loss
         let piped: Option<Value> = match input {
             PipelineData::Value(v, _) => Some(v),
             PipelineData::Empty => None,
@@ -85,6 +86,7 @@ torch backward $loss
 
         let arg0: Option<Value> = call.nth(0);
 
+        // ── validate exactly one input source ─────────────────────────
         match (&piped, &arg0) {
             (None, None) => {
                 return Err(LabeledError::new("Missing input")
@@ -99,10 +101,11 @@ torch backward $loss
             _ => {}
         }
 
+        // ── extract loss tensor ID ────────────────────────────────────
         let loss_id_val = piped.or(arg0).unwrap();
         let loss_id = loss_id_val.as_str()?.to_string();
 
-        // ───── fetch the loss tensor ─────
+        // ── fetch loss tensor from registry ───────────────────────────
         let reg = TENSOR_REGISTRY.lock().unwrap();
         let loss = reg
             .get(&loss_id)
@@ -112,16 +115,18 @@ torch backward $loss
             })?
             .shallow_clone();
 
-        // ───── ensure it is scalar (numel == 1)  (PyTorch expectation) ──
+        // ── validate scalar requirement (PyTorch expectation) ─────────
+        // backward() only works on scalar losses (single element)
         if loss.numel() != 1 {
             return Err(LabeledError::new("Invalid loss tensor")
                 .with_label("Backward currently supports only scalar losses", call.head));
         }
 
-        // ───── run backward  (grad-mode ON by default) ─────
+        // ── run backward pass ─────────────────────────────────────────
+        // Accumulates gradients into all leaf tensors with requires_grad=true
         loss.backward();
 
-        // return the same id for convenience
+        // ── return same tensor ID for pipeline chaining ───────────────
         Ok(PipelineData::Value(Value::string(loss_id, call.head), None))
     }
 }

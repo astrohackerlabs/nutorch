@@ -73,7 +73,7 @@ For each method, we track:
 
 - **Total Methods Implemented**: 39
 - **Methods with Tests**: 34 (87%)
-- **Methods Meeting All Quality Criteria**: 31 (79%)
+- **Methods Meeting All Quality Criteria**: 32 (82%)
 
 ---
 
@@ -475,13 +475,13 @@ For each method, we track:
 
 **Command**: `torch backward`
 
-- [x] Test Coverage
-- [x] Error Tests (non-scalar)
-- [ ] Helper Usage
-- [x] Dual Input
+- [x] Test Coverage (8 tests: 5 functionality + 3 error)
+- [x] Error Tests
+- [x] Helper Usage (N/A - autograd ops don't need creation helpers)
+- [x] Dual Input (supports both pipeline and argument forms)
 - [x] Examples
 - [x] Validation (scalar only)
-- [ ] Documentation
+- [x] Documentation
 
 ### `tensor.grad` (property)
 
