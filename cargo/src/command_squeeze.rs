@@ -9,8 +9,7 @@ use crate::TENSOR_REGISTRY;
 
 // torch squeeze  -----------------------------------------------------------
 // Remove a dimension of size 1 from a tensor (like tensor.squeeze(dim) in PyTorch).
-// The tensor **must** be supplied through the pipeline; the single positional
-// argument is the dimension to squeeze.
+// Tensor ID must be supplied via the pipeline; one positional argument = dim.
 // -------------------------------------------------------------------------
 pub struct CommandSqueeze;
 
@@ -22,13 +21,12 @@ impl PluginCommand for CommandSqueeze {
     }
 
     fn description(&self) -> &str {
-        "Remove a dimension of size 1 from a tensor (similar to tensor.squeeze(dim) in PyTorch). \
-         The tensor ID is taken from the pipeline; the dimension is a required argument."
+        "Remove a dimension of size 1 from a tensor (similar to tensor.squeeze(dim) in PyTorch)"
     }
 
     fn signature(&self) -> Signature {
         Signature::build("torch squeeze")
-            .input_output_types(vec![(Type::String, Type::String)]) // tensor id in, tensor id out
+            .input_output_types(vec![(Type::String, Type::String)])
             .required(
                 "dim",
                 SyntaxShape::Int,
@@ -52,10 +50,10 @@ impl PluginCommand for CommandSqueeze {
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        // ------ tensor ID must come from the pipeline --------------------
+        // ---- tensor ID must come from pipeline --------------------------
         let PipelineData::Value(tensor_id_val, _) = input else {
             return Err(LabeledError::new("Unsupported input")
-                .with_label("Only Value inputs are supported", call.head));
+                .with_label("Tensor ID must be supplied via the pipeline", call.head));
         };
 
         let tensor_id = tensor_id_val.as_str().map(|s| s.to_string()).map_err(|_| {
@@ -63,7 +61,7 @@ impl PluginCommand for CommandSqueeze {
                 .with_label("Pipeline input must be a tensor ID (string)", call.head)
         })?;
 
-        // ------ dimension argument ---------------------------------------
+        // ---- parse dimension argument -----------------------------------
         let dim_val = call.nth(0).ok_or_else(|| {
             LabeledError::new("Missing dimension")
                 .with_label("A dimension argument is required", call.head)
