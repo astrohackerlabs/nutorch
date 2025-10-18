@@ -17,7 +17,7 @@ impl PluginCommand for CommandMm {
     }
 
     fn description(&self) -> &str {
-        "Matrix multiply two 2-D tensors (like torch.mm)"
+        "Matrix multiply two 2-D tensors (similar to torch.mm)"
     }
 
     fn signature(&self) -> Signature {
