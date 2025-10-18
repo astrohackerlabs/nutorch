@@ -58,3 +58,39 @@ def "Test reshape preserves values" [] {
   # Values should be preserved in row-major order
   assert ($result == [[1 2] [3 4]])
 }
+
+@test
+def "Test reshape 3D to 2D" [] {
+  let input_data = $in
+  let t = torch full [2 3 4] 1
+  let result = ($t | torch reshape [6 4] | torch shape)
+  # [2, 3, 4] = 24 elements reshaped to [6, 4]
+  assert ($result == [6 4])
+}
+
+@test
+def "Test reshape to row vector" [] {
+  let input_data = $in
+  let t = ([[1 2 3] [4 5 6]] | torch tensor)
+  let result = ($t | torch reshape [1 6] | torch shape)
+  # [2, 3] reshaped to [1, 6]
+  assert ($result == [1 6])
+}
+
+@test
+def "Test reshape to column vector" [] {
+  let input_data = $in
+  let t = ([[1 2 3] [4 5 6]] | torch tensor)
+  let result = ($t | torch reshape [6 1] | torch shape)
+  # [2, 3] reshaped to [6, 1]
+  assert ($result == [6 1])
+}
+
+@test
+def "Test reshape chaining" [] {
+  let input_data = $in
+  let v = ([1 2 3 4 5 6 7 8] | torch tensor)
+  let result = ($v | torch reshape [2 4] | torch reshape [4 2] | torch shape)
+  # [8] -> [2, 4] -> [4, 2]
+  assert ($result == [4 2])
+}
