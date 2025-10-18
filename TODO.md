@@ -73,7 +73,7 @@ For each method, we track:
 
 - **Total Methods Implemented**: 39
 - **Methods with Tests**: 34 (87%)
-- **Methods Meeting All Quality Criteria**: 28 (72%)
+- **Methods Meeting All Quality Criteria**: 29 (74%)
 
 ---
 
@@ -431,13 +431,13 @@ For each method, we track:
 
 **Command**: `torch gather`
 
-- [x] Test Coverage
-- [ ] Error Tests
-- [ ] Helper Usage
-- [x] Dual Input
+- [x] Test Coverage (15 tests: 7 functionality + 8 error)
+- [x] Error Tests
+- [x] Helper Usage (N/A - indexing ops don't need creation helpers)
+- [x] Dual Input (Pipeline-only by design: source via pipeline, dim and index as args)
 - [x] Examples
-- [x] Validation (dimension, shapes)
-- [ ] Documentation
+- [x] Validation (dimension bounds, rank matching, shape compatibility, index range)
+- [x] Documentation
 
 ---
 

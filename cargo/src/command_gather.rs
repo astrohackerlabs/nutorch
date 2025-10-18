@@ -20,8 +20,7 @@ impl PluginCommand for CommandGather {
     }
 
     fn description(&self) -> &str {
-        "Gather values along an axis using an index tensor \
-         (like `x.gather(dim, index)` in PyTorch)"
+        "Gather values along an axis using an index tensor. (similar to tensor.gather() in PyTorch)"
     }
 
     fn signature(&self) -> Signature {
@@ -57,9 +56,8 @@ $src | torch gather 1 $idx | torch value
         call: &nu_plugin::EvaluatedCall,
         input: PipelineData,
     ) -> Result<PipelineData, LabeledError> {
-        //--------------------------------------------------------------
-        // 1. get tensor-id from pipeline, dim and index-id from args
-        //--------------------------------------------------------------
+        // ── source tensor from pipeline ───────────────────────────────
+        // Pipeline-only design: $src | torch gather <dim> <index_id>
         let PipelineData::Value(source_id_val, _) = input else {
             return Err(LabeledError::new("Missing input").with_label(
                 "Source tensor ID must be supplied via the pipeline",
@@ -71,6 +69,7 @@ $src | torch gather 1 $idx | torch value
                 .with_label("Pipeline input must be a tensor ID (string)", call.head)
         })?;
 
+        // ── required arguments: dim and index tensor ID ───────────────
         let dim = call
             .nth(0)
             .ok_or_else(|| {
@@ -96,9 +95,7 @@ $src | torch gather 1 $idx | torch value
                     .with_label("Must be a string", call.head)
             })?;
 
-        //--------------------------------------------------------------
-        // 2. fetch tensors
-        //--------------------------------------------------------------
+        // ── fetch tensors from registry ───────────────────────────────
         let mut reg = TENSOR_REGISTRY.lock().unwrap();
         let source = reg
             .get(&source_id)
@@ -116,19 +113,17 @@ $src | torch gather 1 $idx | torch value
             })?
             .shallow_clone();
 
-        // ensure int64
+        // ── ensure index tensor is Int64 (tch-rs requirement) ─────────
         if index.kind() != Kind::Int64 {
             index = index.to_kind(Kind::Int64);
         }
 
-        //--------------------------------------------------------------
-        // 3. validate shapes & index-range
-        //--------------------------------------------------------------
+        // ── validate shapes and indices ───────────────────────────────
         let src_shape = source.size();
         let idx_shape = index.size();
         let ndims = src_shape.len() as i64;
 
-        // dim bounds
+        // Check dimension is valid for source tensor
         if dim < 0 || dim >= ndims {
             return Err(LabeledError::new("Invalid dimension").with_label(
                 format!("Dim {dim} out of bounds for tensor with {ndims} dims"),
@@ -136,7 +131,7 @@ $src | torch gather 1 $idx | torch value
             ));
         }
 
-        // same rank
+        // Index and source must have same rank
         if idx_shape.len() != src_shape.len() {
             return Err(LabeledError::new("Shape mismatch").with_label(
                 format!(
@@ -148,7 +143,7 @@ $src | torch gather 1 $idx | torch value
             ));
         }
 
-        // all dims except 'dim' must match exactly
+        // All dimensions except gather dim must match exactly
         for (d, (&s, &i)) in src_shape.iter().zip(idx_shape.iter()).enumerate() {
             if d as i64 != dim && s != i {
                 return Err(LabeledError::new("Shape mismatch").with_label(
@@ -158,7 +153,7 @@ $src | torch gather 1 $idx | torch value
             }
         }
 
-        // index values must be in [0, src_shape[dim])
+        // Index values must be in valid range [0, src_shape[dim])
         let max_idx = index.max().int64_value(&[]);
         let min_idx = index.min().int64_value(&[]);
         if min_idx < 0 || max_idx >= src_shape[dim as usize] {
@@ -173,15 +168,11 @@ $src | torch gather 1 $idx | torch value
             ));
         }
 
-        //--------------------------------------------------------------
-        // 4. gather  (sparse_grad matches source tensor)
-        //--------------------------------------------------------------
+        // ── perform gather operation ──────────────────────────────────
         let sparse_grad = source.is_sparse();
         let result_tensor = source.gather(dim, &index, sparse_grad);
 
-        //--------------------------------------------------------------
-        // 5. store & return
-        //--------------------------------------------------------------
+        // ── store & return ────────────────────────────────────────────
         let new_id = Uuid::new_v4().to_string();
         reg.insert(new_id.clone(), result_tensor);
         Ok(PipelineData::Value(Value::string(new_id, call.head), None))
