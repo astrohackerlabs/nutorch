@@ -1,0 +1,16 @@
+# Pin the libtorch used by torch-sys to the repo-local torch 2.11.0 venv
+# (see issues/0002-nutorchd-poc/01-toolchain-proof.md). `.libtorch` is a
+# symlink to .venv-torch/.../site-packages/torch, created by:
+#   python3 -m venv .venv-torch
+#   .venv-torch/bin/pip install torch==2.11.0
+#   ln -s .venv-torch/lib/python3.14/site-packages/torch .libtorch
+#
+# force = true deliberately overrides any LIBTORCH/DYLD_LIBRARY_PATH from the
+# user's shell (the v1 instructions exported a Homebrew Python torch path
+# whose headers do not compile under current clang, and whose dylibs must not
+# shadow the pinned ones at runtime).
+
+[env]
+LIBTORCH = { value = ".libtorch", relative = true, force = true }
+DYLD_LIBRARY_PATH = { value = ".libtorch/lib", relative = true, force = true }
+LD_LIBRARY_PATH = { value = ".libtorch/lib", relative = true, force = true }

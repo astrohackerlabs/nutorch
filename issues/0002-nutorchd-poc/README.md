@@ -124,4 +124,6 @@ random seeds.
 ## Experiments
 
 - [Experiment 1: Toolchain proof — tch 0.24.0 + libtorch 2.11.0 builds and sees MPS](01-toolchain-proof.md)
-  — **Designed**
+  — **Pass** (libtorch 2.11 headers fixed the v1-killing clang error; MPS
+  exact-value matmul green; libtorch pinned via repo-local venv +
+  `.cargo/config.toml`, since no arm64 libtorch zip exists)

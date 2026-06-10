@@ -2,6 +2,16 @@
 [implementer]
 agent = "claude-code"
 model = "claude-fable-5"
+
+[review.design]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
+
+[review.result]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
 +++
 
 # Experiment 1: Toolchain proof — tch 0.24.0 + libtorch 2.11.0 builds and sees MPS
@@ -126,3 +136,90 @@ Nit, all folded in: (1) the build gate now requires no warnings from workspace
 crates per AGENTS.md; (2) `LIBTORCH_USE_PYTORCH` is named as a confirmed-unset
 precondition; (3) rung 3's CXXFLAGS flag name is marked as needing confirmation
 against the actual clang diagnostic.
+
+## Result
+
+**Result:** Pass
+
+**The headline: libtorch v2.11.0's headers compile cleanly under Xcode 26.4's
+clang.** The `std::is_arithmetic` specialization error that killed the v1 build
+(libtorch ~2.7-era headers) is gone in 2.11 — no CXXFLAGS workaround (rung 3)
+was needed. All three smoke tests pass:
+
+```
+test cpu_ones_matmul_is_exact ... ok
+test mps_is_available ... ok
+test mps_ones_matmul_is_exact ... ok
+```
+
+and the diagnostic stub reports `MPS available: true`.
+
+**Versions that built:** tch 0.24.0, torch-sys 0.24.0, libtorch v2.11.0 (the
+official PyPI `torch==2.11.0` macOS arm64 wheel, Python 3.14 venv).
+`cargo build` exits 0 with zero warnings from workspace crates;
+`cargo fmt --all -- --check` clean; `dprint check` clean on all created/edited
+TOML and markdown; `git status --porcelain v1/` empty.
+
+**Fallback ladder, as actually traversed (a deviation from the design, recorded
+honestly):**
+
+- **Rung 1 (`download-libtorch`) — failed**, but not for the anticipated header
+  reason: on Apple Silicon, torch-sys's download path fetches the _PyPI torch
+  wheel_ (no libtorch zip exists for macOS arm64), and torch-sys 0.24.0 panicked
+  with "Failed to find arm64 macosx wheel from pypi".
+- **Rung 2 as designed (official libtorch zip) — impossible**: the design's
+  assumption was wrong; pytorch.org publishes no macOS arm64 libtorch archive.
+  The error message itself prescribes the correct route (tch-rs issue #629):
+  pip-install torch and point `LIBTORCH` at it.
+- **Adapted rung 2′ — succeeded**: a repo-local venv (`.venv-torch/`,
+  gitignored) with `pip install torch==2.11.0` — a _fresh, exactly-paired_
+  torch, not the stale Homebrew install that broke v1 — plus a stable
+  `.libtorch` symlink to its `site-packages/torch`.
+
+**Durable environment pin (the design's deferred fix, now implemented):**
+`.cargo/config.toml` sets `LIBTORCH`, `DYLD_LIBRARY_PATH`, and `LD_LIBRARY_PATH`
+to the `.libtorch` path with `relative = true` and `force = true`.
+Force-override matters twice over: (a) the user's shell still exports the v1-era
+Homebrew `LIBTORCH`, which torch-sys would prefer at build time; (b) at
+_runtime_, macOS dyld searches `DYLD_LIBRARY_PATH` ahead of the binary's baked
+rpath, so a stale Homebrew path could shadow the pinned dylibs even after a
+correct build. With the config pin, plain `cargo build` / `cargo test` work in
+any shell with no `env -u` incantation (verified: the gates above ran without
+it). The `download-libtorch` feature was dropped from `nutorchd/Cargo.toml` — it
+cannot work on this platform and `LIBTORCH` takes precedence anyway.
+
+**One-time setup recorded** in the workspace `Cargo.toml` header comment and
+`.cargo/config.toml`: create `.venv-torch`, pip-install `torch==2.11.0`, symlink
+`.libtorch`. (The symlink embeds the venv's Python minor version — `python3.14`
+today; recreate the symlink if the venv is rebuilt with a different Python.)
+
+## Conclusion
+
+The issue-1 mandate is discharged: the latest tch-rs/libtorch pairing builds and
+computes correctly on MPS on this machine, with exact integer-valued results on
+both devices. The v2 workspace skeleton exists (root workspace + `nutorchd`
+crate) and the libtorch acquisition story is settled and pinned: **PyPI wheel in
+a repo-local venv, `.libtorch` symlink, `.cargo/config.toml` force-pin** — not
+Homebrew, not `download-libtorch`.
+
+What the next experiment should be: the daemon spine — `nutorchd` listens on a
+Unix socket, owns the `HashMap<String, Tensor>` registry, and a first client
+round trip proves a tensor created by one connection is usable by a later one
+(`tensor` → handle → `value`). The remaining ops (`full`, `add`, `mm`, `mean`)
+and the two PoC pipelines follow once the spine stands.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only),
+reviewing the pre-commit working tree. **Verdict: APPROVED — no Required,
+Optional, or Nit findings.** The reviewer independently reran every gate with
+plain commands — notably **with the stale v1-era `LIBTORCH` still exported in
+the live shell** — and all passed, empirically validating the
+`.cargo/config.toml` force-override reasoning at both build time and runtime. It
+confirmed `.libtorch` resolves to the venv and `version.py` reports 2.11.0;
+verified the rung-1 panic message against the build log; judged both design
+deviations (dropping `download-libtorch`, implementing the deferred config pin)
+honestly recorded and the adapted-rung-2 **Pass** classification honest
+("materially the rung-2 strategy, strictly better than rung 3"); and verified
+the plan commit `fecffe4` contains design only, with the result commit correctly
+not yet made.
