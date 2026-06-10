@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-10"
+closed = "2026-06-10"
 +++
 
 # Issue 1: Archive v1 (the Nushell plugin) to make room for v2 (nutorchd)
@@ -89,3 +90,28 @@ checkout away.
 - [Experiment 1: Move v1 into `v1/` and re-point the documentation](01-move-v1-and-repoint-docs.md)
   — **Partial** (archive, docs, and history all land; the v1 build fails on the
   current toolchain — proven pre-existing via a control build at `v1-final`)
+
+## Conclusion
+
+The goal is met in one experiment. v1 — the plugin crate, the Nushell helper
+packages, the quality tracker, the screenshots, and the user docs — lives frozen
+in `v1/`, moved as 111 pure git renames so `git log --follow` traces every file
+through the archive. The v1 architecture record was split out of the root
+contract into `v1/AGENTS.md`, and the root `AGENTS.md` and `README.md` now
+describe v2 (nutorchd): a standalone daemon owning the tensor registry, thin
+clients passing string handles over a Unix socket, any shell as a client. The
+pre-archive layout is tagged `v1-final` (`2233da9`); the move commit is
+`2aba2e9` and the docs commit `a02fdde`.
+
+Two findings worth carrying forward:
+
+1. **v1 no longer builds on the current toolchain** — Xcode 26.4's clang rejects
+   libtorch's headers (`std::is_arithmetic` specialization in
+   `c10/util/strong_type.h`) while compiling `torch-sys v0.20.0`; a control
+   build at `v1-final` fails identically, proving this pre-dates the archive. v2
+   builds against the same stack, so **issue 0002's first experiment must prove
+   the tch-rs toolchain compiles before any design depends on it**.
+2. **Same-commit path reuse breaks rename tracking** — creating the new root
+   `README.md` in the same commit as the move would have silently severed
+   `v1/README.md`'s history (git pairs renames only with deleted paths). The
+   result landed as two commits (pure move, then docs) for this reason.
