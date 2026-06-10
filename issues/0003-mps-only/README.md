@@ -96,3 +96,8 @@ surprises — is unaffected.
 3. Whether the daemon's startup MPS requirement needs a test hook (it cannot be
    integration-tested on this machine, where MPS is always present — likely a
    unit-testable guard function).
+
+## Experiments
+
+- [Experiment 1: Remove the device option; require MPS](01-remove-device-option.md)
+  — **Designed**
