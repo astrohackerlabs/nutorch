@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                   | Title                                                                | Opened     |
+| ----------------------------------- | -------------------------------------------------------------------- | ---------- |
+| [0002](0002-nutorchd-poc/README.md) | nutorchd proof of concept — tensors in a daemon, used from any shell | 2026-06-10 |
 
 ## Closed
 
