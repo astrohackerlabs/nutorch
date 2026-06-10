@@ -130,3 +130,5 @@ random seeds.
 - [Experiment 2: The daemon spine — nutorchd + `torch` client, `tensor`→handle→`value`](02-daemon-spine.md)
   — **Pass** (cross-process handle persistence proven on CPU and MPS; found and
   fixed the no-rpath-from-torch-sys gap that broke direct shell execution)
+- [Experiment 3: The compute ops — `full`, `add`, `mm`, `mean`, and the two PoC pipelines](03-compute-ops.md)
+  — **Designed**
