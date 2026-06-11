@@ -172,3 +172,5 @@ inside it).
 - [Experiment 2: The first pointwise sweep (~55 ops)](02-pointwise-sweep.md) —
   **Pass** (57 ops landed, zero structural changes; goldens 29→90; one MPS
   exclusion recorded: heaviside)
+- [Experiment 3: Reductions + comparison sweep (~35 ops), and variable-arity results](03-reductions-comparison-sweep.md)
+  — **Designed**
