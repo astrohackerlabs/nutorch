@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-10"
+closed = "2026-06-10"
 +++
 
 # Issue 3: GPU-only — drop the device option, require MPS
@@ -102,3 +103,26 @@ surprises — is unaffected.
 - [Experiment 1: Remove the device option; require MPS](01-remove-device-option.md)
   — **Pass** (device gone from client, wire, and daemon; MPS required at
   startup; device-less pipelines exact; 22 tests green)
+
+## Conclusion
+
+Done in one experiment. The device concept is gone from the entire v2 surface:
+the client has no `--device` flag (and now rejects unknown flags instead of
+swallowing them), the wire protocol has no `device` field (and rejects one with
+an explanatory error rather than silently ignoring it), and the daemon creates
+every tensor on MPS unconditionally, refusing to start on a machine without it.
+The flagship pipelines got shorter:
+
+```bash
+torch tensor '[1,2,3]'                  # implicitly on the GPU — the point
+```
+
+Docs updated in the same commit: the AGENTS.md vision is now explicitly
+GPU-only/Mac-only with platform expansion framed as a daemon-level decision
+(never a per-tensor option), carried-forward principle 4's device-placement
+clause is recorded as retired by this issue, and the README states the
+Apple-silicon requirement prominently.
+
+Notes for later issues: the wire-level `device` rejection ages out with the
+throwaway protocol; the registry's all-MPS invariant is debug-asserted so a
+future op inserting a CPU tensor fails loudly in dev builds.
