@@ -173,4 +173,5 @@ inside it).
   **Pass** (57 ops landed, zero structural changes; goldens 29→90; one MPS
   exclusion recorded: heaviside)
 - [Experiment 3: Reductions + comparison sweep (~35 ops), and variable-arity results](03-reductions-comparison-sweep.md)
-  — **Designed**
+  — **Pass** (36 ops, table 72→108; goldens 90→134 first-run; VariableHandles
+  cost exactly one enum variant; zero MPS exclusions)

@@ -2480,5 +2480,1225 @@
         ]
       ]
     }
+  },
+  {
+    "name": "rc_prod",
+    "op": "prod",
+    "tensors": [
+      {
+        "data": [
+          1.5,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        9.0
+      ]
+    }
+  },
+  {
+    "name": "rc_prod_dim",
+    "op": "prod",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          6.0,
+          120.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_amax",
+    "op": "amax",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 0
+    },
+    "expect": {
+      "values": [
+        [
+          6.0,
+          5.0,
+          4.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_amin",
+    "op": "amin",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          4.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_max_all",
+    "op": "max",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        6.0
+      ]
+    }
+  },
+  {
+    "name": "rc_max_dim",
+    "op": "max",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          3.0,
+          6.0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_min_all",
+    "op": "min",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "rc_min_dim",
+    "op": "min",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 0
+    },
+    "expect": {
+      "values": [
+        [
+          3.0,
+          1.0,
+          2.0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_median_all",
+    "op": "median",
+    "tensors": [
+      {
+        "data": [
+          3.0,
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        2.0
+      ]
+    }
+  },
+  {
+    "name": "rc_median_dim",
+    "op": "median",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          2.0,
+          5.0
+        ],
+        [
+          2,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_argmax",
+    "op": "argmax",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_argmin",
+    "op": "argmin",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        1
+      ]
+    }
+  },
+  {
+    "name": "rc_all",
+    "op": "all",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          1.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        false
+      ]
+    }
+  },
+  {
+    "name": "rc_any",
+    "op": "any",
+    "tensors": [
+      {
+        "data": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        true
+      ]
+    }
+  },
+  {
+    "name": "rc_std",
+    "op": "std",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        1.2909945249557495
+      ]
+    }
+  },
+  {
+    "name": "rc_std_corr0",
+    "op": "std",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "correction": 0
+    },
+    "expect": {
+      "values": [
+        1.1180340051651
+      ]
+    }
+  },
+  {
+    "name": "rc_var_dim",
+    "op": "var",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1,
+      "correction": 1
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_nansum",
+    "op": "nansum",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        6.0
+      ]
+    }
+  },
+  {
+    "name": "rc_logsumexp",
+    "op": "logsumexp",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          3.4076058864593506,
+          6.40760612487793
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_count_nonzero",
+    "op": "count_nonzero",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          3.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        2
+      ]
+    }
+  },
+  {
+    "name": "rc_cumsum",
+    "op": "cumsum",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 0
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          3.0,
+          6.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_cumprod",
+    "op": "cumprod",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 0
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          2.0,
+          6.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_norm",
+    "op": "norm",
+    "tensors": [
+      {
+        "data": [
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        5.0
+      ]
+    }
+  },
+  {
+    "name": "rc_norm_p1_dim",
+    "op": "norm",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0,
+            2.0
+          ],
+          [
+            6.0,
+            5.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "p": 1.0,
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          6.0,
+          15.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_gt",
+    "op": "gt",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_lt",
+    "op": "lt",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_ge",
+    "op": "ge",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_le",
+    "op": "le",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          false,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_ne",
+    "op": "ne",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          true,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_logical_and",
+    "op": "logical_and",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          1.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_logical_or",
+    "op": "logical_or",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          false,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_logical_xor",
+    "op": "logical_xor",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          1.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_logical_not",
+    "op": "logical_not",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isclose",
+    "op": "isclose",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.001,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "rtol": 0.01
+    },
+    "expect": {
+      "values": [
+        [
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isnan_finite",
+    "op": "isnan",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          -2.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isinf_finite",
+    "op": "isinf",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          -2.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isfinite_finite",
+    "op": "isfinite",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          -2.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isposinf_finite",
+    "op": "isposinf",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          -2.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_isneginf_finite",
+    "op": "isneginf",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          -2.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_equal_true",
+    "op": "equal",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "value": true
+    }
+  },
+  {
+    "name": "rc_equal_false",
+    "op": "equal",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "value": false
+    }
+  },
+  {
+    "name": "rc_topk",
+    "op": "topk",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "k": 2
+    },
+    "expect": {
+      "values": [
+        [
+          5.0,
+          4.0
+        ],
+        [
+          1,
+          3
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_topk_smallest",
+    "op": "topk",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          5.0,
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "k": 2,
+      "smallest": true
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          3.0
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "name": "rc_argsort",
+    "op": "argsort",
+    "tensors": [
+      {
+        "data": [
+          3.0,
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "descending": true
+    },
+    "expect": {
+      "values": [
+        [
+          0,
+          2,
+          1
+        ]
+      ]
+    }
   }
 ]

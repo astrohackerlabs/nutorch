@@ -362,7 +362,12 @@ pub fn execute_table(
 
     match apply(spec, &tensors, &params) {
         Ok(Applied::Tensors(outputs)) => {
-            debug_assert!(matches!(spec.results, ResultKind::Handles(n) if n == outputs.len()));
+            debug_assert!(match spec.results {
+                ResultKind::Handles(n) => n == outputs.len(),
+                // max/min/median: 1 without --dim, values+indices with it.
+                ResultKind::VariableHandles => (1..=2).contains(&outputs.len()),
+                _ => false,
+            });
             Response::handles(outputs.into_iter().map(|t| registry.insert(t)).collect())
         }
         Ok(Applied::Value(value)) => Response::value(value),
@@ -578,6 +583,140 @@ fn apply(spec: &OpSpec, t: &[&Tensor], p: &Params) -> Result<Applied, OpError> {
                     .and_then(|t| t.f_to_device(Device::Mps)),
             )
         }
+        // --- reductions sweep (issue 0005 exp 3) ---
+        "prod" => match p.int("dim") {
+            Some(dim) => one(
+                op,
+                t[0].f_prod_dim_int(dim, p.bool("keepdim"), None::<Kind>),
+            ),
+            None => one(op, t[0].f_prod(None::<Kind>)),
+        },
+        "amax" => match p.int("dim") {
+            Some(dim) => one(op, t[0].f_amax(&[dim][..], p.bool("keepdim"))),
+            None => one(op, t[0].f_amax(&[][..], p.bool("keepdim"))),
+        },
+        "amin" => match p.int("dim") {
+            Some(dim) => one(op, t[0].f_amin(&[dim][..], p.bool("keepdim"))),
+            None => one(op, t[0].f_amin(&[][..], p.bool("keepdim"))),
+        },
+        "max" | "min" | "median" => match p.int("dim") {
+            Some(dim) => {
+                let pair = match op {
+                    "max" => t[0].f_max_dim(dim, p.bool("keepdim")),
+                    "min" => t[0].f_min_dim(dim, p.bool("keepdim")),
+                    _ => t[0].f_median_dim(dim, p.bool("keepdim")),
+                };
+                pair.map(|(values, indices)| Applied::Tensors(vec![values, indices]))
+                    .map_err(|e| tch(op, e))
+            }
+            None => match op {
+                "max" => one(op, t[0].f_max()),
+                "min" => one(op, t[0].f_min()),
+                _ => one(op, t[0].f_median()),
+            },
+        },
+        "argmax" => one(op, t[0].f_argmax(p.int("dim"), p.bool("keepdim"))),
+        "argmin" => one(op, t[0].f_argmin(p.int("dim"), p.bool("keepdim"))),
+        "all" => match p.int("dim") {
+            Some(dim) => one(op, t[0].f_all_dims(&[dim][..], p.bool("keepdim"))),
+            None => one(op, t[0].f_all()),
+        },
+        "any" => match p.int("dim") {
+            Some(dim) => one(op, t[0].f_any_dims(&[dim][..], p.bool("keepdim"))),
+            None => one(op, t[0].f_any()),
+        },
+        "std" | "var" => {
+            let correction: tch::Scalar = p.int("correction").unwrap_or(1).into();
+            let dim_holder;
+            let dim: Option<&[i64]> = match p.int("dim") {
+                Some(d) => {
+                    dim_holder = [d];
+                    Some(&dim_holder[..])
+                }
+                None => None,
+            };
+            let result = if op == "std" {
+                t[0].f_std_correction(dim, correction, p.bool("keepdim"))
+            } else {
+                t[0].f_var_correction(dim, correction, p.bool("keepdim"))
+            };
+            one(op, result)
+        }
+        "nansum" => {
+            let dim_holder;
+            let dim: Option<&[i64]> = match p.int("dim") {
+                Some(d) => {
+                    dim_holder = [d];
+                    Some(&dim_holder[..])
+                }
+                None => None,
+            };
+            one(op, t[0].f_nansum(dim, p.bool("keepdim"), None::<Kind>))
+        }
+        "logsumexp" => one(
+            op,
+            t[0].f_logsumexp(&[p.int("dim").expect("required")][..], p.bool("keepdim")),
+        ),
+        "count_nonzero" => one(op, t[0].f_count_nonzero(p.int("dim"))),
+        "cumsum" => one(
+            op,
+            t[0].f_cumsum(p.int("dim").expect("required"), None::<Kind>),
+        ),
+        "cumprod" => one(
+            op,
+            t[0].f_cumprod(p.int("dim").expect("required"), None::<Kind>),
+        ),
+        "norm" => {
+            let pval = p.float("p").unwrap_or(2.0);
+            match p.int("dim") {
+                Some(dim) => one(
+                    op,
+                    t[0].f_norm_scalaropt_dim(pval, &[dim][..], p.bool("keepdim")),
+                ),
+                None => one(op, t[0].f_norm_scalaropt_dtype(pval, Kind::Float)),
+            }
+        }
+        // --- comparison sweep ---
+        "gt" => one(op, t[0].f_gt_tensor(t[1])),
+        "lt" => one(op, t[0].f_lt_tensor(t[1])),
+        "ge" => one(op, t[0].f_ge_tensor(t[1])),
+        "le" => one(op, t[0].f_le_tensor(t[1])),
+        "ne" => one(op, t[0].f_ne_tensor(t[1])),
+        "logical_and" => one(op, t[0].f_logical_and(t[1])),
+        "logical_or" => one(op, t[0].f_logical_or(t[1])),
+        "logical_xor" => one(op, t[0].f_logical_xor(t[1])),
+        "logical_not" => one(op, t[0].f_logical_not()),
+        "isclose" => one(
+            op,
+            t[0].f_isclose(
+                t[1],
+                p.float("rtol").unwrap_or(1e-5),
+                p.float("atol").unwrap_or(1e-8),
+                false,
+            ),
+        ),
+        "isnan" => one(op, t[0].f_isnan()),
+        "isinf" => one(op, t[0].f_isinf()),
+        "isfinite" => one(op, t[0].f_isfinite()),
+        "isposinf" => one(op, t[0].f_isposinf()),
+        "isneginf" => one(op, t[0].f_isneginf()),
+        "equal" => t[0]
+            .f_equal(t[1])
+            .map(|b| Applied::Value(serde_json::Value::Bool(b)))
+            .map_err(|e| tch(op, e)),
+        "topk" => t[0]
+            .f_topk(
+                p.int("k").expect("required"),
+                p.int("dim").unwrap_or(-1),
+                !p.bool("smallest"),
+                true,
+            )
+            .map(|(values, indices)| Applied::Tensors(vec![values, indices]))
+            .map_err(|e| tch(op, e)),
+        "argsort" => one(
+            op,
+            t[0].f_argsort(p.int("dim").unwrap_or(-1), p.bool("descending")),
+        ),
         "manual_seed" => {
             tch::manual_seed(p.int("seed").expect("required"));
             Ok(Applied::Nothing)
@@ -888,5 +1027,58 @@ mod nan_to_num_semantics {
             convert::tensor_to_json(&cpu).unwrap(),
             json!([0.5, 100.0, -100.0])
         );
+    }
+}
+
+#[cfg(test)]
+mod non_finite_predicate_semantics {
+    use super::*;
+    use serde_json::json;
+
+    /// Golden inputs must be finite JSON, so the TRUE path of the predicate
+    /// family is proven here with directly constructed non-finite values
+    /// ([NaN, inf, -inf, 1.0] via 0-division on MPS float32).
+    #[test]
+    fn predicates_detect_non_finite_values() {
+        let mut registry = Registry::new();
+        let numerator =
+            convert::json_to_tensor(&json!([0.0, 1.0, -1.0, 1.0]), Kind::Float, Device::Mps)
+                .unwrap();
+        let denominator =
+            convert::json_to_tensor(&json!([0.0, 0.0, 0.0, 1.0]), Kind::Float, Device::Mps)
+                .unwrap();
+        let non_finite = numerator.f_div(&denominator).unwrap(); // [NaN, inf, -inf, 1.0]
+        let handle = registry.insert(non_finite);
+
+        let expectations = [
+            ("isnan", json!([true, false, false, false])),
+            ("isinf", json!([false, true, true, false])),
+            ("isfinite", json!([false, false, false, true])),
+            ("isposinf", json!([false, true, false, false])),
+            ("isneginf", json!([false, false, true, false])),
+        ];
+        for (name, expected) in expectations {
+            let spec = nutorch_ops::find(name).unwrap();
+            let response = execute_table(
+                &mut registry,
+                spec,
+                &[handle.clone()],
+                &serde_json::Map::new(),
+            );
+            let out = match response {
+                Response::Handles { handles, .. } => handles[0].clone(),
+                other => panic!("{name}: expected handles, got {other:?}"),
+            };
+            let cpu = registry
+                .get(&out)
+                .unwrap()
+                .f_to_device(Device::Cpu)
+                .unwrap();
+            assert_eq!(
+                convert::tensor_to_json(&cpu).unwrap(),
+                expected,
+                "{name} true-path"
+            );
+        }
     }
 }

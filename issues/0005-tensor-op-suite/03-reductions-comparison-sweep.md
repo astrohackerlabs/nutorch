@@ -2,6 +2,16 @@
 [implementer]
 agent = "claude-code"
 model = "claude-fable-5"
+
+[review.design]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
+
+[review.result]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
 +++
 
 # Experiment 3: Reductions + comparison sweep (~35 ops), and variable-arity results
@@ -104,3 +114,49 @@ all ~35 ops run on MPS in the linked torch, the client is already N-handle-safe
 the presence-only Bool grammar. Approved with the fixes in place (re-review
 folded into this record; the fixes are the reviewer's own prescriptions
 verbatim).
+
+## Result
+
+**Result:** Pass
+
+36 new ops landed (18 reductions, 18 comparison); the table grew 72 → 108. The
+`VariableHandles` spec extension cost exactly what was declared: one enum
+variant, one debug-assert arm, zero client changes.
+
+- **Golden suite: 134/134** (was 90), first run, byte-stable regeneration
+  (sha256 `02923bda…` twice); dprint-clean; floor raised to 130.
+- **Hygiene**: build 0 warnings; 32 daemon unit tests (including the new
+  non-finite predicate test proving the TRUE path of all five predicates on a
+  constructed [NaN, inf, -inf, 1.0] MPS tensor); fmt/dprint clean; `v1/`
+  untouched.
+- **Live**: `max $m` → 1 handle; `max $m --dim 1` → 2 handles piping to values
+  `[3.0,6.0]` and indices `[0,0]`; `median` scalar; `gt` → `[false,true,false]`;
+  `isnan` finite → all false; `equal` → true/false; `topk 2` → values
+  `[5.0,4.0]` + indices `[1,3]`; `--smallest` flips to `[1.0,3.0]`; `torch ops`
+  = 110 = 108 + 2.
+- **MPS oracle exclusions: none** — all 36 planned ops ran on MPS in the linked
+  PyTorch (generation completed without a single skip).
+
+## Conclusion
+
+Three categories down (pointwise, reductions, comparison): 108 ops, all
+golden-verified. The VariableHandles extension closes the
+output-count-depends-on-params shape; the presence-only-Bool limitation got its
+honest workaround (`--smallest`). Remaining sweeps: linalg + shape + indexing
+(the structurally richest — split/chunk return a variable LIST of tensors,
+einsum brings the Str param + variadic combination, `where` is ternary), then
+creation + the deferred tensor-valued-param extension (clamp bounds, pow tensor
+exponent), then close.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only),
+reviewing the pre-commit working tree. **Verdict: APPROVED — no Required,
+Optional, or Nit findings.** The reviewer independently reproduced every gate:
+all three design-review-mandated items confirmed real (the non-finite predicate
+test runs and passes all five true paths; the VariableHandles debug-assert arm;
+norm's two-armed dispatch); variable arity, topk --smallest, std --correction 0
+vs 1, and dtype promotion all verified live AND against fresh independent Python
+computations; goldens byte-stable at sha256 02923bda…; `all`-on-float coercion
+semantics confirmed to match PyTorch; "zero MPS exclusions" verified honest
+against the generator diff; plan/result commit separation clean.

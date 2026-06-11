@@ -246,7 +246,74 @@ ok("pw_sub_alpha", "sub", [t([10.0, 10.0]), t([1.0, 2.0])], {"alpha": 2},
 ok("pw_add_alpha_float", "add", [t([1.0, 2.0]), t([3.0, 4.0])], {"alpha": 0.5},
    lambda ts: [torch.add(ts[0], ts[1], alpha=0.5)])
 
+# --- reductions + comparison sweep (issue 0005 exp 3) ---
+M = [[3.0, 1.0, 2.0], [6.0, 5.0, 4.0]]
+ok("rc_prod", "prod", [t([1.5, 2.0, 3.0])], {}, lambda ts: [ts[0].prod()])
+ok("rc_prod_dim", "prod", [t(M)], {"dim": 1}, lambda ts: [ts[0].prod(dim=1)])
+ok("rc_amax", "amax", [t(M)], {"dim": 0}, lambda ts: [torch.amax(ts[0], dim=0)])
+ok("rc_amin", "amin", [t(M)], {"dim": 1}, lambda ts: [torch.amin(ts[0], dim=1)])
+ok("rc_max_all", "max", [t(M)], {}, lambda ts: [ts[0].max()])
+ok("rc_max_dim", "max", [t(M)], {"dim": 1},
+   lambda ts: list(ts[0].max(dim=1)))
+ok("rc_min_all", "min", [t(M)], {}, lambda ts: [ts[0].min()])
+ok("rc_min_dim", "min", [t(M)], {"dim": 0},
+   lambda ts: list(ts[0].min(dim=0)))
+ok("rc_median_all", "median", [t([3.0, 1.0, 2.0])], {}, lambda ts: [ts[0].median()])
+ok("rc_median_dim", "median", [t(M)], {"dim": 1},
+   lambda ts: list(ts[0].median(dim=1)))
+ok("rc_argmax", "argmax", [t(M)], {"dim": 1}, lambda ts: [ts[0].argmax(dim=1)])
+ok("rc_argmin", "argmin", [t(M)], {}, lambda ts: [ts[0].argmin()])
+ok("rc_all", "all", [t([1.0, 1.0, 0.0])], {}, lambda ts: [ts[0].bool().all()])
+ok("rc_any", "any", [t([0.0, 0.0, 1.0])], {}, lambda ts: [ts[0].bool().any()])
+ok("rc_std", "std", [t([1.0, 2.0, 3.0, 4.0])], {},
+   lambda ts: [ts[0].std(correction=1)])
+ok("rc_std_corr0", "std", [t([1.0, 2.0, 3.0, 4.0])], {"correction": 0},
+   lambda ts: [ts[0].std(correction=0)])
+ok("rc_var_dim", "var", [t(M)], {"dim": 1, "correction": 1},
+   lambda ts: [ts[0].var(dim=1, correction=1)])
+ok("rc_nansum", "nansum", [t([1.0, 2.0, 3.0])], {}, lambda ts: [ts[0].nansum()])
+ok("rc_logsumexp", "logsumexp", [t(M)], {"dim": 1},
+   lambda ts: [torch.logsumexp(ts[0], dim=1)])
+ok("rc_count_nonzero", "count_nonzero", [t([1.0, 0.0, 3.0, 0.0])], {},
+   lambda ts: [torch.count_nonzero(ts[0])])
+ok("rc_cumsum", "cumsum", [t([1.0, 2.0, 3.0])], {"dim": 0},
+   lambda ts: [ts[0].cumsum(dim=0)])
+ok("rc_cumprod", "cumprod", [t([1.0, 2.0, 3.0])], {"dim": 0},
+   lambda ts: [ts[0].cumprod(dim=0)])
+ok("rc_norm", "norm", [t([3.0, 4.0])], {}, lambda ts: [ts[0].norm()])
+ok("rc_norm_p1_dim", "norm", [t(M)], {"p": 1.0, "dim": 1},
+   lambda ts: [ts[0].norm(p=1, dim=1)])
+
+A, B = [1.0, 5.0, 3.0], [2.0, 4.0, 3.0]
+for name in ["gt", "lt", "ge", "le", "ne"]:
+    ok(f"rc_{name}", name, [t(A), t(B)], {},
+       lambda ts, f=getattr(torch, name): [f(ts[0], ts[1])])
+ok("rc_logical_and", "logical_and", [t([1.0, 0.0, 1.0]), t([1.0, 1.0, 0.0])], {},
+   lambda ts: [torch.logical_and(ts[0], ts[1])])
+ok("rc_logical_or", "logical_or", [t([1.0, 0.0, 0.0]), t([0.0, 0.0, 1.0])], {},
+   lambda ts: [torch.logical_or(ts[0], ts[1])])
+ok("rc_logical_xor", "logical_xor", [t([1.0, 0.0, 1.0]), t([1.0, 1.0, 0.0])], {},
+   lambda ts: [torch.logical_xor(ts[0], ts[1])])
+ok("rc_logical_not", "logical_not", [t([1.0, 0.0, 2.0])], {},
+   lambda ts: [torch.logical_not(ts[0])])
+ok("rc_isclose", "isclose", [t([1.0, 2.0]), t([1.001, 2.0])], {"rtol": 0.01},
+   lambda ts: [torch.isclose(ts[0], ts[1], rtol=0.01)])
+# Predicates on FINITE inputs only (golden constraint); the non-finite TRUE
+# path is guarded by a Rust dispatch unit test.
+for name in ["isnan", "isinf", "isfinite", "isposinf", "isneginf"]:
+    ok(f"rc_{name}_finite", name, [t([1.0, -2.0, 0.0])], {},
+       lambda ts, f=getattr(torch, name): [f(ts[0])])
+ok_value("rc_equal_true", "equal", [t([1.0, 2.0]), t([1.0, 2.0])], {}, True)
+ok_value("rc_equal_false", "equal", [t([1.0, 2.0]), t([1.0, 3.0])], {}, False)
+ok("rc_topk", "topk", [t([1.0, 5.0, 3.0, 4.0])], {"k": 2},
+   lambda ts: list(torch.topk(ts[0], 2)))
+ok("rc_topk_smallest", "topk", [t([1.0, 5.0, 3.0, 4.0])], {"k": 2, "smallest": True},
+   lambda ts: list(torch.topk(ts[0], 2, largest=False)))
+ok("rc_argsort", "argsort", [t([3.0, 1.0, 2.0])], {"descending": True},
+   lambda ts: [torch.argsort(ts[0], descending=True)])
+
 out = pathlib.Path(__file__).resolve().parent.parent / "nutorchd" / "tests" / "golden.json"
+
 
 out.write_text(json.dumps(cases, indent=2) + "\n")
 print(f"wrote {len(cases)} cases to {out}")
