@@ -86,3 +86,8 @@ beyond what brew gives for free.
 5. **codesigning/quarantine**: do downloaded bottles hit Gatekeeper on Apple
    Silicon (ad-hoc signatures may suffice for CLI binaries — verify, decide,
    record).
+
+## Experiments
+
+- [Experiment 1: The relocatable substrate — versioned binaries that run anywhere](01-relocatable-substrate.md)
+  — **Designed**
