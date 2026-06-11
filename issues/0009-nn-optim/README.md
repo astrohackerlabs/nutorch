@@ -128,3 +128,5 @@ or honestly excluded.
 - [Experiment 3: Losses as table ops](03-losses.md) — **Pass** (nine losses,
   12/12 goldens first run, zero exclusions; the loss→backward→weight-grad path
   live)
+- [Experiment 4: Optimizers and the training loop](04-optimizers.md) —
+  **Designed**
