@@ -7,7 +7,7 @@ opened = "2026-06-11"
 
 ## Goal
 
-`brew tap ryanxcharles/nutorch && brew install nutorch` puts working `torch` and
+`brew tap nutorch/nutorch && brew install nutorch` puts working `torch` and
 `nutorchd` binaries (and `nutorch.nu`) on a Mac in seconds, with libtorch
 vendored invisibly — no Python venv dance, no Rust toolchain, no checkout. The
 first real version of nutorch exists: tagged, stamped (`torch --version`),
@@ -80,9 +80,11 @@ beyond what brew gives for free.
    decide (smaller keg vs. fragility to tch's internal linking).
 3. **Version stamping**: compile-time env (`CARGO_PKG_VERSION` + git sha?) and
    whether `nutorchd` reports it via `daemon status` too.
-4. **The tap repo's relationship to this repo**: separate `homebrew-nutorch`
-   repository (the brew convention) — how its formula updates are driven from
-   nutorch releases (manually first; recorded).
+4. **The tap repo's relationship to this repo**: separate
+   `nutorch/homebrew-nutorch` repository (the brew convention — the repo lives
+   under the `nutorch` GitHub org, so the tap is `brew tap nutorch/nutorch`) —
+   how its formula updates are driven from nutorch releases (manually first;
+   recorded).
 5. **codesigning/quarantine**: do downloaded bottles hit Gatekeeper on Apple
    Silicon (ad-hoc signatures may suffice for CLI binaries — verify, decide,
    record).
