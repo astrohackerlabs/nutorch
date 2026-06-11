@@ -84,3 +84,8 @@ wrapper signatures give for free.
    test that regenerates and diffs, like the golden byte-stability check).
 4. **Nushell availability for verification**: is `nu` on this machine, or does
    the verification install/pin one? The experiment must say.
+
+## Experiments
+
+- [Experiment 1: `--json`, the generator, and the module](01-nu-module.md) —
+  **Designed**
