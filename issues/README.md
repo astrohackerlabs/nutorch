@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                       | Title                                                                         | Opened     |
+| --------------------------------------- | ----------------------------------------------------------------------------- | ---------- |
+| [0004](0004-daemon-lifecycle/README.md) | Daemon lifecycle — auto-start, a 1-hour idle TTL, and `torch daemon` commands | 2026-06-10 |
 
 ## Closed
 
