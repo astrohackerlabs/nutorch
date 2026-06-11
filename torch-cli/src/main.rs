@@ -65,6 +65,8 @@ fn daemon_alive(socket: &Path) -> bool {
     UnixStream::connect(socket).is_ok()
 }
 
+/// The socket path with its extension replaced by `.log`
+/// (nutorchd.sock -> nutorchd.log) — must agree with the daemon's convention.
 fn log_path_for(socket: &Path) -> PathBuf {
     socket.with_extension("log")
 }

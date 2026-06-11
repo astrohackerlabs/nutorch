@@ -61,7 +61,8 @@ fn parse_daemon_args() -> Result<DaemonArgs, String> {
     })
 }
 
-/// The conventional log path: the socket path with a `.log` extension. The
+/// The conventional log path: the socket path with its extension replaced
+/// by `.log` (nutorchd.sock -> nutorchd.log). The
 /// spawner (client auto-start) redirects daemon output here; for a manually
 /// started daemon the file may not exist — it is a convention report.
 fn log_path_for(socket: &Path) -> PathBuf {

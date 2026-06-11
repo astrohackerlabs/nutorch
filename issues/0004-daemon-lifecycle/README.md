@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-10"
+closed = "2026-06-10"
 +++
 
 # Issue 4: Daemon lifecycle — auto-start, a 1-hour idle TTL, and `torch daemon` commands
@@ -120,3 +121,39 @@ structural change that makes expiry possible — settled in the experiment.
 - [Experiment 2: Client auto-spawn and the `torch daemon` command family](02-client-autospawn-and-verbs.md)
   — **Pass** (cold start, expiry→transparent-respawn, and all five verbs behave;
   found and fixed a match-scrutinee probe deadlock against the serial daemon)
+
+## Conclusion
+
+Two experiments, both Pass. The daemon is now invisible plumbing with a bounded
+memory horizon, exactly as the goal demanded:
+
+- **Start**: any `torch` command auto-spawns `nutorchd` when the socket is dead
+  (detached, stdin null, output logged beside the socket), polls until it
+  answers, and proceeds. `torch daemon start` is the explicit form.
+- **Lifetime**: a sliding idle TTL, default 1 hour — every tensor op renews the
+  lease; `status` deliberately does not. Configurable via `--ttl`,
+  `NUTORCHD_TTL`, and live via `torch daemon ttl <dur>` (`none` = forever).
+- **End**: idle expiry, graceful `shutdown` op, and SIGTERM/SIGINT — every exit
+  unlinks the socket. Both PoC socket debts (stranded file, live-daemon steal)
+  are closed; probe-before-bind makes a newcomer yield to a living sibling.
+- **Analysis**: `torch daemon status` reports pid, uptime, ttl, idle, remaining,
+  tensor count, approximate memory, socket, and log — the trustworthiness the
+  policy needs. `ttl`/`stop`/`restart`/`start` control it, with sensible
+  idempotence and exit codes.
+
+The expiry→auto-respawn loop was proven live: a 2-second TTL daemon died and the
+next plain tensor op transparently produced a new one.
+
+Hard-won lessons recorded in the experiments:
+
+1. **The match-scrutinee probe deadlock** (Exp 2): holding a liveness-probe
+   connection open across a follow-up request self-deadlocks against the serial
+   one-connection-at-a-time daemon. Fixed with a stream-dropping
+   `daemon_alive()`; the strongest argument yet for the future concurrency
+   issue.
+2. **The simultaneous-start TOCTOU window** remains, recorded and deferred
+   (auto-spawn's one-spawn-per-failure mitigates; an exclusive bind belongs to
+   the concurrency issue).
+3. Verification against shared default state must be structurally incapable of
+   harming a real daemon (the private-TMPDIR pattern, after the design reviewer
+   blocked a check that could have stopped a genuine daemon).
