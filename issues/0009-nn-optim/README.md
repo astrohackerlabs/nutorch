@@ -132,3 +132,5 @@ or honestly excluded.
   (4 optimizers bitwise vs torch.optim incl. the lerp_-pinning coupled-wd Adam;
   BOTH acceptance scripts train successfully from plain zsh — the issue's goal
   demonstrated)
+- [Experiment 5: The module sweep — conv, norms, dropout, embedding, pools](05-module-sweep.md)
+  — **Designed**
