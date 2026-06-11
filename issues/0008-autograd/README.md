@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-11"
+closed = "2026-06-11"
 +++
 
 # Issue 8: Autograd — gradients from the shell
@@ -86,3 +87,35 @@ gradients unless trivially cheap, per-op `grad_fn` introspection.
   — **Pass** (13/13 gradient goldens first run, zero MPS backward exclusions;
   the non-leaf trap pinned by regression test; the f_clone aliasing trap caught
   by the snapshot-immutability test)
+
+## Conclusion
+
+**Solved**, in one experiment. The thesis held exactly: autograd is a workflow,
+not an engine — the entire feature is four one-tensor table ops (`backward`,
+`grad`, `detach`, `zero_grad`), one flag (`--requires_grad`, underscore spelling
+per the existing flag convention — the Goal example above predates that
+decision), and one piece of ordering discipline.
+
+All five design questions closed as the experiment decided them:
+
+1. **Graph lifetime**: document, don't fight — freeing an intermediate's handle
+   before backward works (demonstrated live and by test; the graph holds the
+   tensor internally); leaf handles are the only key to their gradients;
+   `torch tensors` counts registry handles only.
+2. **Tracking**: automatic via tch; `detach` is the exit.
+3. **Backward**: scalar-only with a named-shape error; gradients accumulate
+   (PyTorch fidelity) with `zero_grad` shipped alongside; double-backward errors
+   with libtorch's own informative message as a passthrough.
+4. **`grad` is a snapshot**: deep-copied, immutable under later backward calls —
+   pinned by test after the implementation's one surprise (tch's `f_clone` is
+   the clone-INTO-out variant; the natural call silently aliases — caught by the
+   snapshot-immutability test, fixed with an explicit allocate-and-copy).
+5. **MPS backward coverage**: 13/13 gradient goldens bitwise-equal to Python on
+   MPS, zero exclusions.
+
+The defining find was the design review's: the `.to()` non-leaf trap —
+`set_requires_grad` before a CPU→MPS transfer silently produces a non-leaf whose
+grad stays None forever. The ordering (requires_grad LAST, post-transfer) is now
+load-bearing at three sites and pinned by a regression test.
+
+nn/optim has its prerequisite.

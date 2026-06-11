@@ -2,14 +2,14 @@
 
 ## Open
 
-| #                               | Title                               | Opened     |
-| ------------------------------- | ----------------------------------- | ---------- |
-| [0008](0008-autograd/README.md) | Autograd — gradients from the shell | 2026-06-11 |
+| # | Title | Opened |
+| - | ----- | ------ |
 
 ## Closed
 
 | #                                                     | Title                                                                              | Opened     | Closed     |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------- | ---------- |
+| [0008](0008-autograd/README.md)                       | Autograd — gradients from the shell                                                | 2026-06-11 | 2026-06-11 |
 | [0007](0007-daemon-concurrency/README.md)             | Concurrent connections, serialized execution                                       | 2026-06-11 | 2026-06-11 |
 | [0006](0006-tensor-lifecycle-and-roundtrip/README.md) | Tensor lifecycle (free + list) and lossless JSON round-trip                        | 2026-06-11 | 2026-06-11 |
 | [0005](0005-tensor-op-suite/README.md)                | The full tensor-op surface — a high-quality CLI for every PyTorch tensor operation | 2026-06-10 | 2026-06-10 |
