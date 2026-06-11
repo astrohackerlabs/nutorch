@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-11"
+closed = "2026-06-11"
 +++
 
 # Issue 6: Tensor lifecycle (free + list) and lossless JSON round-trip
@@ -117,3 +118,40 @@ formats for very large tensors.
 - [Experiment 3: The lossless round-trip — bool, non-finite, and the meta envelope](03-lossless-roundtrip.md)
   — **Pass** (bool, non-finite tokens, and the dtype envelope all round-trip
   losslessly; the export→restart→re-import valve executed live and documented)
+
+## Conclusion
+
+**Solved.** Three experiments, three passes, six adversarial review gates.
+
+All four strands delivered:
+
+1. **`torch free`** — atomic (validate-all-before-remove-any), by argument, by
+   stdin pipeline, or `--all`; silent on success (the rm convention); touches
+   the idle lease; registry accounting verified to the byte.
+2. **`torch tensors`** — the census: handle, shape, dtype, bytes, age, idle;
+   oldest-first; awk-composable (`torch tensors | awk '{print $1}' | torch free`
+   proven live); no daemon spawn, no lease touch; per-tensor timestamps with
+   explicit touch semantics (`get` stays pure).
+3. **The lossless round-trip** — bool input path (inference + both PyTorch cast
+   directions), the non-finite string-token dialect
+   (`"NaN"`/`"Infinity"`/`"-Infinity"` replacing serde's silent `null`
+   corruption), and the `--meta` dtype envelope with explicit-over-implicit
+   conflict errors. Every dtype the registry holds and every value a float
+   tensor can contain now survives `torch value` → file → `torch tensor`.
+4. **The documented relief valve** — README's "Saving tensors and reclaiming
+   memory" section, every command executed verbatim before being written down
+   (the result gate caught the first attempt claiming a section that didn't
+   exist).
+
+What this issue deliberately did NOT build, with reasoning recorded in the
+Background: no garbage collector (the shell holds the roots — reachability is
+invisible to the daemon, and policy-based destruction converts a memory problem
+into a correctness problem) and no save/load feature (shell redirection over the
+now-lossless import/export is the persistence story, selective by construction).
+Out-of-scope-but-recorded: LRU spill-to-disk budgets, opt-in per-tensor TTLs,
+binary transfer formats.
+
+Process note for the record: three of this issue's six review gates caught real,
+blocking defects — the `--all` argument-swallowing hazard, the dtype-column
+panic on Bool tensors, and a Result claiming a README section that had silently
+failed to land. The gates continue to earn their cost.
