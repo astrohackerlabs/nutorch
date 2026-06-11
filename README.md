@@ -43,6 +43,25 @@ The default TTL is configurable via `NUTORCHD_TTL` (e.g. `30m`, `2h`, `none`).
 Run `torch ops` to list every available operation, and `torch <op> --help` for
 any one of them.
 
+## Neural networks
+
+Modules are daemon-resident objects with `nn://` handles, composed and run from
+the shell:
+
+```bash
+l=$(torch nn linear 2 3)                         # PyTorch-default init, seeded
+m=$(torch nn sequential $l "$(torch nn relu)")   # consumes the child handles
+y=$(torch forward $m $x)                         # or: $x | torch forward $m
+torch nn parameters $m                           # tensor:// handles — LIVE views
+torch nn info $m
+```
+
+Parameter handles alias the module's weights (the live-view contract): gradients
+populate through them after `backward`, and optimizer steps (coming in this
+issue) will be visible through them. Pretrained weights load at construction:
+`torch nn linear 2 3 --weight $w --bias-tensor $b` (deep-copied; your tensors
+are never mutated).
+
 ## Autograd
 
 Gradients flow through any pipeline — libtorch records the graph automatically

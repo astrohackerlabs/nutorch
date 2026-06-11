@@ -111,12 +111,14 @@ fn mint(kind: HandleKind, id: &str) -> String {
 /// experiments (issue 0009).
 pub enum Object {
     Tensor(Tensor),
+    Module(crate::nn::NnModule),
 }
 
 impl Object {
     fn kind(&self) -> HandleKind {
         match self {
             Object::Tensor(_) => HandleKind::Tensor,
+            Object::Module(_) => HandleKind::Module,
         }
     }
 }
@@ -149,17 +151,26 @@ impl Registry {
     }
 
     pub fn insert_tensor(&mut self, tensor: Tensor) -> String {
+        self.insert_object(Object::Tensor(tensor))
+    }
+
+    pub fn insert_module(&mut self, module: crate::nn::NnModule) -> String {
+        self.insert_object(Object::Module(module))
+    }
+
+    fn insert_object(&mut self, object: Object) -> String {
+        let kind = object.kind();
         let id = uuid::Uuid::new_v4().to_string();
         let now = Instant::now();
         self.entries.insert(
             id.clone(),
             Entry {
-                object: Object::Tensor(tensor),
+                object,
                 created: now,
                 touched: now,
             },
         );
-        mint(HandleKind::Tensor, &id)
+        mint(kind, &id)
     }
 
     fn lookup(&self, handle: &str, expected: HandleKind) -> Result<&Entry, Lookup> {
@@ -187,6 +198,14 @@ impl Registry {
     pub fn get_tensor(&self, handle: &str) -> Result<&Tensor, Lookup> {
         match &self.lookup(handle, HandleKind::Tensor)?.object {
             Object::Tensor(tensor) => Ok(tensor),
+            _ => unreachable!("lookup kind-checked"),
+        }
+    }
+
+    pub fn get_module(&self, handle: &str) -> Result<&crate::nn::NnModule, Lookup> {
+        match &self.lookup(handle, HandleKind::Module)?.object {
+            Object::Module(module) => Ok(module),
+            _ => unreachable!("lookup kind-checked"),
         }
     }
 
@@ -252,6 +271,7 @@ impl Registry {
             .values()
             .map(|e| match &e.object {
                 Object::Tensor(t) => t.numel() as u64 * t.kind().elt_size_in_bytes() as u64,
+                Object::Module(m) => m.param_bytes(),
             })
             .sum()
     }
@@ -262,8 +282,9 @@ impl Registry {
         let mut rows: Vec<(&String, &Entry)> = self.entries.iter().collect();
         rows.sort_by_key(|(_, entry)| entry.created);
         rows.into_iter()
-            .map(|(id, entry)| match &entry.object {
-                Object::Tensor(t) => Listing {
+            .filter_map(|(id, entry)| match &entry.object {
+                Object::Module(_) => None,
+                Object::Tensor(t) => Some(Listing {
                     handle: mint(HandleKind::Tensor, id),
                     kind: HandleKind::Tensor,
                     shape: t.size(),
@@ -271,7 +292,7 @@ impl Registry {
                     bytes: t.numel() as u64 * t.kind().elt_size_in_bytes() as u64,
                     age_secs: now.duration_since(entry.created).as_secs(),
                     idle_secs: now.duration_since(entry.touched).as_secs(),
-                },
+                }),
             })
             .collect()
     }

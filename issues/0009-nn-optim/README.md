@@ -123,4 +123,5 @@ or honestly excluded.
   **Pass** (every handle now tensor://…; the error quartet live; goldens
   byte-identical; zero client/protocol/ops changes)
 - [Experiment 2: The module foundation — linear, activations, sequential, forward](02-module-foundation.md)
-  — **Designed**
+  — **Pass** (Object::Module for one enum variant; 5/5 nn goldens first run;
+  live views proven by grad identity; sequential consumes atomically)

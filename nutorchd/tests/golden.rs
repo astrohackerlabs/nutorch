@@ -13,7 +13,7 @@ const GOLDEN: &str = include_str!("golden.json");
 #[test]
 fn golden_cases_agree_with_real_pytorch() {
     let cases: Vec<serde_json::Value> = serde_json::from_str(GOLDEN).expect("golden.json parses");
-    assert!(cases.len() >= 218, "suspiciously few golden cases");
+    assert!(cases.len() >= 225, "suspiciously few golden cases");
 
     let mut failures = Vec::new();
     for case in &cases {
@@ -32,6 +32,9 @@ fn golden_cases_agree_with_real_pytorch() {
 fn run_case(case: &serde_json::Value) -> Result<(), String> {
     if case.get("grad_op").is_some() {
         return run_grad_case(case);
+    }
+    if case.get("nn_linear_forward").is_some() {
+        return run_nn_linear_case(case);
     }
     let mut registry = Registry::new();
     let op = case["op"].as_str().expect("op");
@@ -196,6 +199,136 @@ fn run_grad_case(case: &serde_json::Value) -> Result<(), String> {
     let expected = &case["expect_grad"];
     if &actual != expected {
         return Err(format!("expected grad {expected}, got {actual}"));
+    }
+    Ok(())
+}
+
+/// nn golden (issue 0009): construct linear with EXPLICIT weights via the
+/// bespoke dispatch, optionally chain activations via sequential, forward
+/// a known input, then backward and compare weight/bias grads — all
+/// against torch.nn.functional on MPS.
+fn run_nn_linear_case(case: &serde_json::Value) -> Result<(), String> {
+    use nutorchd::lifecycle::Lifecycle;
+    use std::path::PathBuf;
+    use std::sync::Mutex;
+
+    let mut registry = Registry::new();
+    let lifecycle = Mutex::new(Lifecycle::new(None));
+    let socket = PathBuf::from("/tmp/golden.sock");
+    let bespoke = |registry: &mut Registry,
+                   request: serde_json::Value|
+     -> Result<serde_json::Value, String> {
+        let parsed = dispatch::parse_request(&request.to_string())
+            .map_err(|response| format!("parse: {response:?}"))?;
+        let (response, _) = dispatch::handle_request(registry, &lifecycle, &socket, parsed);
+        match response {
+            nutorchd::protocol::Response::Handle { handle, .. } => {
+                Ok(serde_json::Value::String(handle))
+            }
+            nutorchd::protocol::Response::Handles { handles, .. } => Ok(serde_json::json!(handles)),
+            nutorchd::protocol::Response::Value { value, .. } => Ok(value),
+            other => Err(format!("bespoke: unexpected {other:?}")),
+        }
+    };
+
+    // Inputs and explicit weights.
+    let make = |registry: &mut Registry, data: &serde_json::Value| -> Result<String, String> {
+        let t = convert::json_to_tensor(data, tch::Kind::Float, Device::Mps)
+            .map_err(|e| format!("input: {e}"))?;
+        Ok(registry.insert_tensor(t))
+    };
+    let x = make(&mut registry, &case["input"])?;
+    let w = make(&mut registry, &case["weight"])?;
+    let mut args = serde_json::json!({ "weight": w });
+    if case["bias"].is_null() {
+        args["no_bias"] = serde_json::json!(true);
+    } else {
+        let b = make(&mut registry, &case["bias"])?;
+        args["bias_tensor"] = serde_json::json!(b);
+    }
+    let shape = case["weight"].as_array().unwrap();
+    args["out_features"] = serde_json::json!(shape.len() as i64);
+    args["in_features"] = serde_json::json!(shape[0].as_array().unwrap().len() as i64);
+    let linear = bespoke(
+        &mut registry,
+        serde_json::json!({"op":"nn","kind":"linear","args": args}),
+    )?;
+    let linear = linear.as_str().unwrap().to_string();
+
+    // Optional activation chain via sequential composition.
+    let model = if case["chain"].as_array().is_some_and(|c| !c.is_empty()) {
+        let mut children = vec![serde_json::Value::String(linear.clone())];
+        for activation in case["chain"].as_array().unwrap() {
+            let child = bespoke(
+                &mut registry,
+                serde_json::json!({"op":"nn","kind": activation, "args": {}}),
+            )?;
+            children.push(child);
+        }
+        let composed = bespoke(
+            &mut registry,
+            serde_json::json!({"op":"nn","kind":"sequential","args":{"children": children}}),
+        )?;
+        composed.as_str().unwrap().to_string()
+    } else {
+        linear
+    };
+
+    // Forward, check output.
+    let y = bespoke(
+        &mut registry,
+        serde_json::json!({"op":"forward","module": model, "tensor": x}),
+    )?;
+    let y = y.as_str().unwrap().to_string();
+    let to_json = |registry: &Registry, handle: &str| -> Result<serde_json::Value, String> {
+        let cpu = registry
+            .get_tensor(handle)
+            .map_err(|l| l.message())?
+            .f_to_device(Device::Cpu)
+            .map_err(|e| format!("cpu: {e}"))?;
+        convert::tensor_to_json(&cpu).map_err(|e| format!("json: {e}"))
+    };
+    let actual = to_json(&registry, &y)?;
+    if &actual != &case["expect_output"] {
+        return Err(format!(
+            "output: expected {}, got {actual}",
+            case["expect_output"]
+        ));
+    }
+
+    // Backward through sum; compare parameter grads via live views.
+    let table =
+        |registry: &mut Registry, op: &str, handles: &[String]| -> Result<Vec<String>, String> {
+            let spec = nutorch_ops::find(op).ok_or_else(|| format!("{op} not in table"))?;
+            match dispatch::execute_table(registry, spec, handles, &serde_json::Map::new()) {
+                nutorchd::protocol::Response::Handles { handles, .. } => Ok(handles),
+                other => Err(format!("{op}: unexpected {other:?}")),
+            }
+        };
+    let loss = table(&mut registry, "sum", &[y])?[0].clone();
+    table(&mut registry, "backward", &[loss]).ok(); // ResultKind::None → Value resp; ignore shape
+    let params = bespoke(
+        &mut registry,
+        serde_json::json!({"op":"nn_parameters","module": model}),
+    )?;
+    let params: Vec<String> = serde_json::from_value(params).map_err(|e| e.to_string())?;
+    let weight_grad = table(&mut registry, "grad", &[params[0].clone()])?[0].clone();
+    let actual = to_json(&registry, &weight_grad)?;
+    if &actual != &case["expect_weight_grad"] {
+        return Err(format!(
+            "weight grad: expected {}, got {actual}",
+            case["expect_weight_grad"]
+        ));
+    }
+    if !case["expect_bias_grad"].is_null() {
+        let bias_grad = table(&mut registry, "grad", &[params[1].clone()])?[0].clone();
+        let actual = to_json(&registry, &bias_grad)?;
+        if &actual != &case["expect_bias_grad"] {
+            return Err(format!(
+                "bias grad: expected {}, got {actual}",
+                case["expect_bias_grad"]
+            ));
+        }
     }
     Ok(())
 }

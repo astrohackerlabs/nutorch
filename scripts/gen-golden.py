@@ -522,7 +522,42 @@ grad_case("ag_sum_dim", "sum", [[1.0, 2.0], [3.0, 4.0]], params={"dim": 1})
 grad_case("ag_softmax_sq", "softmax", [1.0, 2.0, 3.0], params={"dim": 0},
           square_loss=True)
 
+# --- nn module goldens (issue 0009 exp 2): explicit weights, forward +
+# parameter gradients vs torch.nn.functional on MPS. Init parity is NOT
+# golden-tested (different draw sequences); these cases LOAD weights.
+def nn_linear_case(name, x, weight, bias, chain=None):
+    """chain: optional list of activation names applied after linear."""
+    xt = torch.tensor(x, dtype=torch.float32, device=DEV)
+    wt = torch.tensor(weight, dtype=torch.float32, device=DEV).requires_grad_(True)
+    bt = (torch.tensor(bias, dtype=torch.float32, device=DEV).requires_grad_(True)
+          if bias is not None else None)
+    y = torch.nn.functional.linear(xt, wt, bt)
+    for act in (chain or []):
+        y = getattr(torch, act)(y) if act != "gelu" else torch.nn.functional.gelu(y)
+    y.sum().backward()
+    cases.append({
+        "name": name,
+        "nn_linear_forward": True,
+        "input": x,
+        "weight": weight,
+        "bias": bias,
+        "chain": chain or [],
+        "expect_output": y.detach().cpu().tolist(),
+        "expect_weight_grad": wt.grad.cpu().tolist(),
+        "expect_bias_grad": bt.grad.cpu().tolist() if bt is not None else None,
+    })
+
+W = [[0.5, -0.25], [1.5, 2.0], [-1.0, 0.75]]
+B = [0.1, -0.2, 0.3]
+X = [[1.0, 2.0], [3.0, -1.0]]
+nn_linear_case("nn_linear_bias", X, W, B)
+nn_linear_case("nn_linear_no_bias", X, W, None)
+nn_linear_case("nn_linear_relu", X, W, B, chain=["relu"])
+nn_linear_case("nn_linear_gelu", X, W, B, chain=["gelu"])
+nn_linear_case("nn_linear_sigmoid", X, W, B, chain=["sigmoid"])
+
 out = pathlib.Path(__file__).resolve().parent.parent / "nutorchd" / "tests" / "golden.json"
+
 
 
 

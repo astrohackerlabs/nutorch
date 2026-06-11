@@ -5,5 +5,6 @@
 pub mod convert;
 pub mod dispatch;
 pub mod lifecycle;
+pub mod nn;
 pub mod protocol;
 pub mod registry;

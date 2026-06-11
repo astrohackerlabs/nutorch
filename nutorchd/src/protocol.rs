@@ -31,6 +31,24 @@ pub enum Bespoke {
     },
     /// List every tensor the registry holds (issue 0006).
     Tensors,
+    /// Construct a module (issue 0009): {"op":"nn","kind":"linear","args":{…}}.
+    Nn {
+        kind: String,
+        args: Option<serde_json::Map<String, serde_json::Value>>,
+    },
+    /// Run a module on a tensor.
+    Forward {
+        module: String,
+        tensor: String,
+    },
+    #[serde(rename = "nn_parameters")]
+    NnParameters {
+        module: String,
+    },
+    #[serde(rename = "nn_info")]
+    NnInfo {
+        module: String,
+    },
     Status,
     #[serde(rename = "set_ttl")]
     SetTtl {

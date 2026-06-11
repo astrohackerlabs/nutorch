@@ -147,7 +147,7 @@ fn print_response(response: &serde_json::Value) {
 
 /// Presence-only flags on bespoke (non-table) ops; all other bespoke
 /// flags take a value.
-const BESPOKE_PRESENCE_FLAGS: &[&str] = &["all", "meta", "requires_grad"];
+const BESPOKE_PRESENCE_FLAGS: &[&str] = &["all", "meta", "requires_grad", "no-bias", "no_bias"];
 
 struct RawArgs {
     op: String,
@@ -452,7 +452,89 @@ fn build_bespoke_request(args: &RawArgs) -> Result<serde_json::Value, String> {
             }
             Ok(serde_json::json!({ "op": "free", "handles": handles }))
         }
+        "forward" => {
+            if let Some((name, _)) = args.flags.first() {
+                return Err(format!("unknown flag: --{name}"));
+            }
+            // Dual input: `torch forward $m $x` or `$x | torch forward $m`.
+            let module = args
+                .positionals
+                .first()
+                .cloned()
+                .ok_or("forward: usage: torch forward <nn://module> [tensor]")?;
+            let tensor = positional_or_stdin(args, 1, "input tensor handle")?;
+            Ok(serde_json::json!({ "op": "forward", "module": module, "tensor": tensor }))
+        }
         other => Err(format!("unknown op: {other} (see `torch ops`)")),
+    }
+}
+
+/// `torch nn <kind> [args…]`: the module construction subcommand
+/// (issue 0009). Kind specs are a small client-side match until the
+/// module sweep needs a declarative table.
+fn build_nn_request(args: &RawArgs) -> Result<serde_json::Value, String> {
+    let kind = args
+        .positionals
+        .first()
+        .ok_or("usage: torch nn <linear|relu|sigmoid|tanh|gelu|sequential|parameters|info> …")?;
+    let mut nn_args = serde_json::Map::new();
+    match kind.as_str() {
+        "linear" => {
+            let parse_feat = |index: usize, name: &str| -> Result<i64, String> {
+                args.positionals
+                    .get(index)
+                    .ok_or(format!("nn linear: usage: torch nn linear <in> <out>"))?
+                    .parse::<i64>()
+                    .map_err(|_| format!("nn linear: {name} must be an integer"))
+            };
+            nn_args.insert("in_features".into(), parse_feat(1, "in_features")?.into());
+            nn_args.insert("out_features".into(), parse_feat(2, "out_features")?.into());
+            for (name, value) in &args.flags {
+                match (name.as_str(), value) {
+                    ("no-bias" | "no_bias", _) => {
+                        nn_args.insert("no_bias".into(), true.into());
+                    }
+                    ("weight", Some(handle)) => {
+                        nn_args.insert("weight".into(), handle.clone().into());
+                    }
+                    ("bias-tensor" | "bias_tensor", Some(handle)) => {
+                        nn_args.insert("bias_tensor".into(), handle.clone().into());
+                    }
+                    (other, _) => return Err(format!("nn linear: unknown flag --{other}")),
+                }
+            }
+            Ok(serde_json::json!({ "op": "nn", "kind": "linear", "args": nn_args }))
+        }
+        "relu" | "sigmoid" | "tanh" | "gelu" => {
+            Ok(serde_json::json!({ "op": "nn", "kind": kind, "args": {} }))
+        }
+        "sequential" => {
+            let mut children: Vec<String> = args.positionals[1..].to_vec();
+            if children.is_empty() && !std::io::stdin().is_terminal() {
+                children = read_stdin_lines()?;
+            }
+            nn_args.insert("children".into(), serde_json::json!(children));
+            Ok(serde_json::json!({ "op": "nn", "kind": "sequential", "args": nn_args }))
+        }
+        "parameters" => {
+            let module = args
+                .positionals
+                .get(1)
+                .cloned()
+                .ok_or("usage: torch nn parameters <nn://module>")?;
+            Ok(serde_json::json!({ "op": "nn_parameters", "module": module }))
+        }
+        "info" => {
+            let module = args
+                .positionals
+                .get(1)
+                .cloned()
+                .ok_or("usage: torch nn info <nn://module>")?;
+            Ok(serde_json::json!({ "op": "nn_info", "module": module }))
+        }
+        other => Err(format!(
+            "unknown nn kind: {other} (expected linear, relu, sigmoid, tanh, gelu, sequential, parameters, or info)"
+        )),
     }
 }
 
@@ -672,6 +754,27 @@ fn run() -> Result<(), String> {
 
     if args.op == "tensors" {
         return run_tensors(&args, &socket);
+    }
+
+    if args.op == "nn" {
+        let request = build_nn_request(&args)?;
+        if !daemon_alive(&socket) {
+            ensure_daemon(&socket)?;
+        }
+        let response = exchange(&socket, &request)?;
+        // nn info's value is a list of human lines, printed as lines.
+        if args.positionals.first().map(String::as_str) == Some("info") {
+            if let Some(lines) = response["value"].as_array() {
+                for line in lines {
+                    if let Some(text) = line.as_str() {
+                        println!("{text}");
+                    }
+                }
+                return Ok(());
+            }
+        }
+        print_response(&response);
+        return Ok(());
     }
 
     let request = match spec {

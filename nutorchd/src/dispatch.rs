@@ -32,7 +32,8 @@ pub fn parse_request(line: &str) -> Result<Request, Response> {
         .ok_or_else(|| Response::error("bad_request", "request has no op"))?
         .to_string();
     match name.as_str() {
-        "tensor" | "value" | "free" | "tensors" | "status" | "set_ttl" | "shutdown" => {
+        "tensor" | "value" | "free" | "tensors" | "nn" | "forward" | "nn_parameters"
+        | "nn_info" | "status" | "set_ttl" | "shutdown" => {
             let bespoke: Bespoke = serde_json::from_value(raw)
                 .map_err(|e| Response::error("bad_request", format!("bad request: {e}")))?;
             Ok(Request::Bespoke(bespoke))
@@ -201,6 +202,72 @@ pub fn handle_request(
                     .collect();
                 (Response::value(serde_json::Value::Array(rows)), false)
             }
+            Bespoke::Nn { kind, args } => {
+                lifecycle.lock().unwrap().touch();
+                let args = args.unwrap_or_default();
+                match build_module(registry, &kind, &args) {
+                    Ok(module) => (Response::handle(registry.insert_module(module)), false),
+                    Err((code, message)) => (Response::error(code, message), false),
+                }
+            }
+            Bespoke::Forward { module, tensor } => {
+                lifecycle.lock().unwrap().touch();
+                registry.touch(&module);
+                registry.touch(&tensor);
+                let result = match registry.get_module(&module) {
+                    Ok(m) => match registry.get_tensor(&tensor) {
+                        Ok(x) => m.forward(x),
+                        Err(lookup) => {
+                            return (Response::error(lookup.code(), lookup.message()), false)
+                        }
+                    },
+                    Err(lookup) => {
+                        return (Response::error(lookup.code(), lookup.message()), false)
+                    }
+                };
+                match result {
+                    Ok(output) => (Response::handle(registry.insert_tensor(output)), false),
+                    Err(message) => (Response::error("torch_error", message), false),
+                }
+            }
+            Bespoke::NnParameters { module } => {
+                lifecycle.lock().unwrap().touch();
+                registry.touch(&module);
+                // Live views (issue 0009 decision 4): shallow clones share
+                // the TensorImpl — storage, requires_grad, and .grad — so
+                // grad/backward work through these handles, and later
+                // in-place optimizer steps will be visible through them.
+                let params: Vec<Tensor> = match registry.get_module(&module) {
+                    Ok(m) => m
+                        .parameters()
+                        .into_iter()
+                        .map(|t| t.shallow_clone())
+                        .collect(),
+                    Err(lookup) => {
+                        return (Response::error(lookup.code(), lookup.message()), false)
+                    }
+                };
+                let handles: Vec<String> = params
+                    .into_iter()
+                    .map(|t| registry.insert_tensor(t))
+                    .collect();
+                (Response::handles(handles), false)
+            }
+            Bespoke::NnInfo { module } => {
+                lifecycle.lock().unwrap().touch();
+                match registry.get_module(&module) {
+                    Ok(m) => (
+                        Response::value(serde_json::Value::Array(
+                            m.describe()
+                                .into_iter()
+                                .map(serde_json::Value::String)
+                                .collect(),
+                        )),
+                        false,
+                    ),
+                    Err(lookup) => (Response::error(lookup.code(), lookup.message()), false),
+                }
+            }
             Bespoke::Status => {
                 let state = lifecycle.lock().unwrap();
                 (
@@ -345,6 +412,153 @@ fn mark_requires_grad(tensor: Tensor) -> Result<Tensor, (&'static str, String)> 
         ));
     }
     Ok(tensor.set_requires_grad(true))
+}
+
+/// Construct a module from `torch nn <kind>` args (issue 0009).
+fn build_module(
+    registry: &mut Registry,
+    kind: &str,
+    args: &serde_json::Map<String, serde_json::Value>,
+) -> Result<crate::nn::NnModule, (&'static str, String)> {
+    use crate::nn::NnModule;
+    let int_arg = |name: &str| -> Option<i64> { args.get(name).and_then(|v| v.as_i64()) };
+    let str_arg = |name: &str| -> Option<&str> { args.get(name).and_then(|v| v.as_str()) };
+    let bool_arg =
+        |name: &str| -> bool { args.get(name).and_then(|v| v.as_bool()).unwrap_or(false) };
+    match kind {
+        "linear" => {
+            let in_features = int_arg("in_features").ok_or((
+                "bad_argument",
+                "nn linear: usage: torch nn linear <in> <out> [--no-bias] [--weight T] [--bias-tensor T]".to_string(),
+            ))?;
+            let out_features = int_arg("out_features").ok_or((
+                "bad_argument",
+                "nn linear: missing out_features".to_string(),
+            ))?;
+            if in_features < 1 || out_features < 1 {
+                return Err((
+                    "bad_argument",
+                    format!("nn linear: features must be >= 1, got {in_features} and {out_features}"),
+                ));
+            }
+            let no_bias = bool_arg("no_bias");
+            if no_bias && str_arg("bias_tensor").is_some() {
+                return Err((
+                    "bad_argument",
+                    "nn linear: --bias-tensor contradicts --no-bias".to_string(),
+                ));
+            }
+            // Explicit weights are DEEP-COPIED (state_dict-load semantics:
+            // the caller's tensor is never aliased or mutated) and the
+            // module's parameter gets requires_grad set LAST on the
+            // post-copy tensor regardless of the source's setting.
+            let copy_param = |registry: &Registry,
+                              handle: &str,
+                              expected_shape: &[i64],
+                              what: &str|
+             -> Result<Tensor, (&'static str, String)> {
+                let source = registry
+                    .get_tensor(handle)
+                    .map_err(|lookup| (lookup.code(), lookup.message()))?;
+                let actual = source.size();
+                if actual != expected_shape {
+                    return Err((
+                        "shape_mismatch",
+                        format!(
+                            "nn linear: {what} must have shape {expected_shape:?}, got {actual:?}"
+                        ),
+                    ));
+                }
+                let detached = source.f_detach().map_err(|e| tch("nn", e))?;
+                let mut copy = detached.f_zeros_like().map_err(|e| tch("nn", e))?;
+                copy.f_copy_(&detached).map_err(|e| tch("nn", e))?;
+                Ok(copy.set_requires_grad(true))
+            };
+            let weight = match str_arg("weight") {
+                Some(handle) => {
+                    copy_param(registry, handle, &[out_features, in_features], "weight")?
+                }
+                None => init_linear_param(&[out_features, in_features], in_features)?,
+            };
+            let bias = if no_bias {
+                None
+            } else {
+                Some(match str_arg("bias_tensor") {
+                    Some(handle) => copy_param(registry, handle, &[out_features], "bias")?,
+                    None => init_linear_param(&[out_features], in_features)?,
+                })
+            };
+            Ok(NnModule::Linear { weight, bias })
+        }
+        "relu" => Ok(NnModule::Relu),
+        "sigmoid" => Ok(NnModule::Sigmoid),
+        "tanh" => Ok(NnModule::Tanh),
+        "gelu" => Ok(NnModule::Gelu),
+        "sequential" => {
+            let children = match args.get("children") {
+                Some(serde_json::Value::Array(items)) => items
+                    .iter()
+                    .map(|v| {
+                        v.as_str().map(str::to_string).ok_or((
+                            "bad_argument",
+                            "nn sequential: children must be module handles".to_string(),
+                        ))
+                    })
+                    .collect::<Result<Vec<String>, _>>()?,
+                _ => Vec::new(),
+            };
+            if children.is_empty() {
+                return Err((
+                    "bad_argument",
+                    "nn sequential: needs at least one child module".to_string(),
+                ));
+            }
+            // ATOMIC consume (the free invariant): validate ALL children
+            // — including duplicates, which fail the seen-twice check —
+            // BEFORE removing any from the registry.
+            let mut seen = std::collections::HashSet::new();
+            for handle in &children {
+                registry
+                    .get_module(handle)
+                    .map_err(|lookup| (lookup.code(), lookup.message()))?;
+                if !seen.insert(handle.clone()) {
+                    return Err((
+                        "bad_argument",
+                        format!("nn sequential: duplicate child handle {handle}"),
+                    ));
+                }
+            }
+            let mut modules = Vec::with_capacity(children.len());
+            for handle in &children {
+                let entry = registry.remove(handle).expect("validated above");
+                match entry.object {
+                    crate::registry::Object::Module(module) => modules.push(module),
+                    _ => unreachable!("validated as module"),
+                }
+            }
+            Ok(NnModule::Sequential { children: modules })
+        }
+        other => Err((
+            "bad_argument",
+            format!(
+                "unknown module kind: {other} (expected linear, relu, sigmoid, tanh, gelu, or sequential)"
+            ),
+        )),
+    }
+}
+
+/// PyTorch nn.Linear default init: U(-1/sqrt(in), 1/sqrt(in)) for both
+/// weight and bias (kaiming_uniform(a=sqrt(5)) reduces to exactly this).
+/// Drawn on the seeded CPU generator (the randn convention), moved to
+/// MPS, requires_grad set LAST (the issue-0008 non-leaf trap).
+fn init_linear_param(shape: &[i64], in_features: i64) -> Result<Tensor, (&'static str, String)> {
+    let bound = 1.0 / (in_features as f64).sqrt();
+    let uniform = Tensor::f_rand(shape, (Kind::Float, Device::Cpu))
+        .and_then(|t| t.f_mul_scalar(2.0 * bound))
+        .and_then(|t| t.f_sub_scalar(bound))
+        .and_then(|t| t.f_to_device(Device::Mps))
+        .map_err(|e| tch("nn", e))?;
+    Ok(uniform.set_requires_grad(true))
 }
 
 /// nutorchd is GPU-only (issue 0003): Mac-only for now, so the GPU is MPS.
@@ -2185,5 +2399,264 @@ mod autograd_semantics {
             convert::tensor_to_json(&g_cpu).unwrap(),
             convert::tensor_to_json(&doubled).unwrap()
         );
+    }
+}
+
+#[cfg(test)]
+mod module_foundation_semantics {
+    use super::*;
+    use crate::lifecycle::Lifecycle;
+    use serde_json::json;
+    use std::path::PathBuf;
+    use std::sync::Mutex;
+
+    fn bespoke(registry: &mut Registry, request: serde_json::Value) -> Response {
+        let parsed = parse_request(&request.to_string()).expect("parses");
+        let lifecycle = Mutex::new(Lifecycle::new(None));
+        let socket = PathBuf::from("/tmp/test.sock");
+        handle_request(registry, &lifecycle, &socket, parsed).0
+    }
+
+    fn handle_of(response: Response) -> String {
+        match response {
+            Response::Handle { handle, .. } => handle,
+            other => panic!("expected handle, got {other:?}"),
+        }
+    }
+
+    fn make_tensor(registry: &mut Registry, data: serde_json::Value) -> String {
+        let t = convert::json_to_tensor(&data, Kind::Float, Device::Mps).unwrap();
+        registry.insert_tensor(t)
+    }
+
+    fn linear(registry: &mut Registry, args: serde_json::Value) -> Response {
+        bespoke(registry, json!({"op":"nn","kind":"linear","args": args}))
+    }
+
+    #[test]
+    fn construction_shapes_and_seeded_determinism() {
+        let mut registry = Registry::new();
+        let m = handle_of(linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":3}),
+        ));
+        assert!(m.starts_with("nn://"));
+        let module = registry.get_module(&m).unwrap();
+        let params = module.parameters();
+        assert_eq!(params.len(), 2);
+        assert_eq!(params[0].size(), vec![3, 2]); // weight [out, in]
+        assert_eq!(params[1].size(), vec![3]); // bias [out]
+        assert!(params.iter().all(|p| p.requires_grad()));
+        assert!(params.iter().all(|p| p.device() == Device::Mps));
+
+        // Seeded determinism: same seed → identical weights.
+        let weights_of = |registry: &mut Registry| -> serde_json::Value {
+            tch::manual_seed(7);
+            let m = handle_of(linear(registry, json!({"in_features":2,"out_features":3})));
+            let module = registry.get_module(&m).unwrap();
+            let cpu = module.parameters()[0].f_to_device(Device::Cpu).unwrap();
+            convert::tensor_to_json(&cpu).unwrap()
+        };
+        assert_eq!(weights_of(&mut registry), weights_of(&mut registry));
+    }
+
+    #[test]
+    fn explicit_weights_are_deep_copied_and_track_gradients() {
+        let mut registry = Registry::new();
+        let w = make_tensor(&mut registry, json!([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]));
+        assert!(!registry.get_tensor(&w).unwrap().requires_grad());
+        let m = handle_of(linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":3,"weight": w, "no_bias": true}),
+        ));
+        let module = registry.get_module(&m).unwrap();
+        // Module param tracks regardless of the source's setting…
+        assert!(module.parameters()[0].requires_grad());
+        // …and the SOURCE tensor is unchanged (deep copy, never aliased).
+        assert!(!registry.get_tensor(&w).unwrap().requires_grad());
+    }
+
+    #[test]
+    fn explicit_weight_shape_mismatch_errors() {
+        let mut registry = Registry::new();
+        let w = make_tensor(&mut registry, json!([[1.0, 2.0]])); // [1,2], not [3,2]
+        match linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":3,"weight": w}),
+        ) {
+            Response::Error { code, error, .. } => {
+                assert_eq!(code, "shape_mismatch");
+                assert!(error.contains("[3, 2]"));
+            }
+            other => panic!("expected error, got {other:?}"),
+        }
+        // --bias-tensor with --no-bias contradicts.
+        match linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":3,"no_bias":true,"bias_tensor":"tensor://x"}),
+        ) {
+            Response::Error { code, .. } => assert_eq!(code, "bad_argument"),
+            other => panic!("expected error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn sequential_consumes_children_atomically() {
+        let mut registry = Registry::new();
+        let a = handle_of(linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":2}),
+        ));
+        let relu = handle_of(bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"relu","args":{}}),
+        ));
+        // Bad middle: registry unchanged (both children survive).
+        match bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"sequential","args":{"children":[a, "nn://absent", relu]}}),
+        ) {
+            Response::Error { code, .. } => assert_eq!(code, "unknown_handle"),
+            other => panic!("expected error, got {other:?}"),
+        }
+        assert!(registry.get_module(&a).is_ok());
+        assert!(registry.get_module(&relu).is_ok());
+        // Duplicate child: rejected, registry unchanged.
+        match bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"sequential","args":{"children":[a, a]}}),
+        ) {
+            Response::Error { code, error, .. } => {
+                assert_eq!(code, "bad_argument");
+                assert!(error.contains("duplicate"));
+            }
+            other => panic!("expected error, got {other:?}"),
+        }
+        assert!(registry.get_module(&a).is_ok());
+        // Happy path consumes: children gone, composite forward works.
+        let m = handle_of(bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"sequential","args":{"children":[a.clone(), relu.clone()]}}),
+        ));
+        assert!(registry.get_module(&a).is_err());
+        assert!(registry.get_module(&relu).is_err());
+        let x = make_tensor(&mut registry, json!([[1.0, -1.0]]));
+        let y = bespoke(
+            &mut registry,
+            json!({"op":"forward","module": m, "tensor": x}),
+        );
+        assert!(matches!(y, Response::Handle { .. }));
+    }
+
+    #[test]
+    fn forward_kind_validates_both_ways() {
+        let mut registry = Registry::new();
+        let m = handle_of(linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":2}),
+        ));
+        let x = make_tensor(&mut registry, json!([[1.0, 2.0]]));
+        // Swapped: tensor where module expected, module where tensor expected.
+        match bespoke(
+            &mut registry,
+            json!({"op":"forward","module": x, "tensor": m}),
+        ) {
+            Response::Error { code, .. } => assert_eq!(code, "wrong_kind"),
+            other => panic!("expected error, got {other:?}"),
+        }
+        // torch value on a module handle is wrong_kind too.
+        match bespoke(&mut registry, json!({"op":"value","handle": m})) {
+            Response::Error { code, .. } => assert_eq!(code, "wrong_kind"),
+            other => panic!("expected error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parameters_are_live_views_proven_by_grad_identity() {
+        let mut registry = Registry::new();
+        let m = handle_of(linear(
+            &mut registry,
+            json!({"in_features":2,"out_features":1}),
+        ));
+        let x = make_tensor(&mut registry, json!([[1.0, 2.0]]));
+        let y = handle_of(bespoke(
+            &mut registry,
+            json!({"op":"forward","module": m, "tensor": x}),
+        ));
+        let run_table = |registry: &mut Registry, op: &str, handles: &[String]| -> Response {
+            let spec = nutorch_ops::find(op).unwrap();
+            execute_table(registry, spec, handles, &serde_json::Map::new())
+        };
+        let loss = match run_table(&mut registry, "sum", &[y]) {
+            Response::Handles { handles, .. } => handles[0].clone(),
+            other => panic!("{other:?}"),
+        };
+        let _ = run_table(&mut registry, "backward", &[loss]);
+        // Gradients are readable through the parameters handles —
+        // impossible unless they alias the module's tensors.
+        let params = match bespoke(&mut registry, json!({"op":"nn_parameters","module": m})) {
+            Response::Handles { handles, .. } => handles,
+            other => panic!("{other:?}"),
+        };
+        let grad = run_table(&mut registry, "grad", &[params[0].clone()]);
+        match grad {
+            Response::Handles { handles, .. } => {
+                let g = registry.get_tensor(&handles[0]).unwrap();
+                assert_eq!(g.size(), vec![1, 2]);
+                let cpu = g.f_to_device(Device::Cpu).unwrap();
+                assert_eq!(
+                    convert::tensor_to_json(&cpu).unwrap(),
+                    json!([[1.0, 2.0]]) // d(sum(xW^T+b))/dW = x
+                );
+            }
+            other => panic!("expected grad handles, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn activation_modules_match_table_ops() {
+        let mut registry = Registry::new();
+        let x = make_tensor(&mut registry, json!([-1.5, 0.0, 2.0]));
+        for kind in ["relu", "sigmoid", "tanh"] {
+            let m = handle_of(bespoke(
+                &mut registry,
+                json!({"op":"nn","kind": kind, "args": {}}),
+            ));
+            let via_module = handle_of(bespoke(
+                &mut registry,
+                json!({"op":"forward","module": m, "tensor": x.clone()}),
+            ));
+            let spec = nutorch_ops::find(kind).unwrap();
+            let via_table =
+                match execute_table(&mut registry, spec, &[x.clone()], &serde_json::Map::new()) {
+                    Response::Handles { handles, .. } => handles[0].clone(),
+                    other => panic!("{other:?}"),
+                };
+            let a = registry.get_tensor(&via_module).unwrap();
+            let b = registry.get_tensor(&via_table).unwrap();
+            assert!(a.f_equal(b).unwrap(), "{kind} module vs table op");
+        }
+    }
+
+    #[test]
+    fn unknown_module_kind_and_empty_sequential_error() {
+        let mut registry = Registry::new();
+        match bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"transformer","args":{}}),
+        ) {
+            Response::Error { code, error, .. } => {
+                assert_eq!(code, "bad_argument");
+                assert!(error.contains("unknown module kind"));
+            }
+            other => panic!("expected error, got {other:?}"),
+        }
+        match bespoke(
+            &mut registry,
+            json!({"op":"nn","kind":"sequential","args":{"children":[]}}),
+        ) {
+            Response::Error { code, .. } => assert_eq!(code, "bad_argument"),
+            other => panic!("expected error, got {other:?}"),
+        }
     }
 }

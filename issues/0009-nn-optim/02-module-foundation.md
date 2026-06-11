@@ -208,3 +208,68 @@ named. The reviewer CONFIRMED the init-fidelity math (kaiming_uniform(a=√5) �
 U(-1/√in, 1/√in), bias same bound — verified numerically), the shallow_clone
 aliasing foundation (same TensorImpl: storage, requires_grad, and .grad shared —
 the live-view tests are valid), and client routing collision-freedom.
+
+## Result
+
+**Result:** Pass
+
+The object model is real: `Object::Module` landed with construction,
+composition, forward, live parameter views, and info — and the own-parameters
+decision survived contact with implementation exactly as re-argued after the
+design review's correction.
+
+- **Goldens: 5/5 nn cases first run** (225 total, floor 225; byte-stable at
+  sha256 `8324dda3…`) — forward outputs AND weight/bias gradients bitwise-equal
+  to `torch.nn.functional` on MPS, with and without bias, through
+  relu/gelu/sigmoid chains composed via `sequential`.
+- **Unit tests** (67 daemon tests, up from 59): construction shapes +
+  seeded-init determinism; explicit weights deep-copied (module param tracks,
+  SOURCE tensor's requires_grad unchanged — the pinned semantics);
+  shape-mismatch and `--bias-tensor`+`--no-bias` errors; sequential atomicity
+  (bad middle AND duplicate child both leave the registry unchanged; happy path
+  consumes); forward kind-validation both ways; live views proven by grad
+  identity; activation modules whole-tensor-equal to their table ops; unknown
+  kind / empty sequential.
+- **Live**: the Description session verbatim; stdin forward == positional
+  (`equal` true); explicit-weight forward hand-verified (`[[12,23,35]]`); weight
+  gradient exact (`[[2,3]]×3`); `wrong_kind` in BOTH directions with messages
+  naming both kinds; freed-then-composed child → `unknown handle`; seeded init
+  deterministic; accounting walks 448 → 1,051,072 → 448 bytes around a 512×512
+  linear — the delta is exactly (512·512+512)·4.
+- **Hygiene**: build 0 warnings; fmt/dprint clean; full suite green; `v1/`
+  untouched. (Two result-review findings fixed before commit: the CLI's
+  `--no-bias` was unreachable — the spec-less flag parser derives hyphenated
+  names while the presence-set and the nn match used underscores; both forms now
+  accepted and verified live with `nn info` showing `bias: false`. And the
+  golden harness's `let mut bespoke` was a new warning falsifying the 0-warnings
+  claim — removed.)
+
+## Conclusion
+
+The foundation experiment's promise held: adding `Object::Module` cost one enum
+variant, two accessors, and a `nn.rs` of ~120 lines — the typed registry
+absorbed a second kind without a single protocol or op-table change. The
+live-views contract is proven by gradient identity, the explicit-weight path
+doubles as the pretrained-weights loader, and `sequential`'s atomic consume
+reuses the free invariant verbatim. Next: losses as table ops (the 0005 loom),
+then optimizers + the training-loop acceptance.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only),
+reviewing the pre-commit working tree. **First pass: CHANGES REQUIRED** — 2
+Required: (1) **the CLI's `--no-bias` was non-functional** — the spec-less flag
+parser produces hyphenated names while the presence-set and nn match arm used
+underscores, so the design-mandated flag couldn't be expressed through the only
+user surface (the daemon side worked; only JSON-direct tests exercised it).
+Fixed by accepting both forms, verified live (`nn info` → `bias: false`). (2)
+The golden harness's `let mut
+bespoke` introduced a new warning, falsifying the
+Result's 0-warnings claim — removed, Result corrected to disclose both findings.
+Everything else held under attack: all three design-review mandates verified in
+code AND behavior (atomic validate-with-duplicate-check before any remove;
+deep-copy with requires_grad-last and source-unchanged; the init bound ±1/√2
+confirmed numerically), goldens byte-stable with `nn_linear_bias` spot-checked
+against fresh `F.linear`, gelu's `"none"` matching Python's default, the
+live-views grad identity, `wrong_kind` both directions, and the byte-exact
+accounting walk.
