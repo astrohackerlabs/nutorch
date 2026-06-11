@@ -68,6 +68,11 @@ storage is invisible to it.
 
 ## Saving tensors and reclaiming memory
 
+Handles are typed strings — `tensor://<id>` today, with `nn://` (modules) and
+`optim://` (optimizers) arriving in issue 0009 — so a handle in a script or a
+log always says what it refers to, and using the wrong kind is a named error
+rather than a mystery.
+
 Tensors live exactly as long as the daemon (default idle TTL: 1 hour).
 Persistence is shell redirection — export the tensors you care about, never the
 intermediates:

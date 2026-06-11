@@ -138,3 +138,70 @@ string-agnostic, `wrong_kind` reachability is correctly scoped, the
 single-variant Entry enum produces no dead-code warnings (all HandleKind
 variants are constructed in parse), and no code anywhere assumes a bare-UUID
 format.
+
+## Result
+
+**Result:** Pass
+
+Every handle in nutorch is now typed. The migration landed exactly inside its
+declared boundary: registry rewritten (HandleKind, Object/Entry enums, Lookup
+errors, typed accessors), dispatch call sites moved to the typed API, test code
+updated, README sentence added — zero client, protocol, or ops code changes (the
+torch-cli edit is the one comment the design declared).
+
+- **Live, the error quartet**: bare UUID →
+  `malformed handle: … (expected
+  tensor://<id>, nn://<id>, or optim://<id>)`;
+  `nn://<real-tensor-id>` → `handle … refers to a tensor, not a module`
+  (`wrong_kind` — the error the scheme exists for); `tensor://absent` →
+  `unknown handle`; `blob://…` → malformed. All exit 1.
+- **The composition holds**: `torch tensors | awk '{print $1}' | torch
+  free`
+  empties the registry over prefixed handles; the PoC pipeline and the full
+  autograd flow run end to end with `tensor://…` throughout.
+- **The second observable path confirmed**: the `HandleOrScalar` typo
+  (`torch pow $c notahandle`) now reports malformed-handle, and the torch-cli
+  comment documenting the old UX was updated (comment-only).
+- **Suite**: 59 unit tests (4 new registry error-shape tests; the two predicted
+  flips landed — `free_is_atomic…` holds its validate-before-remove invariant
+  under a MALFORMED middle handle; `double_free` correctly stays
+  `unknown_handle`), 220 goldens green and golden.json **byte-identical**
+  (handles never appear in it, as verified), 0 warnings, fmt/dprint clean, `v1/`
+  untouched.
+- **Sweep completeness**: `rg` proves UUID minting exists only inside the
+  registry, and no legacy `registry.insert/get/contains` call survives.
+- **One refinement found by the new tests**: the WrongKind error originally
+  blamed the ACCESSOR's expectation, producing "refers to a tensor, not a
+  tensor" for a wrong prefix — the message now blames the PREFIX's claim (what
+  the user wrote) and falls back to the accessor's expectation only when the
+  prefix is truthful.
+- **One process note**: two background-task writes to dispatch.rs were lost
+  mid-implementation (a file-state race between overlapping background builds
+  and edits); re-applied in the foreground with immediate `rg` verification.
+  Lesson recorded: edits to a file and builds touching it stay sequential.
+
+## Conclusion
+
+The foundation holds: kinds parse, mint, and kind-check exactly per the issue's
+recorded contract, with the error space complete before a single module exists.
+Experiment 2 can now add `Object::Module` as one more enum variant plus its
+accessors — the shape this experiment exists to make cheap. Next: the module
+foundation (`nn linear`, `relu`, `sequential`, `forward`, `parameters`) and the
+VarStore-vs-own-parameters decision.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only),
+reviewing the pre-commit working tree. **Verdict: APPROVED — no Required,
+Optional, or Nit findings.** The reviewer verified the issue's decision-3
+contract directly against the code (bare-UUID keys, prefixed minting,
+three-prefix parsing), traced the WrongKind attribution in BOTH directions —
+including the future `get_module` fallback branch, judged correctly written
+though unreachable until Experiment 2 — reproduced the live error quartet
+verbatim, read both flipped tests (atomicity with both survivors asserted under
+a malformed middle; double_free correctly retaining `unknown_handle` for
+well-formed-but-absent), confirmed sweep completeness by rg (UUID minting only
+in the registry; zero legacy calls; torch-cli diff comment-only), proved
+golden.json handle-free and byte-unmodified, and re-ran the end-to-end flows
+including autograd. The process note about the lost background writes was
+checked and judged candid and immaterial to the final state.

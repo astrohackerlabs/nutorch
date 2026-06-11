@@ -104,15 +104,15 @@ pub fn handle_request(
             } => {
                 lifecycle.lock().unwrap().touch();
                 match build_input_tensor(&data, dtype.as_deref(), requires_grad.unwrap_or(false)) {
-                    Ok(tensor) => (Response::handle(registry.insert(tensor)), false),
+                    Ok(tensor) => (Response::handle(registry.insert_tensor(tensor)), false),
                     Err((code, message)) => (Response::error(code, message), false),
                 }
             }
             Bespoke::Value { handle, meta } => {
                 lifecycle.lock().unwrap().touch();
                 registry.touch(&handle);
-                match registry.get(&handle) {
-                    Some(tensor) => {
+                match registry.get_tensor(&handle) {
+                    Ok(tensor) => {
                         let cpu = match tensor.f_to_device(Device::Cpu) {
                             Ok(t) => t,
                             Err(e) => {
@@ -140,10 +140,7 @@ pub fn handle_request(
                             Err(e) => (Response::error("torch_error", e), false),
                         }
                     }
-                    None => (
-                        Response::error("unknown_handle", format!("unknown handle: {handle}")),
-                        false,
-                    ),
+                    Err(lookup) => (Response::error(lookup.code(), lookup.message()), false),
                 }
             }
             Bespoke::Free { handles, all } => {
@@ -174,11 +171,8 @@ pub fn handle_request(
                 }
                 // Atomic: validate ALL handles before removing ANY.
                 for handle in &handles {
-                    if !registry.contains(handle) {
-                        return (
-                            Response::error("unknown_handle", format!("unknown handle: {handle}")),
-                            false,
-                        );
+                    if let Err(lookup) = registry.check(handle) {
+                        return (Response::error(lookup.code(), lookup.message()), false);
                     }
                 }
                 for handle in &handles {
@@ -198,7 +192,7 @@ pub fn handle_request(
                         serde_json::json!({
                             "handle": row.handle,
                             "shape": row.shape,
-                            "dtype": convert::kind_name(row.kind),
+                            "dtype": convert::kind_name(row.dtype),
                             "bytes": row.bytes,
                             "age_secs": row.age_secs,
                             "idle_secs": row.idle_secs,
@@ -531,9 +525,9 @@ pub fn execute_table(
     // Handles.
     let mut tensors: Vec<&Tensor> = Vec::with_capacity(tensor_handles.len());
     for handle in tensor_handles {
-        match registry.get(handle) {
-            Some(t) => tensors.push(t),
-            None => return Response::error("unknown_handle", format!("unknown handle: {handle}")),
+        match registry.get_tensor(handle) {
+            Ok(t) => tensors.push(t),
+            Err(lookup) => return Response::error(lookup.code(), lookup.message()),
         }
     }
     debug_assert!(
@@ -549,16 +543,11 @@ pub fn execute_table(
     for param in spec.params {
         if param.kind == ParamKind::HandleOrScalar {
             if let Some(serde_json::Value::String(handle)) = params.map.get(param.name) {
-                match registry.get(handle) {
-                    Some(tensor) => {
+                match registry.get_tensor(handle) {
+                    Ok(tensor) => {
                         param_tensors.insert(param.name, tensor);
                     }
-                    None => {
-                        return Response::error(
-                            "unknown_handle",
-                            format!("unknown handle: {handle}"),
-                        )
-                    }
+                    Err(lookup) => return Response::error(lookup.code(), lookup.message()),
                 }
             }
         }
@@ -587,7 +576,12 @@ pub fn execute_table(
                 ResultKind::VariableHandles => !outputs.is_empty(),
                 _ => false,
             });
-            Response::handles(outputs.into_iter().map(|t| registry.insert(t)).collect())
+            Response::handles(
+                outputs
+                    .into_iter()
+                    .map(|t| registry.insert_tensor(t))
+                    .collect(),
+            )
         }
         Ok(Applied::Value(value)) => Response::value(value),
         Ok(Applied::Nothing) => Response::handles(Vec::new()),
@@ -1395,7 +1389,7 @@ mod tests {
     fn created_tensors_live_on_mps() {
         let mut registry = Registry::new();
         let h = tensor_of(&mut registry, json!([1, 2, 3]));
-        assert_eq!(registry.get(&h).unwrap().device(), Device::Mps);
+        assert_eq!(registry.get_tensor(&h).unwrap().device(), Device::Mps);
     }
 
     #[test]
@@ -1532,8 +1526,26 @@ mod tests {
         let mut registry = Registry::new();
         let (code, _) = expect_error(run(&mut registry, json!({"op":"frobnicate"})));
         assert_eq!(code, "unknown_op");
+        // Bare strings are MALFORMED handles post issue 0009 (no kind
+        // prefix — the recorded clean break); well-formed-but-absent stays
+        // unknown_handle; wrong prefix on a real object is wrong_kind.
         let (code, _) = expect_error(run(&mut registry, json!({"op":"sin","tensors":["nope"]})));
+        assert_eq!(code, "bad_argument");
+        let (code, _) = expect_error(run(
+            &mut registry,
+            json!({"op":"sin","tensors":["tensor://absent"]}),
+        ));
         assert_eq!(code, "unknown_handle");
+        let real = registry.insert_tensor(
+            convert::json_to_tensor(&json!([1.0]), Kind::Float, Device::Mps).unwrap(),
+        );
+        let as_module = real.replace("tensor://", "nn://");
+        let (code, message) = expect_error(run(
+            &mut registry,
+            json!({"op":"sin","tensors":[as_module]}),
+        ));
+        assert_eq!(code, "wrong_kind");
+        assert!(message.contains("refers to a tensor, not a module"));
         let (code, _) = expect_error(run(
             &mut registry,
             json!({"op":"sin","tensors":[],"params":{"bogus":1}}),
@@ -1597,7 +1609,7 @@ mod nan_to_num_semantics {
             convert::json_to_tensor(&json!([0.0, 1.0, -1.0]), Kind::Float, Device::Mps).unwrap();
         let zero = convert::json_to_tensor(&json!([0.0]), Kind::Float, Device::Mps).unwrap();
         let non_finite = numerator.f_div(&zero).unwrap(); // [NaN, inf, -inf]
-        let handle = registry.insert(non_finite);
+        let handle = registry.insert_tensor(non_finite);
         let spec = nutorch_ops::find("nan_to_num").unwrap();
         let mut params = serde_json::Map::new();
         params.insert("nan".into(), json!(0.5));
@@ -1609,7 +1621,7 @@ mod nan_to_num_semantics {
             other => panic!("expected handles, got {other:?}"),
         };
         let cpu = registry
-            .get(&out)
+            .get_tensor(&out)
             .unwrap()
             .f_to_device(Device::Cpu)
             .unwrap();
@@ -1638,7 +1650,7 @@ mod non_finite_predicate_semantics {
             convert::json_to_tensor(&json!([0.0, 0.0, 0.0, 1.0]), Kind::Float, Device::Mps)
                 .unwrap();
         let non_finite = numerator.f_div(&denominator).unwrap(); // [NaN, inf, -inf, 1.0]
-        let handle = registry.insert(non_finite);
+        let handle = registry.insert_tensor(non_finite);
 
         let expectations = [
             ("isnan", json!([true, false, false, false])),
@@ -1660,7 +1672,7 @@ mod non_finite_predicate_semantics {
                 other => panic!("{name}: expected handles, got {other:?}"),
             };
             let cpu = registry
-                .get(&out)
+                .get_tensor(&out)
                 .unwrap()
                 .f_to_device(Device::Cpu)
                 .unwrap();
@@ -1695,7 +1707,7 @@ mod free_semantics {
             .map(|i| {
                 let t =
                     convert::json_to_tensor(&json!([i as f64]), Kind::Float, Device::Mps).unwrap();
-                registry.insert(t)
+                registry.insert_tensor(t)
             })
             .collect()
     }
@@ -1707,7 +1719,7 @@ mod free_semantics {
         let response = run_free(&mut registry, json!({"op":"free","handles":[h[0], h[2]]}));
         assert!(matches!(response, Response::Value { .. }));
         assert_eq!(registry.len(), 1);
-        assert!(registry.contains(&h[1]));
+        assert!(registry.check_ok(&h[1]));
     }
 
     #[test]
@@ -1719,12 +1731,14 @@ mod free_semantics {
             json!({"op":"free","handles":[h[0], "nope", h[1]]}),
         );
         match response {
-            Response::Error { code, .. } => assert_eq!(code, "unknown_handle"),
+            // Bare string = malformed handle (issue 0009); atomicity must
+            // hold under malformed middles too.
+            Response::Error { code, .. } => assert_eq!(code, "bad_argument"),
             other => panic!("expected error, got {other:?}"),
         }
         // BOTH known handles survive — a remove-as-you-go bug fails here.
-        assert!(registry.contains(&h[0]));
-        assert!(registry.contains(&h[1]));
+        assert!(registry.check_ok(&h[0]));
+        assert!(registry.check_ok(&h[1]));
     }
 
     #[test]
@@ -1821,8 +1835,9 @@ mod tensors_listing_semantics {
     fn rows_match_registry_contents_including_bool() {
         let mut registry = Registry::new();
         let lifecycle = Mutex::new(Lifecycle::new(None));
-        let a = registry
-            .insert(convert::json_to_tensor(&json!([1.0, 2.0]), Kind::Float, Device::Mps).unwrap());
+        let a = registry.insert_tensor(
+            convert::json_to_tensor(&json!([1.0, 2.0]), Kind::Float, Device::Mps).unwrap(),
+        );
         let spec = nutorch_ops::find("eq").unwrap();
         let response = execute_table(
             &mut registry,
@@ -1849,10 +1864,12 @@ mod tensors_listing_semantics {
     fn ops_reset_operand_idle_and_listing_resets_nothing() {
         let mut registry = Registry::new();
         let lifecycle = Mutex::new(Lifecycle::new(Some(Duration::from_secs(3600))));
-        let a = registry
-            .insert(convert::json_to_tensor(&json!([1.0]), Kind::Float, Device::Mps).unwrap());
-        let b = registry
-            .insert(convert::json_to_tensor(&json!([2.0]), Kind::Float, Device::Mps).unwrap());
+        let a = registry.insert_tensor(
+            convert::json_to_tensor(&json!([1.0]), Kind::Float, Device::Mps).unwrap(),
+        );
+        let b = registry.insert_tensor(
+            convert::json_to_tensor(&json!([2.0]), Kind::Float, Device::Mps).unwrap(),
+        );
         std::thread::sleep(Duration::from_millis(1100));
 
         // An op touches its operand...
@@ -1886,7 +1903,7 @@ mod roundtrip_semantics {
 
     fn cpu_json(registry: &Registry, handle: &str) -> serde_json::Value {
         let cpu = registry
-            .get(handle)
+            .get_tensor(handle)
             .unwrap()
             .f_to_device(Device::Cpu)
             .unwrap();
@@ -1898,7 +1915,7 @@ mod roundtrip_semantics {
         let tensor = build_input_tensor(&json!([true, false, true]), None, false).unwrap();
         assert_eq!(tensor.kind(), Kind::Bool);
         let mut registry = Registry::new();
-        let h = registry.insert(tensor);
+        let h = registry.insert_tensor(tensor);
         assert_eq!(cpu_json(&registry, &h), json!([true, false, true]));
     }
 
@@ -1914,15 +1931,15 @@ mod roundtrip_semantics {
         // numbers -> bool via != 0 (the [2,0,-1] case proves != 0, not == 1)
         let t = build_input_tensor(&json!([0, 1, 2]), Some("bool"), false).unwrap();
         let mut registry = Registry::new();
-        let h = registry.insert(t);
+        let h = registry.insert_tensor(t);
         assert_eq!(cpu_json(&registry, &h), json!([false, true, true]));
         let t = build_input_tensor(&json!([2, 0, -1]), Some("bool"), false).unwrap();
-        let h = registry.insert(t);
+        let h = registry.insert_tensor(t);
         assert_eq!(cpu_json(&registry, &h), json!([true, false, true]));
         // bools -> float32
         let t = build_input_tensor(&json!([true, false]), Some("float32"), false).unwrap();
         assert_eq!(t.kind(), Kind::Float);
-        let h = registry.insert(t);
+        let h = registry.insert_tensor(t);
         assert_eq!(cpu_json(&registry, &h), json!([1.0, 0.0]));
     }
 
@@ -1932,7 +1949,7 @@ mod roundtrip_semantics {
             build_input_tensor(&json!(["NaN", "Infinity", "-Infinity", 1.5]), None, false).unwrap();
         assert_eq!(t.kind(), Kind::Float);
         let mut registry = Registry::new();
-        let h = registry.insert(t);
+        let h = registry.insert_tensor(t);
         // NaN -> NaN, ±inf -> ±inf, finite untouched — and NO null anywhere.
         assert_eq!(
             cpu_json(&registry, &h),
@@ -1940,10 +1957,10 @@ mod roundtrip_semantics {
         );
         // Constructed non-finite values (0-division) export as tokens too.
         let spec = nutorch_ops::find("div").unwrap();
-        let a = registry.insert(
+        let a = registry.insert_tensor(
             convert::json_to_tensor(&json!([0.0, 1.0, -1.0]), Kind::Float, Device::Mps).unwrap(),
         );
-        let zero = registry.insert(
+        let zero = registry.insert_tensor(
             convert::json_to_tensor(&json!([0.0, 0.0, 0.0]), Kind::Float, Device::Mps).unwrap(),
         );
         let response = execute_table(&mut registry, spec, &[a, zero], &serde_json::Map::new());
@@ -2014,7 +2031,7 @@ mod autograd_semantics {
 
     fn value_of(registry: &Registry, handle: &str) -> serde_json::Value {
         let cpu = registry
-            .get(handle)
+            .get_tensor(handle)
             .unwrap()
             .f_to_device(Device::Cpu)
             .unwrap();
@@ -2023,7 +2040,7 @@ mod autograd_semantics {
 
     fn tracked_leaf(registry: &mut Registry, data: serde_json::Value) -> String {
         let tensor = build_input_tensor(&data, None, true).unwrap();
-        registry.insert(tensor)
+        registry.insert_tensor(tensor)
     }
 
     /// x*x summed: grad = 2x. Builds the loss and runs backward.
@@ -2092,7 +2109,7 @@ mod autograd_semantics {
     fn backward_on_untracked_tensor_errors() {
         let mut registry = Registry::new();
         let tensor = build_input_tensor(&json!(1.5), None, false).unwrap();
-        let x = registry.insert(tensor);
+        let x = registry.insert_tensor(tensor);
         match run_op(&mut registry, "backward", &[x]) {
             Response::Error { code, error, .. } => {
                 assert_eq!(code, "bad_argument");
@@ -2107,9 +2124,9 @@ mod autograd_semantics {
         let mut registry = Registry::new();
         let x = tracked_leaf(&mut registry, json!([1.0, 2.0]));
         let y = first_handle(run_op(&mut registry, "mul", &[x.clone(), x.clone()]));
-        assert!(registry.get(&y).unwrap().requires_grad()); // tracked result
+        assert!(registry.get_tensor(&y).unwrap().requires_grad()); // tracked result
         let d = first_handle(run_op(&mut registry, "detach", &[y]));
-        assert!(!registry.get(&d).unwrap().requires_grad());
+        assert!(!registry.get_tensor(&d).unwrap().requires_grad());
     }
 
     #[test]
@@ -2148,14 +2165,22 @@ mod autograd_semantics {
             Response::Handles { handles, .. } => handles[0].clone(),
             other => panic!("expected handles, got {other:?}"),
         };
-        assert!(registry.get(&x).unwrap().requires_grad());
-        assert_eq!(registry.get(&x).unwrap().device(), Device::Mps);
+        assert!(registry.get_tensor(&x).unwrap().requires_grad());
+        assert_eq!(registry.get_tensor(&x).unwrap().device(), Device::Mps);
         square_loss_backward(&mut registry, &x);
         let g = first_handle(run_op(&mut registry, "grad", &[x.clone()]));
         // grad = 2x, elementwise — verify against the tensor's own value.
-        let x_cpu = registry.get(&x).unwrap().f_to_device(Device::Cpu).unwrap();
+        let x_cpu = registry
+            .get_tensor(&x)
+            .unwrap()
+            .f_to_device(Device::Cpu)
+            .unwrap();
         let doubled = x_cpu.f_mul_scalar(2).unwrap();
-        let g_cpu = registry.get(&g).unwrap().f_to_device(Device::Cpu).unwrap();
+        let g_cpu = registry
+            .get_tensor(&g)
+            .unwrap()
+            .f_to_device(Device::Cpu)
+            .unwrap();
         assert_eq!(
             convert::tensor_to_json(&g_cpu).unwrap(),
             convert::tensor_to_json(&doubled).unwrap()

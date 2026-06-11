@@ -48,7 +48,7 @@ fn run_case(case: &serde_json::Value) -> Result<(), String> {
             .map_err(|e| format!("bad input dtype: {e}"))?;
         let tensor = convert::json_to_tensor(&input["data"], kind, Device::Mps)
             .map_err(|e| format!("bad input data: {e}"))?;
-        handles.push(registry.insert(tensor));
+        handles.push(registry.insert_tensor(tensor));
     }
 
     // HandleOrScalar convention: a param value "T<i>" refers to input
@@ -114,7 +114,7 @@ fn run_case(case: &serde_json::Value) -> Result<(), String> {
         ));
     }
     for (handle, expected) in out_handles.iter().zip(expected_values) {
-        let tensor = registry.get(handle).expect("output handle resolves");
+        let tensor = registry.get_tensor(handle).expect("output handle resolves");
         let cpu = tensor
             .f_to_device(Device::Cpu)
             .map_err(|e| format!("cpu copy failed: {e}"))?;
@@ -138,7 +138,7 @@ fn run_grad_case(case: &serde_json::Value) -> Result<(), String> {
     let tensor = convert::json_to_tensor(&input["data"], kind, Device::Mps)
         .map_err(|e| format!("bad input data: {e}"))?
         .set_requires_grad(true);
-    let x = registry.insert(tensor);
+    let x = registry.insert_tensor(tensor);
 
     let run = |registry: &mut Registry, name: &str, handles: &[String], params| {
         let spec = nutorch_ops::find(name).ok_or_else(|| format!("op {name} not in table"))?;
@@ -188,7 +188,7 @@ fn run_grad_case(case: &serde_json::Value) -> Result<(), String> {
         .ok_or("grad produced no handle")?;
 
     let cpu = registry
-        .get(&grad)
+        .get_tensor(&grad)
         .expect("grad handle resolves")
         .f_to_device(Device::Cpu)
         .map_err(|e| format!("cpu copy failed: {e}"))?;

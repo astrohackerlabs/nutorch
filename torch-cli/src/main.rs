@@ -288,8 +288,9 @@ fn parse_param_value(
         ParamKind::Bool => Ok(serde_json::Value::Bool(true)),
         ParamKind::Str => Ok(serde_json::Value::from(text)),
         // Number → scalar; anything else is assumed to be a tensor handle
-        // (a UUID can never parse as a number). A typo'd scalar surfaces as
-        // unknown_handle from the daemon — an honest error.
+        // (a handle can never parse as a number). A typo'd scalar surfaces
+        // from the daemon as a malformed-handle error (issue 0009) — honest
+        // either way.
         ParamKind::HandleOrScalar => {
             if let Ok(i) = text.parse::<i64>() {
                 Ok(serde_json::Value::from(i))
