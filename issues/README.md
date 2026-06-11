@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                         | Title                                        | Opened     |
+| ----------------------------------------- | -------------------------------------------- | ---------- |
+| [0007](0007-daemon-concurrency/README.md) | Concurrent connections, serialized execution | 2026-06-11 |
 
 ## Closed
 
