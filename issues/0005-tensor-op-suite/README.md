@@ -163,3 +163,8 @@ Autograd, save/load, sparse/quantized/complex dtypes (all above); concurrency
 (separately motivated and deferred); the Nushell premium client; protocol
 redesign (the NDJSON protocol remains throwaway — the generic op request lives
 inside it).
+
+## Experiments
+
+- [Experiment 1: The op table — architecture, grammar, errors, golden tests, and 15 representative ops](01-op-table-architecture.md)
+  — **Designed**
