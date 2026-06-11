@@ -101,6 +101,27 @@ the graph itself dies), but keep your LEAF handles — they are the only key to
 their gradients. `torch tensors` counts only registry handles; graph-held
 storage is invisible to it.
 
+## Nushell
+
+A generated module gives Nushell native structured data over the same daemon
+(`torch nu-module | save -f nutorch.nu` regenerates it; a current copy is
+committed at the repo root):
+
+```nu
+use nutorch.nu *
+
+let t = ([[1 2] [3 4]] | nutorch tensor)
+$t | nutorch mm $t | nutorch value            # a native table
+nutorch tensors | where bytes > 1mb | get handle | each {|h| nutorch free $h }
+```
+
+Wrappers are pipeline-first (the first tensor slot is `$in`); non-finite values
+cross the boundary as REAL Nushell NaN/infinity floats (the JSON dialect is
+handled for you). The structured verbs also serve plain JSON anywhere via
+`--json`: `torch tensors --json`, `torch ops --json`, `torch nn info $m --json`,
+`torch daemon status --json`. See `scripts/train-regression.nu` for a full
+training loop in Nushell.
+
 ## Saving tensors and reclaiming memory
 
 Handles are typed strings — `tensor://<id>` today, with `nn://` (modules) and

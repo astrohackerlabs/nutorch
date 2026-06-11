@@ -88,4 +88,6 @@ wrapper signatures give for free.
 ## Experiments
 
 - [Experiment 1: `--json`, the generator, and the module](01-nu-module.md) —
-  **Designed**
+  **Pass** (185 generated wrappers + prelude; the nu training twin
+  byte-identical to zsh; nu's broken non-finite comparisons discovered and
+  routed around via string-form detection)

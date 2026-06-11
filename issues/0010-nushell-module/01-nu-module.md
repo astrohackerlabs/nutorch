@@ -89,7 +89,7 @@ The whole issue in one cohesive experiment: the `--json` output mode, the
    `nu-module` verb + `generate_nu_module()` (prelude string + OpSpec-driven
    emission) and the staleness `#[test]`.
 2. **`nutorch.nu`** (committed, generated): the prelude + one
-   `def "nutorch <op>"` per table op (172 ops) with faithful signatures.
+   `def "nutorch <op>"` per table op (185 ops) with faithful signatures.
 3. **`scripts/train-regression.nu`** (committed): the Nushell twin.
 4. **`README.md`**: a Nushell section (use, the three-line example, the pointer
    to regeneration).
@@ -140,3 +140,70 @@ reviewer probed and confirmed sound: the include_str path, compact IntList
 `to json -r`, scalar `$in` piping without trailing newline, the unpiped-`$in`
 clean error, float precision through stringification, the nn-info colon split,
 and nu's assert facilities.
+
+## Result
+
+**Result:** Pass
+
+Nushell speaks tensor natively, and the implementation surfaced a genuine
+Nushell bug the design's probes had only grazed.
+
+- **The find of the experiment**: nu 0.113's float comparisons are UNRELIABLE
+  for non-finite values — `1.5 == inf` is true, `inf > 0` is false (probed
+  exhaustively). The design's `$x != $x` NaN detection and equality-based inf
+  detection were therefore unsound; the shipped encoder detects non-finite
+  floats by their STRING form (`into string` → `"NaN"`/`"inf"`/`"-inf"`), which
+  is deterministic. With that, the non-finite round trip is lossless BOTH
+  directions (`NaN,inf,-inf` in → out → in, verified by string form).
+- **The verification battery, in real nu** (0.113, private TMPDIR sockets):
+  native round trip (`[[1 2] [3 4]]` → table back, exact); `mm` via piped first
+  slot; the census composition emptying the registry; autograd (grad = 2x);
+  variadic `cat` via a piped LIST (the design review's `str join` fix, working);
+  `nn info` as a native record; `daemon status | get pid`;
+  `nutorch ops | where category ==
+  loss | length` = 9.
+- **`scripts/train-regression.nu` PASSES with values byte-identical to the zsh
+  twin** (first loss 6.0012307, final 2.458e-7, weight 1.9996, bias 1.0008) —
+  same seed, same daemon, same math, two shells.
+- **`--json` live on all four verbs** (each through its own plumbing path, per
+  the design review): tensors (array), ops (array from the client-resident
+  table), daemon status (object), nn info (record split on first `": "`).
+  Default text rendering undisturbed (the zsh scripts still pass).
+- **The staleness guard**: the torch-cli `#[test]` regenerates the module and
+  asserts byte-equality with the committed `nutorch.nu` (1213 lines: prelude +
+  185 generated wrappers).
+- **Two implementation iterations beyond the design, recorded**:
+  `nutorch nn`/`nutorch daemon` needed `def --wrapped` (plain rest params cannot
+  receive unknown flags like `--lr` — nu rejects them at parse); and a
+  `$"…(target 2)…"` interpolation in the demo script was executing `target` as a
+  command (nu string interpolation treats parens as subexpressions — reworded).
+- **Hygiene**: build 0 warnings; fmt/dprint clean; goldens untouched (255
+  green); `v1/` untouched. One pre-existing non-finding noted: any truncated
+  stdout (e.g. `torch ops | head`) panics with Rust's default SIGPIPE behavior —
+  present since issue 0002, out of scope, recorded.
+
+## Conclusion
+
+The fourth consumer of the ops table works: 172 wrappers generated from the same
+rows that drive the daemon, the CLI grammar, and `torch ops` — with the
+staleness test making drift impossible. The data boundary is where all the real
+work lived: nu's broken non-finite comparisons, list piping as box glyphs, def
+--wrapped for flag passthrough — every one found by probing the actual shell
+rather than trusting docs. The issue can close.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only, real nu
+0.113). **Verdict: APPROVED — one Optional finding, folded in** (stale
+wrapper/line counts: the table holds 185 ops, not the 172 quoted — corrected).
+The reviewer REPRODUCED the headline nu bug independently (`1.5 == inf` true,
+`inf > 0` false), verified the string-form encoder and the lossless
+both-directions round trip live, exercised every design-review mandate (the
+variadic str-join via a piped list, all four --json plumbing paths including
+`[]` on a dead daemon, the recorded pipeline-first trade), spot-checked
+generated wrappers across every ParamKind and ResultKind shape, judged the
+staleness test sound (full-byte assert_eq over generator output vs committed
+file), ran the nu training twin to byte-identical values with the zsh twin,
+confirmed the mandate boundary held (git diff on nutorchd/ and ops/ empty), and
+checked the SIGPIPE non-finding is genuinely pre-existing. **Close readiness:
+READY.**
