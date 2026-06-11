@@ -136,3 +136,5 @@ or honestly excluded.
   — **Pass** (13 kinds, 13/13 goldens first-run; one recorded ULP exclusion
   (group_norm C-API vs Python dispatch); train/eval mode; training regression
   unchanged)
+- [Experiment 6: Save and load — the state_dict for nested modules](06-save-load.md)
+  — **Designed**
