@@ -178,3 +178,5 @@ inside it).
 - [Experiment 4: Linalg + shape/indexing sweep (~32 ops)](04-linalg-shape-sweep.md)
   — **Pass** (33 ops, table 108→141; goldens 134→170 first-run; one MPS
   exclusion: take; dense linalg all runs on MPS)
+- [Experiment 5: Creation ops, tensor-or-scalar params, and the remainder batch (~33 ops)](05-creation-and-remainder.md)
+  — **Designed**
