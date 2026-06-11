@@ -1,14 +1,14 @@
 # Nutorch v2 workspace. v1/cargo is the archived v1 crate and is NOT a member.
 #
 # Build note: libtorch comes from the repo-local torch 2.11.0 venv via the
-# `.libtorch` symlink, pinned (force-override) in .cargo/config.toml — the
-# stale LIBTORCH/DYLD_LIBRARY_PATH a shell may export from the v1 era is
-# deliberately ignored. One-time setup if .venv-torch is missing:
-#   python3 -m venv .venv-torch
-#   .venv-torch/bin/pip install torch==2.11.0
-#   ln -s .venv-torch/lib/python3.14/site-packages/torch .libtorch
-# See issues/0002-nutorchd-poc/01-toolchain-proof.md.
+# `.libtorch` symlink, pinned (force-override) in .cargo/config.toml.
+# One-time setup AND build: scripts/bootstrap.sh (idempotent — skips the
+# torch download when .venv-torch already exists). Install with
+# scripts/install.sh. See issues/0011-homebrew-distribution/.
 
 [workspace]
 members = ["nutorchd", "ops", "torch-cli"]
 resolver = "2"
+
+[workspace.package]
+version = "0.1.0"

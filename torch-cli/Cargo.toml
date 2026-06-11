@@ -1,6 +1,6 @@
 [package]
 name = "torch-cli"
-version = "0.0.1"
+version.workspace = true
 edition = "2021"
 license = "Apache-2.0"
 description = "Nutorch v2 thin client: talk to nutorchd from any shell (PoC)"

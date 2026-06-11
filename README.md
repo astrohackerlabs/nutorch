@@ -151,6 +151,21 @@ Note: JSON has no NaN/Infinity, so `torch value` writes the string tokens
 `"NaN"`, `"Infinity"`, and `"-Infinity"` for non-finite values, and
 `torch tensor` reads them back — round-trips are lossless.
 
+## Installing from source
+
+```bash
+git clone https://github.com/nutorch/nutorch
+cd nutorch
+scripts/bootstrap.sh     # venv + torch 2.11.0 + release build (idempotent)
+scripts/install.sh       # → ~/.nutorch (or pass a prefix); add ~/.nutorch/bin to PATH
+torch --version
+```
+
+The installed binaries are relocatable: libtorch's required dylibs are copied
+into the prefix and resolved by a baked relative rpath — no environment
+variables, no checkout needed at runtime. A Homebrew tap is the issue-0011
+follow-up.
+
 ## Status
 
 **Proof of concept working** (issue 0002): daemon, thin client, six ops

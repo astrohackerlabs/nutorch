@@ -19,13 +19,18 @@ LD_LIBRARY_PATH = { value = ".libtorch/lib", relative = true, force = true }
 # directly from a shell (the PoC's whole point) cannot find the torch dylibs —
 # the [env] above only covers processes spawned BY cargo. Bake repo-relative
 # rpaths: target/{debug,release}/<bin> → ../../.libtorch/lib, and
-# target/<profile>/deps/<test> → ../../../.libtorch/lib. PoC limitation:
-# binaries resolve dylibs only while inside the repo; an install story is a
-# later issue. (issues/0002-nutorchd-poc/02-daemon-spine.md)
+# target/<profile>/deps/<test> → ../../../.libtorch/lib. The third rpath
+# serves installed binaries (issue 0011). (issues/0002-nutorchd-poc/,
+# issues/0011-homebrew-distribution/)
 [build]
 rustflags = [
   "-C",
   "link-arg=-Wl,-rpath,@loader_path/../../.libtorch/lib",
   "-C",
   "link-arg=-Wl,-rpath,@loader_path/../../../.libtorch/lib",
+  # Installed layout (issue 0011): <prefix>/bin/<bin> resolves dylibs at
+  # <prefix>/libexec/libtorch/lib. Dev rpaths above are tried first, so
+  # one binary serves both the checkout and the keg.
+  "-C",
+  "link-arg=-Wl,-rpath,@loader_path/../libexec/libtorch/lib",
 ]

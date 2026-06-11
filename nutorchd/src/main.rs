@@ -124,6 +124,16 @@ fn write_response(
 }
 
 fn main() -> std::io::Result<()> {
+    // Pure diagnostics: must work on GPU-less machines (brew test, CI),
+    // so it runs BEFORE the MPS gate.
+    if std::env::args().nth(1).as_deref() == Some("--version") {
+        println!(
+            "nutorch {} ({})",
+            env!("CARGO_PKG_VERSION"),
+            env!("NUTORCH_GIT_SHA")
+        );
+        return Ok(());
+    }
     if let Err(message) = require_mps() {
         eprintln!("{message}");
         std::process::exit(1);
@@ -148,7 +158,11 @@ fn main() -> std::io::Result<()> {
         }
     };
 
-    println!("nutorchd");
+    println!(
+        "nutorchd {} ({})",
+        env!("CARGO_PKG_VERSION"),
+        env!("NUTORCH_GIT_SHA")
+    );
     println!("pid: {}", std::process::id());
     println!("socket: {}", args.socket.display());
     println!("device: mps");

@@ -154,3 +154,61 @@ load-bearing premise**: nutorchd links by `@rpath/` names and the dylibs carry
 `@rpath/` install names, so the third-rpath plan needs no install_name_tool
 surgery — and pre-measured the full closure (keep 4 ≈ 208MB / drop 3) for the
 Result to confirm independently.
+
+## Result
+
+**Result:** Pass
+
+Nutorch 0.1.0 exists and runs outside its checkout.
+
+- **The adversarial relocation proof, executed**: bootstrap → install to a
+  mktemp prefix (211MB, down from 237MB — the measured subset) → `.libtorch` AND
+  `.venv-torch` renamed away → from `/tmp` with a private TMPDIR, the installed
+  `torch` auto-spawned the installed `nutorchd` via sibling discovery and ran
+  `tensor → add → value` = `[4.0, 6.0]` on MPS; `daemon status` showed
+  `version: 0.1.0` and `device: mps`; `--json` carried the version. Dev world
+  restored; full suite green both before and after.
+- **The dylib closure, independently confirmed** (matching the design review's
+  pre-measurement): KEEP `libtorch.dylib`, `libtorch_cpu.dylib`, `libc10.dylib`,
+  `libomp.dylib` (the non-direct keeper — referenced only by libtorch_cpu as
+  `@rpath/libomp.dylib`; its own LC_ID is an absolute `/opt/llvm-openmp` path,
+  recorded); DROP `libtorch_python.dylib` (28M), `libshm.dylib`,
+  `libtorch_global_deps.dylib`. The subset list lives in `scripts/install.sh`
+  with the closure documented inline — the single source Experiment 2's formula
+  will mirror.
+- **Three rpaths verified baked** (`otool -l`): the two dev paths first, then
+  `@loader_path/../libexec/libtorch/lib` — one binary, both worlds, no
+  `install_name_tool`.
+- **Version story**: workspace-inherited 0.1.0; both binaries print
+  `nutorch 0.1.0 (<sha>)` (the daemon BEFORE its MPS gate — GPU-less machines
+  can ask); the banner and `status` carry it; build.rs stamps declare
+  rerun-if-changed on `.git/HEAD` + the active ref.
+- **Bootstrap**: second run skips the download (`already has torch 2.11.0`); the
+  fresh-clone simulation (venv symlinked in, per the design-review mechanism)
+  bootstraps and passes `cargo test -p nutorch-ops`.
+- **Hygiene**: 0 warnings debug AND release; fmt/dprint clean; 79 unit + 255
+  golden + smoke + the nutorch.nu staleness test green; `v1/` untouched;
+  Cargo.lock regenerated with the bump (the noted delta).
+
+## Conclusion
+
+The substrate holds: one layout, one binary, both worlds. Everything Experiment
+2's formula needs now exists — the wheel-pinned bootstrap trick, the measured
+dylib subset (in the install script it can mirror), relocatable binaries, and a
+version to put in the formula's `url`. Next: the tap repository and the formula,
+source-build proven end to end.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing the
+pre-commit working tree. **Verdict: APPROVED — no Required, Optional, or Nit
+findings.** The reviewer REPRODUCED the adversarial relocation proof itself —
+installed to its own temp prefix (211M confirmed), renamed
+`.libtorch`/`.venv-torch` away, ran the MPS pipeline from /tmp via
+sibling-discovered auto-spawn, then restored the dev world and verified
+restoration with git status + tests. It independently confirmed the dylib
+closure (3 direct @rpath links; the libomp stowaway via libtorch_cpu; nothing
+referencing the dropped three), the three baked rpaths, the version stamp
+matching `git rev-parse --short HEAD`, the pre-MPS-gate `--version`, the
+rerun-if-changed directives, bootstrap's download-skip, old-client status
+compat, and the Cargo.lock delta being exactly the version bumps.

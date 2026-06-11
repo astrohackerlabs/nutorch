@@ -90,4 +90,6 @@ beyond what brew gives for free.
 ## Experiments
 
 - [Experiment 1: The relocatable substrate — versioned binaries that run anywhere](01-relocatable-substrate.md)
-  — **Designed**
+  — **Pass** (the renamed-away-libtorch proof: installed binaries serve MPS from
+  a 211MB prefix; 0.1.0 stamped everywhere; the 4-dylib closure confirmed incl.
+  the libomp stowaway)

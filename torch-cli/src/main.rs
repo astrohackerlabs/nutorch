@@ -786,6 +786,9 @@ fn print_status(status: &serde_json::Value) {
             None => "none".to_string(),
         }
     };
+    if let Some(version) = v["version"].as_str() {
+        println!("version: {version}");
+    }
     println!("pid: {}", v["pid"]);
     println!("uptime: {}s", v["uptime_secs"]);
     println!("device: {}", v["device"].as_str().unwrap_or("?"));
@@ -938,6 +941,14 @@ fn run() -> Result<(), String> {
     }
     if op_name == "--help" || op_name == "help" {
         println!("{GENERAL_USAGE}");
+        return Ok(());
+    }
+    if op_name == "--version" || op_name == "version" {
+        println!(
+            "nutorch {} ({})",
+            env!("CARGO_PKG_VERSION"),
+            env!("NUTORCH_GIT_SHA")
+        );
         return Ok(());
     }
 

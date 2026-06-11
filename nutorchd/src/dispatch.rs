@@ -416,6 +416,7 @@ pub fn handle_request(
                 let state = lifecycle.lock().unwrap();
                 (
                     Response::value(serde_json::json!({
+                        "version": env!("CARGO_PKG_VERSION"),
                         "pid": std::process::id(),
                         "uptime_secs": state.uptime_secs(),
                         "device": "mps",

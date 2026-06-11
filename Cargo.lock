@@ -481,11 +481,11 @@ dependencies = [
 
 [[package]]
 name = "nutorch-ops"
-version = "0.0.1"
+version = "0.1.0"
 
 [[package]]
 name = "nutorchd"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "nutorch-ops",
  "serde",
@@ -842,7 +842,7 @@ checksum = "7694e1cfe791f8d31026952abf09c69ca6f6fa4e1a1229e18988f06a04a12dca"
 
 [[package]]
 name = "torch-cli"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "nutorch-ops",
  "serde_json",
