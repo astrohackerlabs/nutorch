@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-11"
+closed = "2026-06-11"
 +++
 
 # Issue 9: nn/optim — modules and optimizers as first-class objects
@@ -139,3 +140,42 @@ or honestly excluded.
 - [Experiment 6: Save and load — the state_dict for nested modules](06-save-load.md)
   — **Pass** (round trip exact incl. buffers; PyTorch state_dict keys verbatim;
   Python reads the files; optimizer aliasing survives load)
+
+## Conclusion
+
+**Solved.** Six experiments, six passes, twelve adversarial review gates — the
+largest issue since 0005, and the one that completes the project's original
+wishlist (tensor ops, concurrency, autograd, nn/optim).
+
+Delivered, per the Goal's own example which now runs verbatim:
+
+1. **The typed foundation** — `tensor://`/`nn://`/`optim://` handles over one
+   kind-checked registry; wrong-kind errors name what stands behind a handle.
+2. **19 module kinds** — linear, the conv family, embedding, the three norms,
+   dropout (own-mask, seeded, p-edge-safe), six activations, pools, flatten,
+   sequential (atomic consume) — with train/eval mode, live parameter views
+   (proven by gradient identity), explicit-weight loading, and PyTorch-default
+   seeded init. lstm/gru excluded on the recorded multi-output-forward grounds.
+3. **Nine losses** as ordinary table rows.
+4. **Four optimizers** whose 3-step trajectories are BITWISE equal to
+   `torch.optim` on MPS — including the design review's empirical discovery that
+   PyTorch's Adam uses `lerp_` where the textbook diverges by 1 ULP under
+   coupled weight decay.
+5. **The acceptance**: two committed zsh scripts that train a regression (loss
+   6.0 → 2.5e-7) and a classifier (100%) on the GPU — the issue's reason to
+   exist, demonstrated and re-verified at every later gate.
+6. **state_dict save/load** — safetensors with PyTorch's exact key scheme
+   including `num_batches_tracked`, interchange verified in BOTH directions,
+   optimizer aliasing surviving load.
+
+Suite at close: 79 daemon unit tests, 255 golden vectors, 3 smoke — all green; 0
+warnings; recorded exclusions: lstm/gru (contract), group_norm's exact golden (a
+1-ULP C-API-vs-Python dispatch divergence, pinned by an internal-consistency
+test instead).
+
+The review gates caught, among others: a false VarStore claim corrected with
+source evidence; the `.to()` non-leaf trap that would have orphaned every random
+weight's gradients; the Adam `lerp_` ULP; a divide-by-zero daemon-crasher in
+conv groups; the dropout p=1 NaN; the missing `num_batches_tracked` that would
+have broken interchange both ways; and a silently-unreachable `--no-bias` flag.
+Every one was found BEFORE its result commit.
