@@ -379,7 +379,110 @@ ok("ls_repeat_interleave", "repeat_interleave", [t([1.0, 2.0])], {"repeats": 3},
 ok("ls_movedim", "movedim", [t([M2])], {"source": 0, "destination": 2},
    lambda ts: [ts[0].movedim(0, 2)])
 
+# --- creation + remainder sweep (issue 0005 exp 5) ---
+ok("cr_zeros", "zeros", [], {"shape": [2, 2]},
+   lambda ts: [torch.zeros(2, 2, dtype=torch.float32, device=DEV)])
+ok("cr_ones_int", "ones", [], {"shape": [3], "dtype": "int64"},
+   lambda ts: [torch.ones(3, dtype=torch.int64, device=DEV)])
+ok("cr_eye", "eye", [], {"n": 3},
+   lambda ts: [torch.eye(3, dtype=torch.float32, device=DEV)])
+ok("cr_eye_m", "eye", [], {"n": 2, "m": 4},
+   lambda ts: [torch.eye(2, 4, dtype=torch.float32, device=DEV)])
+ok("cr_arange", "arange", [], {"end": 5},
+   lambda ts: [torch.arange(5, dtype=torch.float32, device=DEV)])
+ok("cr_arange_start_step", "arange", [], {"end": 7, "start": 1, "step": 2},
+   lambda ts: [torch.arange(1, 7, 2, dtype=torch.float32, device=DEV)])
+ok("cr_linspace", "linspace", [], {"start": 0, "end": 1, "steps": 5},
+   lambda ts: [torch.linspace(0, 1, 5, dtype=torch.float32, device=DEV)])
+torch.manual_seed(7)
+rand_expected = torch.rand([2, 2], dtype=torch.float32, device="cpu").to(DEV)
+cases.append({"name": "cr_rand_seeded", "op": "rand", "tensors": [],
+              "params": {"shape": [2, 2]}, "seed": 7,
+              "expect": {"values": [rand_expected.cpu().tolist()]}})
+torch.manual_seed(9)
+ri_expected = torch.randint(2, 10, [2, 3], dtype=torch.int64, device="cpu").to(DEV)
+cases.append({"name": "cr_randint_seeded", "op": "randint", "tensors": [],
+              "params": {"high": 10, "shape": [2, 3], "low": 2}, "seed": 9,
+              "expect": {"values": [ri_expected.cpu().tolist()]}})
+ok("cr_zeros_like", "zeros_like", [t([[1.0, 2.0], [3.0, 4.0]])], {},
+   lambda ts: [torch.zeros_like(ts[0])])
+ok("cr_ones_like", "ones_like", [t([1, 2, 3], "int64")], {},
+   lambda ts: [torch.ones_like(ts[0])])
+ok("cr_full_like", "full_like", [t([1.0, 2.0])], {"value": 7},
+   lambda ts: [torch.full_like(ts[0], 7)])
+torch.manual_seed(11)
+rl_expected = torch.rand([2, 2], dtype=torch.float32, device="cpu").to(DEV)
+cases.append({"name": "cr_rand_like_seeded", "op": "rand_like",
+              "tensors": [t([[1.0, 2.0], [3.0, 4.0]])], "params": {}, "seed": 11,
+              "expect": {"values": [rl_expected.cpu().tolist()]}})
+torch.manual_seed(13)
+rnl_expected = torch.randn([3], dtype=torch.float32, device="cpu").to(DEV)
+cases.append({"name": "cr_randn_like_seeded", "op": "randn_like",
+              "tensors": [t([1.0, 2.0, 3.0])], "params": {}, "seed": 13,
+              "expect": {"values": [rnl_expected.cpu().tolist()]}})
+# HandleOrScalar: tensor bounds / exponents / weights
+ok("cr_clamp_tensor_bounds", "clamp",
+   [t([-5.0, 0.0, 5.0]), t([-1.0, -1.0, -1.0]), t([1.0, 2.0, 3.0])],
+   {"min": "T1", "max": "T2"},
+   lambda ts: [torch.clamp(ts[0], ts[1], ts[2])])
+ok("cr_pow_tensor_exponent", "pow", [t([2.0, 3.0, 4.0]), t([2.0, 1.0, 0.5])],
+   {"exponent": "T1"},
+   lambda ts: [torch.pow(ts[0], ts[1])])
+ok("cr_lerp_scalar", "lerp", [t([0.0, 10.0]), t([10.0, 20.0])], {"weight": 0.5},
+   lambda ts: [torch.lerp(ts[0], ts[1], 0.5)])
+ok("cr_lerp_tensor", "lerp", [t([0.0, 10.0]), t([10.0, 20.0]), t([0.25, 0.75])],
+   {"weight": "T2"},
+   lambda ts: [torch.lerp(ts[0], ts[1], ts[2])])
+ok("cr_addcmul", "addcmul", [t([1.0, 2.0]), t([3.0, 4.0]), t([5.0, 6.0])],
+   {"value": 2},
+   lambda ts: [torch.addcmul(ts[0], ts[1], ts[2], value=2)])
+ok("cr_addcdiv", "addcdiv", [t([1.0, 2.0]), t([6.0, 8.0]), t([2.0, 4.0])], {},
+   lambda ts: [torch.addcdiv(ts[0], ts[1], ts[2])])
+ok("cr_cross", "cross", [t([1.0, 0.0, 0.0]), t([0.0, 1.0, 0.0])], {},
+   lambda ts: [torch.linalg.cross(ts[0], ts[1])])
+ok("cr_kron", "kron", [t([1.0, 2.0]), t([3.0, 4.0])], {},
+   lambda ts: [torch.kron(ts[0], ts[1])])
+ok("cr_tensordot", "tensordot", [t([[1.0, 2.0], [3.0, 4.0]]), t([[5.0, 6.0], [7.0, 8.0]])],
+   {"dims": 2},
+   lambda ts: [torch.tensordot(ts[0], ts[1], dims=2)])
+ok("cr_take_along_dim", "take_along_dim",
+   [t([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), t([[0, 2], [1, 0]], "int64")],
+   {"dim": 1},
+   lambda ts: [torch.take_along_dim(ts[0], ts[1], dim=1)])
+ok("cr_searchsorted", "searchsorted", [t([1.0, 3.0, 5.0, 7.0]), t([2.0, 6.0])], {},
+   lambda ts: [torch.searchsorted(ts[0], ts[1])])
+ok("cr_bucketize", "bucketize", [t([2.0, 6.0]), t([1.0, 3.0, 5.0, 7.0])], {},
+   lambda ts: [torch.bucketize(ts[0], ts[1])])
+ok("cr_msort", "msort", [t([[3.0, 1.0], [2.0, 4.0]])], {},
+   lambda ts: [torch.msort(ts[0])])
+ok("cr_diff", "diff", [t([1.0, 4.0, 9.0, 16.0])], {},
+   lambda ts: [torch.diff(ts[0])])
+ok("cr_scatter", "scatter",
+   [t([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]), t([[0, 1], [1, 2]], "int64"),
+    t([[10.0, 20.0], [30.0, 40.0]])],
+   {"dim": 1},
+   lambda ts: [torch.scatter(ts[0], 1, ts[1], ts[2])])
+ok("cr_bitwise_and", "bitwise_and", [t([12, 10], "int64"), t([10, 6], "int64")], {},
+   lambda ts: [torch.bitwise_and(ts[0], ts[1])])
+ok("cr_bitwise_or", "bitwise_or", [t([12, 10], "int64"), t([10, 6], "int64")], {},
+   lambda ts: [torch.bitwise_or(ts[0], ts[1])])
+ok("cr_bitwise_xor", "bitwise_xor", [t([12, 10], "int64"), t([10, 6], "int64")], {},
+   lambda ts: [torch.bitwise_xor(ts[0], ts[1])])
+ok("cr_bitwise_not", "bitwise_not", [t([0, 1, 7], "int64")], {},
+   lambda ts: [torch.bitwise_not(ts[0])])
+ok("cr_left_shift", "bitwise_left_shift", [t([1, 2], "int64"), t([2, 3], "int64")], {},
+   lambda ts: [torch.bitwise_left_shift(ts[0], ts[1])])
+ok("cr_right_shift", "bitwise_right_shift", [t([8, 16], "int64"), t([2, 3], "int64")], {},
+   lambda ts: [torch.bitwise_right_shift(ts[0], ts[1])])
+ok("cr_unique", "unique", [t([3.0, 1.0, 2.0, 1.0, 3.0])], {},
+   lambda ts: [torch.unique(ts[0])])
+# Rank-2 case pins the flattening default (result-review finding: a 1-D-only
+# golden let a non-flattening implementation pass vacuously).
+ok("cr_unique_rank2", "unique", [t([[3.0, 1.0], [2.0, 1.0]])], {},
+   lambda ts: [torch.unique(ts[0])])
+
 out = pathlib.Path(__file__).resolve().parent.parent / "nutorchd" / "tests" / "golden.json"
+
 
 
 

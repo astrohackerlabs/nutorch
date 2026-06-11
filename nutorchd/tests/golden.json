@@ -5119,5 +5119,1148 @@
         ]
       ]
     }
+  },
+  {
+    "name": "cr_zeros",
+    "op": "zeros",
+    "tensors": [],
+    "params": {
+      "shape": [
+        2,
+        2
+      ]
+    },
+    "expect": {
+      "values": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_ones_int",
+    "op": "ones",
+    "tensors": [],
+    "params": {
+      "shape": [
+        3
+      ],
+      "dtype": "int64"
+    },
+    "expect": {
+      "values": [
+        [
+          1,
+          1,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_eye",
+    "op": "eye",
+    "tensors": [],
+    "params": {
+      "n": 3
+    },
+    "expect": {
+      "values": [
+        [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_eye_m",
+    "op": "eye",
+    "tensors": [],
+    "params": {
+      "n": 2,
+      "m": 4
+    },
+    "expect": {
+      "values": [
+        [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_arange",
+    "op": "arange",
+    "tensors": [],
+    "params": {
+      "end": 5
+    },
+    "expect": {
+      "values": [
+        [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_arange_start_step",
+    "op": "arange",
+    "tensors": [],
+    "params": {
+      "end": 7,
+      "start": 1,
+      "step": 2
+    },
+    "expect": {
+      "values": [
+        [
+          1.0,
+          3.0,
+          5.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_linspace",
+    "op": "linspace",
+    "tensors": [],
+    "params": {
+      "start": 0,
+      "end": 1,
+      "steps": 5
+    },
+    "expect": {
+      "values": [
+        [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_rand_seeded",
+    "op": "rand",
+    "tensors": [],
+    "params": {
+      "shape": [
+        2,
+        2
+      ]
+    },
+    "seed": 7,
+    "expect": {
+      "values": [
+        [
+          [
+            0.5349225401878357,
+            0.19880318641662598
+          ],
+          [
+            0.6592116951942444,
+            0.6568902730941772
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_randint_seeded",
+    "op": "randint",
+    "tensors": [],
+    "params": {
+      "high": 10,
+      "shape": [
+        2,
+        3
+      ],
+      "low": 2
+    },
+    "seed": 9,
+    "expect": {
+      "values": [
+        [
+          [
+            8,
+            6,
+            8
+          ],
+          [
+            7,
+            8,
+            2
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_zeros_like",
+    "op": "zeros_like",
+    "tensors": [
+      {
+        "data": [
+          [
+            1.0,
+            2.0
+          ],
+          [
+            3.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_ones_like",
+    "op": "ones_like",
+    "tensors": [
+      {
+        "data": [
+          1,
+          2,
+          3
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          1,
+          1,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_full_like",
+    "op": "full_like",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "value": 7
+    },
+    "expect": {
+      "values": [
+        [
+          7.0,
+          7.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_rand_like_seeded",
+    "op": "rand_like",
+    "tensors": [
+      {
+        "data": [
+          [
+            1.0,
+            2.0
+          ],
+          [
+            3.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "seed": 11,
+    "expect": {
+      "values": [
+        [
+          [
+            0.14904171228408813,
+            0.4865531325340271
+          ],
+          [
+            0.985661506652832,
+            0.16840142011642456
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_randn_like_seeded",
+    "op": "randn_like",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "seed": 13,
+    "expect": {
+      "values": [
+        [
+          -0.11165934801101685,
+          -1.145609736442566,
+          1.4103161096572876
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_clamp_tensor_bounds",
+    "op": "clamp",
+    "tensors": [
+      {
+        "data": [
+          -5.0,
+          0.0,
+          5.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          -1.0,
+          -1.0,
+          -1.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "min": "T1",
+      "max": "T2"
+    },
+    "expect": {
+      "values": [
+        [
+          -1.0,
+          0.0,
+          3.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_pow_tensor_exponent",
+    "op": "pow",
+    "tensors": [
+      {
+        "data": [
+          2.0,
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          1.0,
+          0.5
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "exponent": "T1"
+    },
+    "expect": {
+      "values": [
+        [
+          4.0,
+          3.0,
+          2.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_lerp_scalar",
+    "op": "lerp",
+    "tensors": [
+      {
+        "data": [
+          0.0,
+          10.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          10.0,
+          20.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "weight": 0.5
+    },
+    "expect": {
+      "values": [
+        [
+          5.0,
+          15.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_lerp_tensor",
+    "op": "lerp",
+    "tensors": [
+      {
+        "data": [
+          0.0,
+          10.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          10.0,
+          20.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          0.25,
+          0.75
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "weight": "T2"
+    },
+    "expect": {
+      "values": [
+        [
+          2.5,
+          17.5
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_addcmul",
+    "op": "addcmul",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          5.0,
+          6.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "value": 2
+    },
+    "expect": {
+      "values": [
+        [
+          31.0,
+          50.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_addcdiv",
+    "op": "addcdiv",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          6.0,
+          8.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          4.0,
+          4.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_cross",
+    "op": "cross",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_kron",
+    "op": "kron",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          2.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          3.0,
+          4.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          3.0,
+          4.0,
+          6.0,
+          8.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_tensordot",
+    "op": "tensordot",
+    "tensors": [
+      {
+        "data": [
+          [
+            1.0,
+            2.0
+          ],
+          [
+            3.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          [
+            5.0,
+            6.0
+          ],
+          [
+            7.0,
+            8.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dims": 2
+    },
+    "expect": {
+      "values": [
+        70.0
+      ]
+    }
+  },
+  {
+    "name": "cr_take_along_dim",
+    "op": "take_along_dim",
+    "tensors": [
+      {
+        "data": [
+          [
+            1.0,
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            5.0,
+            6.0
+          ]
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          [
+            1.0,
+            3.0
+          ],
+          [
+            5.0,
+            4.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_searchsorted",
+    "op": "searchsorted",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          3.0,
+          5.0,
+          7.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          2.0,
+          6.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          1,
+          3
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_bucketize",
+    "op": "bucketize",
+    "tensors": [
+      {
+        "data": [
+          2.0,
+          6.0
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          1.0,
+          3.0,
+          5.0,
+          7.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          1,
+          3
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_msort",
+    "op": "msort",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0
+          ],
+          [
+            2.0,
+            4.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          [
+            2.0,
+            1.0
+          ],
+          [
+            3.0,
+            4.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_diff",
+    "op": "diff",
+    "tensors": [
+      {
+        "data": [
+          1.0,
+          4.0,
+          9.0,
+          16.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          3.0,
+          5.0,
+          7.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_scatter",
+    "op": "scatter",
+    "tensors": [
+      {
+        "data": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dtype": "float32"
+      },
+      {
+        "data": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          [
+            10.0,
+            20.0
+          ],
+          [
+            30.0,
+            40.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {
+      "dim": 1
+    },
+    "expect": {
+      "values": [
+        [
+          [
+            10.0,
+            20.0,
+            0.0
+          ],
+          [
+            0.0,
+            30.0,
+            40.0
+          ]
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_bitwise_and",
+    "op": "bitwise_and",
+    "tensors": [
+      {
+        "data": [
+          12,
+          10
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          10,
+          6
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          8,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_bitwise_or",
+    "op": "bitwise_or",
+    "tensors": [
+      {
+        "data": [
+          12,
+          10
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          10,
+          6
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          14,
+          14
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_bitwise_xor",
+    "op": "bitwise_xor",
+    "tensors": [
+      {
+        "data": [
+          12,
+          10
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          10,
+          6
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          6,
+          12
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_bitwise_not",
+    "op": "bitwise_not",
+    "tensors": [
+      {
+        "data": [
+          0,
+          1,
+          7
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          -1,
+          -2,
+          -8
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_left_shift",
+    "op": "bitwise_left_shift",
+    "tensors": [
+      {
+        "data": [
+          1,
+          2
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          2,
+          3
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          4,
+          16
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_right_shift",
+    "op": "bitwise_right_shift",
+    "tensors": [
+      {
+        "data": [
+          8,
+          16
+        ],
+        "dtype": "int64"
+      },
+      {
+        "data": [
+          2,
+          3
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_unique",
+    "op": "unique",
+    "tensors": [
+      {
+        "data": [
+          3.0,
+          1.0,
+          2.0,
+          1.0,
+          3.0
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          1.0,
+          2.0,
+          3.0
+        ]
+      ]
+    }
+  },
+  {
+    "name": "cr_unique_rank2",
+    "op": "unique",
+    "tensors": [
+      {
+        "data": [
+          [
+            3.0,
+            1.0
+          ],
+          [
+            2.0,
+            1.0
+          ]
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "params": {},
+    "expect": {
+      "values": [
+        [
+          1.0,
+          2.0,
+          3.0
+        ]
+      ]
+    }
   }
 ]

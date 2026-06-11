@@ -237,6 +237,7 @@ impl<'a> Params<'a> {
                     }
                     ParamKind::Bool => value.is_boolean(),
                     ParamKind::Str => value.is_string(),
+                    ParamKind::HandleOrScalar => value.is_number() || value.is_string(),
                 };
                 if !ok {
                     return Err(Response::error(
@@ -345,6 +346,29 @@ pub fn execute_table(
         "registry invariant violated: all tensors live on MPS"
     );
 
+    // Resolve HandleOrScalar params whose value is a handle string into
+    // tensor refs (issue 0005 exp 5). Plain &self borrows coexist with the
+    // operand borrows; registry.insert only runs after apply returns.
+    let mut param_tensors: std::collections::HashMap<&str, &Tensor> =
+        std::collections::HashMap::new();
+    for param in spec.params {
+        if param.kind == ParamKind::HandleOrScalar {
+            if let Some(serde_json::Value::String(handle)) = params.map.get(param.name) {
+                match registry.get(handle) {
+                    Some(tensor) => {
+                        param_tensors.insert(param.name, tensor);
+                    }
+                    None => {
+                        return Response::error(
+                            "unknown_handle",
+                            format!("unknown handle: {handle}"),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     // Broadcasting pre-check for elementwise ops (quality errors; tch
     // broadcasts natively on the happy path).
     if spec.broadcasts && tensors.len() == 2 {
@@ -360,7 +384,7 @@ pub fn execute_table(
         }
     }
 
-    match apply(spec, &tensors, &params) {
+    match apply(spec, &tensors, &params, &param_tensors) {
         Ok(Applied::Tensors(outputs)) => {
             debug_assert!(match spec.results {
                 ResultKind::Handles(n) => n == outputs.len(),
@@ -382,7 +406,12 @@ fn one(op: &str, result: Result<Tensor, tch::TchError>) -> Result<Applied, OpErr
         .map_err(|e| tch(op, e))
 }
 
-fn apply(spec: &OpSpec, t: &[&Tensor], p: &Params) -> Result<Applied, OpError> {
+fn apply(
+    spec: &OpSpec,
+    t: &[&Tensor],
+    p: &Params,
+    pt: &std::collections::HashMap<&str, &Tensor>,
+) -> Result<Applied, OpError> {
     let op = spec.name;
     match op {
         // add: a + alpha*b; sub: a - alpha*b (PyTorch semantics; tch's f_add
@@ -480,9 +509,12 @@ fn apply(spec: &OpSpec, t: &[&Tensor], p: &Params) -> Result<Applied, OpError> {
         "copysign" => one(op, t[0].f_copysign(t[1])),
         "xlogy" => one(op, t[0].f_xlogy(t[1])),
         "logaddexp" => one(op, t[0].f_logaddexp(t[1])),
-        "pow" => match p.scalar("exponent").expect("required") {
-            Scalar::Int(i) => one(op, t[0].f_pow_tensor_scalar(i)),
-            Scalar::Float(f) => one(op, t[0].f_pow_tensor_scalar(f)),
+        "pow" => match pt.get("exponent") {
+            Some(exponent) => one(op, t[0].f_pow(exponent)),
+            None => match p.scalar("exponent").expect("required") {
+                Scalar::Int(i) => one(op, t[0].f_pow_tensor_scalar(i)),
+                Scalar::Float(f) => one(op, t[0].f_pow_tensor_scalar(f)),
+            },
         },
         "clamp" => {
             let to_scalar = |s: Scalar| -> tch::Scalar {
@@ -491,6 +523,12 @@ fn apply(spec: &OpSpec, t: &[&Tensor], p: &Params) -> Result<Applied, OpError> {
                     Scalar::Float(f) => f.into(),
                 }
             };
+            // Tensor bounds (HandleOrScalar) take f_clamp_tensor; scalar
+            // bounds keep the original single/double-bound calls.
+            let (min_t, max_t) = (pt.get("min"), pt.get("max"));
+            if min_t.is_some() || max_t.is_some() {
+                return one(op, t[0].f_clamp_tensor(min_t.copied(), max_t.copied()));
+            }
             match (p.scalar("min"), p.scalar("max")) {
                 (None, None) => Err((
                     "bad_argument",
@@ -832,6 +870,171 @@ fn apply(spec: &OpSpec, t: &[&Tensor], p: &Params) -> Result<Applied, OpError> {
                 p.int("destination").expect("required"),
             ),
         ),
+        // --- creation + remainder sweep (issue 0005 exp 5) ---
+        "zeros" | "ones" => {
+            let shape = p.int_list("shape").expect("required");
+            validate_shape(op, &shape)?;
+            let kind = parse_table_kind(op, p.str("dtype"))?;
+            let result = if op == "zeros" {
+                Tensor::f_zeros(&shape, (kind, Device::Mps))
+            } else {
+                Tensor::f_ones(&shape, (kind, Device::Mps))
+            };
+            one(op, result)
+        }
+        "eye" => {
+            let n = p.int("n").expect("required");
+            match p.int("m") {
+                Some(m) => one(op, Tensor::f_eye_m(n, m, (Kind::Float, Device::Mps))),
+                None => one(op, Tensor::f_eye(n, (Kind::Float, Device::Mps))),
+            }
+        }
+        "arange" => {
+            let to_scalar = |s: Scalar| -> tch::Scalar {
+                match s {
+                    Scalar::Int(i) => i.into(),
+                    Scalar::Float(f) => f.into(),
+                }
+            };
+            let end = to_scalar(p.scalar("end").expect("required"));
+            let start = to_scalar(p.scalar("start").unwrap_or(Scalar::Int(0)));
+            let step = to_scalar(p.scalar("step").unwrap_or(Scalar::Int(1)));
+            one(
+                op,
+                Tensor::f_arange_start_step(start, end, step, (Kind::Float, Device::Mps)),
+            )
+        }
+        "linspace" => {
+            let to_scalar = |s: Scalar| -> tch::Scalar {
+                match s {
+                    Scalar::Int(i) => i.into(),
+                    Scalar::Float(f) => f.into(),
+                }
+            };
+            one(
+                op,
+                Tensor::f_linspace(
+                    to_scalar(p.scalar("start").expect("required")),
+                    to_scalar(p.scalar("end").expect("required")),
+                    p.int("steps").expect("required"),
+                    (Kind::Float, Device::Mps),
+                ),
+            )
+        }
+        "rand" => {
+            let shape = p.int_list("shape").expect("required");
+            validate_shape(op, &shape)?;
+            // Seeded CPU generator -> MPS (the randn convention).
+            one(
+                op,
+                Tensor::f_rand(&shape, (Kind::Float, Device::Cpu))
+                    .and_then(|t| t.f_to_device(Device::Mps)),
+            )
+        }
+        "randint" => {
+            let shape = p.int_list("shape").expect("required");
+            validate_shape(op, &shape)?;
+            let low = p.int("low").unwrap_or(0);
+            let high = p.int("high").expect("required");
+            one(
+                op,
+                Tensor::f_randint_low(low, high, &shape, (Kind::Int64, Device::Cpu))
+                    .and_then(|t| t.f_to_device(Device::Mps)),
+            )
+        }
+        "zeros_like" => one(op, t[0].f_zeros_like()),
+        "ones_like" => one(op, t[0].f_ones_like()),
+        "full_like" => match p.scalar("value").expect("required") {
+            Scalar::Int(i) => one(op, t[0].f_full_like(i)),
+            Scalar::Float(f) => one(op, t[0].f_full_like(f)),
+        },
+        "rand_like" | "randn_like" => {
+            // By-shape on the seeded CPU generator -> MPS (golden parity).
+            let shape = t[0].size();
+            let result = if op == "rand_like" {
+                Tensor::f_rand(&shape, (Kind::Float, Device::Cpu))
+            } else {
+                Tensor::f_randn(&shape, (Kind::Float, Device::Cpu))
+            };
+            one(op, result.and_then(|x| x.f_to_device(Device::Mps)))
+        }
+        "lerp" => match pt.get("weight") {
+            Some(weight) => one(op, t[0].f_lerp_tensor(t[1], weight)),
+            None => match p.scalar("weight").expect("required") {
+                Scalar::Int(i) => one(op, t[0].f_lerp(t[1], i)),
+                Scalar::Float(f) => one(op, t[0].f_lerp(t[1], f)),
+            },
+        },
+        "addcmul" | "addcdiv" => {
+            // tch 0.24 exposes no `value` parameter for addcmul/addcdiv, so
+            // the scaled form is computed manually: a + value * (b ∘ c).
+            let combined = if op == "addcmul" {
+                t[1].f_mul(t[2])
+            } else {
+                t[1].f_div(t[2])
+            }
+            .map_err(|e| tch(op, e))?;
+            let result = match p.scalar("value") {
+                None => t[0].f_add(&combined),
+                Some(value) => {
+                    let scaled = match value {
+                        Scalar::Int(i) => combined.f_mul_scalar(i),
+                        Scalar::Float(f) => combined.f_mul_scalar(f),
+                    }
+                    .map_err(|e| tch(op, e))?;
+                    t[0].f_add(&scaled)
+                }
+            };
+            one(op, result)
+        }
+        "cross" => one(op, t[0].f_cross(t[1], p.int("dim"))),
+        "kron" => one(op, t[0].f_kron(t[1])),
+        "tensordot" => {
+            let dims = p.int("dims").unwrap_or(2);
+            let axes: Vec<i64> = (0..dims).collect();
+            let a_axes: Vec<i64> =
+                (t[0].size().len() as i64 - dims..t[0].size().len() as i64).collect();
+            one(op, t[0].f_tensordot(t[1], &a_axes, &axes))
+        }
+        "take_along_dim" => one(
+            op,
+            t[0].f_take_along_dim(t[1], p.int("dim").expect("required")),
+        ),
+        // ATen's searchsorted self is the VALUES tensor; our spec order is
+        // (sorted_sequence, values), matching torch.searchsorted.
+        "searchsorted" => one(
+            op,
+            t[1].f_searchsorted(t[0], false, false, "left", None::<&Tensor>),
+        ),
+        "bucketize" => one(op, t[0].f_bucketize(t[1], false, false)),
+        "msort" => one(op, t[0].f_msort()),
+        "diff" => one(
+            op,
+            t[0].f_diff(
+                1,
+                p.int("dim").unwrap_or(-1),
+                None::<&Tensor>,
+                None::<&Tensor>,
+            ),
+        ),
+        "scatter" => one(
+            op,
+            t[0].f_scatter(p.int("dim").expect("required"), t[1], t[2]),
+        ),
+        "bitwise_and" => one(op, t[0].f_bitwise_and_tensor(t[1])),
+        "bitwise_or" => one(op, t[0].f_bitwise_or_tensor(t[1])),
+        "bitwise_xor" => one(op, t[0].f_bitwise_xor_tensor(t[1])),
+        "bitwise_not" => one(op, t[0].f_bitwise_not()),
+        "bitwise_left_shift" => one(op, t[0].f_bitwise_left_shift(t[1])),
+        "bitwise_right_shift" => one(op, t[0].f_bitwise_right_shift(t[1])),
+        // torch.unique flattens first; tch exposes no flattened f_unique,
+        // so flatten explicitly then unique along dim 0 (a rank-2 golden
+        // pins this — f_unique_dim(-1) alone diverges for rank >= 2).
+        "unique" => t[0]
+            .f_flatten(0, -1)
+            .and_then(|flat| flat.f_unique_dim(0, true, false, false))
+            .map(|(values, _, _)| Applied::Tensors(vec![values]))
+            .map_err(|e| tch(op, e)),
         "manual_seed" => {
             tch::manual_seed(p.int("seed").expect("required"));
             Ok(Applied::Nothing)

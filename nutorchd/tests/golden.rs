@@ -13,7 +13,7 @@ const GOLDEN: &str = include_str!("golden.json");
 #[test]
 fn golden_cases_agree_with_real_pytorch() {
     let cases: Vec<serde_json::Value> = serde_json::from_str(GOLDEN).expect("golden.json parses");
-    assert!(cases.len() >= 165, "suspiciously few golden cases");
+    assert!(cases.len() >= 200, "suspiciously few golden cases");
 
     let mut failures = Vec::new();
     for case in &cases {
@@ -48,9 +48,26 @@ fn run_case(case: &serde_json::Value) -> Result<(), String> {
         handles.push(registry.insert(tensor));
     }
 
-    let params = case["params"].as_object().cloned().unwrap_or_default();
+    // HandleOrScalar convention: a param value "T<i>" refers to input
+    // tensor i — substitute its handle and exclude it from the operand list.
+    let mut params = case["params"].as_object().cloned().unwrap_or_default();
+    let mut referenced: Vec<usize> = Vec::new();
+    for (_, value) in params.iter_mut() {
+        if let Some(text) = value.as_str() {
+            if let Some(index) = text.strip_prefix('T').and_then(|n| n.parse::<usize>().ok()) {
+                referenced.push(index);
+                *value = serde_json::Value::String(handles[index].clone());
+            }
+        }
+    }
+    let operands: Vec<String> = handles
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| !referenced.contains(i))
+        .map(|(_, h)| h.clone())
+        .collect();
 
-    let response = dispatch::execute_table(&mut registry, spec, &handles, &params);
+    let response = dispatch::execute_table(&mut registry, spec, &operands, &params);
     let expect = &case["expect"];
 
     if let Some(expected_code) = expect["error"].as_str() {

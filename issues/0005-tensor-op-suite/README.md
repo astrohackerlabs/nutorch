@@ -179,4 +179,5 @@ inside it).
   — **Pass** (33 ops, table 108→141; goldens 134→170 first-run; one MPS
   exclusion: take; dense linalg all runs on MPS)
 - [Experiment 5: Creation ops, tensor-or-scalar params, and the remainder batch (~33 ops)](05-creation-and-remainder.md)
-  — **Designed**
+  — **Pass** (31 ops, table 141→172; goldens 170→207; HandleOrScalar cost
+  exactly its three declared sites; both deferrals discharged)

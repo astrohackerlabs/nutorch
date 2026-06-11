@@ -2,6 +2,16 @@
 [implementer]
 agent = "claude-code"
 model = "claude-fable-5"
+
+[review.design]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
+
+[review.result]
+agent = "claude-code"
+subagent = "adversarial-reviewer"
+model = "claude-opus"
 +++
 
 # Experiment 5: Creation ops, tensor-or-scalar params, and the remainder batch (~33 ops)
@@ -89,3 +99,66 @@ default really is one sorted values tensor, `randint` is int64 with the stated
 overload, and rand_like-by-shape-on-CPU gives golden parity. A UUID can never
 parse as a number, so the HandleOrScalar client rule has no ambiguity; a typo'd
 scalar becoming `unknown_handle` is an honest error.
+
+## Result
+
+**Result:** Pass
+
+31 new ops landed (12 creation, 19 remainder); the table grew 141 → 172. The
+`HandleOrScalar` extension cost exactly the three declared sites (one enum
+variant + client parse arm + dispatch resolution/branches) and discharged both
+recorded deferrals: `clamp` takes tensor bounds, `pow` takes a tensor exponent,
+and `lerp` shipped with both weight forms from day one.
+
+- **Golden suite: 206/206** (was 170); byte-stable (sha256 `bac61e5f…` twice);
+  dprint-clean; floor 200. The harness gained the `T<i>` convention: a golden
+  param value `"T1"` resolves to input tensor 1's handle and drops it from the
+  operand list — how param-tensors are golden-tested.
+- **Hygiene**: build 0 warnings; fmt clean; all tests green; `v1/` untouched.
+- **Live**: `zeros`/`arange --start --step`/`eye`; clamp with tensor AND scalar
+  bounds; pow both exponent forms; lerp both weight forms; bitwise int64; seeded
+  `rand` deterministic; `scatter` exact; a typo'd scalar surfaces as honest
+  `unknown_handle`; `torch ops` = 174 = 172 + 2.
+- **MPS oracle exclusions: none this sweep.** `empty`/`empty_like` excluded
+  permanently by design (nondeterministic contents; recorded).
+- **Two tch-binding notes**: `addcmul`/`addcdiv` expose no `value` param in tch
+  0.24, so the scaled form is computed manually (`a + value*(b∘c)`; goldens pin
+  parity with PyTorch's fused kwarg). ATen's `searchsorted` binds `self` to the
+  VALUES tensor, so the dispatch flips operands to keep the CLI faithful to
+  `torch.searchsorted(sorted_seq, values)`.
+- **Two silent-replace escapes caught by the goldens** during implementation:
+  the clamp param retype and the clamp tensor-bounds branch both initially
+  no-op'd against fmt-drifted text; the golden `cr_clamp_tensor_bounds` case
+  caught each within seconds. The golden pipeline continues to pay for itself.
+
+## Conclusion
+
+The op surface is complete per the issue's scope: **172 table ops across six
+categories** (pointwise, reduction, comparison, linalg, shape, creation), every
+one golden-verified against the exact PyTorch the daemon links, plus the bespoke
+tensor/value/daemon verbs. Every structural shape the issue predicted is
+implemented and exercised: dual results, variable results, list results,
+variadic tensors, Str/IntList/Bool/Scalar params, and tensor-or-scalar hybrid
+params. Three MPS exclusions stand recorded (heaviside, take — upstream gaps;
+empty — by design). The long tail (special functions, the deeper fft/linalg
+namespaces) is table-row work the loom makes mechanical whenever wanted. The
+issue can close.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context, read-only),
+reviewing the pre-commit working tree. **First pass: CHANGES REQUIRED** — one
+Required finding, and a textbook one: `unique` via `f_unique_dim(-1)` does not
+flatten, so it diverged from `torch.unique` for rank ≥ 2 while the 1-D-only
+golden passed vacuously (live evidence: `[[3,1],[2,1]]` returned `[[1,3],[1,2]]`
+where PyTorch returns `[1,2,3]`). **Fixed with the reviewer's prescription
+verbatim** (flatten → unique dim 0) plus a rank-2 golden pinning the contract;
+207/207 green, rank-2 live check returns `[1.0,2.0,3.0]`. Everything else held
+under attack: HandleOrScalar end-to-end live in all forms, addcmul value=2
+bitwise-identical to fresh PyTorch, the searchsorted operand flip, tensordot
+axis order on a non-symmetric case, byte-stable goldens at the recorded sha, the
+Fail criterion (three declared sites) honored, registry orphan-freedom, and the
+172+2 count parsed from the OPS static. **Close readiness:** the reviewer
+audited every promise across the issue and its experiments — AGENTS.md
+amendments (exp 1), the README pointer, both deferred tensor-param extensions
+(here) — and found nothing undischarged beyond the unique fix.
