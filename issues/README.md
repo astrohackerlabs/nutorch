@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                     | Title                                                   | Opened     |
+| ------------------------------------- | ------------------------------------------------------- | ---------- |
+| [0010](0010-nushell-module/README.md) | The Nushell module — native data over the same thin CLI | 2026-06-11 |
 
 ## Closed
 
