@@ -12,11 +12,11 @@ out, listings queryable — through a generated `torch.nu` wrapper module over t
 existing CLI, plus a `--json` output mode on the structured verbs:
 
 ```nu
-use torch.nu *
+use nutorch.nu *
 
-let t = [[1 2] [3 4]] | torch-tensor
-$t | torch-mm $t | torch-value              # a native table
-torch-tensors | where bytes > 1mb | get handle | each {|h| torch-free $h }
+let t = [[1 2] [3 4]] | nutorch tensor
+$t | nutorch mm $t | nutorch value           # a native table
+nutorch tensors | where bytes > 1mb | get handle | each {|h| nutorch free $h }
 ```
 
 ## Background — why a module, not a plugin
@@ -40,8 +40,8 @@ float NaN/infinity — making round-trips cleaner in Nushell than in bash.
 
 ## Decisions Already Made
 
-1. **`torch.nu` is GENERATED from the ops table.** A `torch nu-module` CLI verb
-   emits a wrapper per table op from the same `OpSpec` rows that drive the
+1. **`nutorch.nu` is GENERATED from the ops table.** A `torch nu-module` CLI
+   verb emits a wrapper per table op from the same `OpSpec` rows that drive the
    daemon, the CLI grammar, and `torch ops` — the fourth consumer of the single
    source of truth; it cannot drift. Bespoke verbs (tensor, value, free,
    tensors, nn family, forward, step, daemon) get hand-written wrappers in a
@@ -70,12 +70,17 @@ wrapper signatures give for free.
 
 ## Design Questions (settled per-experiment)
 
-1. **Command naming**: `torch-add` flat vs `torch add` subcommand-style
-   `def "torch add"` — Nushell allows both; the experiment picks one and records
-   why (collision behavior with the real `torch` external on PATH matters here).
+1. **Command naming — SETTLED (user decision)**: subcommand style under a
+   distinct `nutorch` namespace (`def "nutorch tensor"`, `nutorch nn
+   linear`,
+   …), perfectly analogous to the CLI's `torch tensor`. Flat `torch-tensor`
+   rejected as clumsy; same-name `def "torch tensor"` rejected for PARTIAL
+   SHADOWING — wrapped subcommands would be native while unwrapped ones silently
+   fall through to the external binary, two behaviors under one name. The module
+   file is `nutorch.nu`.
 2. **Flag fidelity in wrappers**: Bool presence flags, HandleOrScalar, IntList —
    how each ParamKind maps to a Nushell wrapper parameter.
-3. **Where the committed `torch.nu` lives** and how staleness is guarded (a test
-   that regenerates and diffs, like the golden byte-stability check).
+3. **Where the committed `nutorch.nu` lives** and how staleness is guarded (a
+   test that regenerates and diffs, like the golden byte-stability check).
 4. **Nushell availability for verification**: is `nu` on this machine, or does
    the verification install/pin one? The experiment must say.
