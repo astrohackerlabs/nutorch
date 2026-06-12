@@ -92,15 +92,17 @@ try {
     "docs/neural-networks/": 3,
     "docs/nushell/": 0,
     "docs/install-from-source/": 0,
-    "docs/reference/creation/": 0,
-    "docs/reference/pointwise/": 0,
-    "docs/reference/comparison/": 0,
-    "docs/reference/reduction/": 0,
-    "docs/reference/linalg/": 0,
-    "docs/reference/shape/": 0,
-    "docs/reference/loss/": 0,
-    "docs/reference/autograd/": 0,
-    "docs/reference/utility/": 0,
+    // Reference pages: one generated pair per op (issue 0017 exp 3) —
+    // the counts are the category sizes from the op table.
+    "docs/reference/creation/": 14,
+    "docs/reference/pointwise/": 71,
+    "docs/reference/comparison/": 25,
+    "docs/reference/reduction/": 21,
+    "docs/reference/linalg/": 17,
+    "docs/reference/shape/": 23,
+    "docs/reference/loss/": 9,
+    "docs/reference/autograd/": 4,
+    "docs/reference/utility/": 1,
     "404.html": 0,
   };
   for (const [page, expected] of Object.entries(EXPECTED)) {

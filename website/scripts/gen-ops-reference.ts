@@ -86,11 +86,17 @@ function page(category: string, index: number, entries: Op[]): string {
   ];
   for (const op of entries) {
     // Display layer: the summary is rendered prose, where the project
-    // name is the proper noun NuTorch (issue 0013 exp 6). The usage line
-    // stays verbatim — it is CLI output.
+    // name is the proper noun NuTorch (issue 0013 exp 6).
     const summary = op.summary.replace(/\bnutorch\b/g, "NuTorch");
-    lines.push("", `### ${op.name}`, "", summary, "", "```");
-    lines.push(usageLine(op.name), "```");
+    // The usage SHAPE as a bash/nu pair (issue 0017 exp 3): the `usage: `
+    // prefix drops (it is an example shape, not a help dump) and the nu
+    // twin swaps only the leading token — valid because the module accepts
+    // the CLI's exact positional grammar (issues 0016, 0017 exp 1). The
+    // rehype plugin pairs the adjacent fences into a shell tab group.
+    const usage = usageLine(op.name).replace(/^usage: /, "");
+    const nuUsage = usage.replace(/^torch /, "nutorch ");
+    lines.push("", `### ${op.name}`, "", summary, "");
+    lines.push("```bash", usage, "```", "", "```nu", nuUsage, "```");
   }
   lines.push("");
   return lines.join("\n");

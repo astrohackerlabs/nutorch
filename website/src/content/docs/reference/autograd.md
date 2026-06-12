@@ -12,30 +12,46 @@ hand. Every op also documents itself: `torch <op> --help`.
 
 backpropagate from a scalar loss (gradients accumulate)
 
+```bash
+torch backward <t1>
 ```
-usage: torch backward <t1>
+
+```nu
+nutorch backward <t1>
 ```
 
 ### grad
 
 snapshot of a tensor's accumulated gradient
 
+```bash
+torch grad <t1>
 ```
-usage: torch grad <t1>
+
+```nu
+nutorch grad <t1>
 ```
 
 ### detach
 
 a graph-free reference to the same data
 
+```bash
+torch detach <t1>
 ```
-usage: torch detach <t1>
+
+```nu
+nutorch detach <t1>
 ```
 
 ### zero_grad
 
 zero a tensor's accumulated gradient in place
 
+```bash
+torch zero_grad <t1>
 ```
-usage: torch zero_grad <t1>
+
+```nu
+nutorch zero_grad <t1>
 ```

@@ -12,6 +12,10 @@ hand. Every op also documents itself: `torch <op> --help`.
 
 seed the random number generator
 
+```bash
+torch manual_seed <seed>
 ```
-usage: torch manual_seed <seed>
+
+```nu
+nutorch manual_seed <seed>
 ```

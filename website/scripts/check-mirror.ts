@@ -3,7 +3,7 @@
 // comment-only lines excluded), modulo the documented exceptions below for
 // shell-forced divergences. Forms alignment is the by-eye criterion; this
 // gate stops silent structural drift.
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 
 const DOCS = new URL("../src/content/docs/", import.meta.url).pathname;
 const INDEX = new URL("../src/pages/index.astro", import.meta.url).pathname;
@@ -39,7 +39,21 @@ function checkPair(id: string, bash: string, nu: string) {
 
 // Docs pairs: a bash fence immediately followed (blank lines allowed
 // between) by a nu fence — the same adjacency the rehype plugin uses.
-for (const file of readdirSync(DOCS).filter((f) => f.endsWith(".md"))) {
+// Recursive walk keyed by docs-root-relative path (issue 0017 exp 3 —
+// the generated reference pairs join the gate, and autograd.md exists
+// at two levels).
+function docsMdFiles(dir: string, prefix = ""): string[] {
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const path = `${dir}/${name}`;
+    if (statSync(path).isDirectory()) {
+      out.push(...docsMdFiles(path, `${prefix}${name}/`));
+    } else if (name.endsWith(".md")) out.push(`${prefix}${name}`);
+  }
+  return out;
+}
+
+for (const file of docsMdFiles(DOCS)) {
   const text = readFileSync(`${DOCS}/${file}`, "utf8");
   const fences = [
     ...text.matchAll(/```(bash|nu)\n([\s\S]*?)\n```/g),

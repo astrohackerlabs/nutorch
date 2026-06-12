@@ -117,3 +117,66 @@ folded: the regex widens in BOTH its occurrences (docs scan and `index.astro`
 scan) so the hero scan sheds the same latent vacuous-pass behavior; one Nit
 folded: the record cites the module source and the exp-1 harness rather than an
 unreproducible reviewer action.
+
+## Result
+
+**Result:** Pass
+
+185 flat fences became 185 tab groups, and the gates grew to cover them.
+
+- **The generator emits pairs**: each op's `usage:` line drops its prefix and
+  becomes a ```bash fence; the nu twin swaps only the leading token. All nine
+  pages regenerate byte-stable, dprint fixed point holds, `check:ops-ref` and
+  orphan detection unchanged.
+- **One design refinement, forced by reality**: the planned `[a-z0-9_-]+` verb
+  class false-positived on version numbers in prose comments (`torch 2.11.0` →
+  verb `2`, `nutorch 0.1.0` → verb `0` in `install-from-source.md`). The landed
+  class is letter-first `[a-z][a-z0-9_-]*` — every real op starts with a letter
+  (including `i0` and `l1_loss`), pure-number tokens stay excluded, and the six
+  digit-bearing ops the design review named all match in full. Applied in both
+  occurrences, as designed.
+- **The recursive scan is a real detector**: an injected misspelling (`deg9rad`)
+  failed `check:content` by its relative path (`reference/pointwise.md`), then
+  green after restore — and the restore itself caught a process slip (the
+  `git checkout` reverted the regenerated page; the staleness gate's re-run
+  caught it before anything shipped).
+- **Coverage preserved**: 185 `###` headings, heading set equals
+  `torch ops --json` exactly; every op has exactly one bash and one nu fence.
+- **Gates, all green**: `check:mirror` now reports 200 pairs (15 editorial + 185
+  generated, all reference pairs 1 = 1); `check:content` recursive; `check:tabs`
+  27 assertions including the nine reference pages at their category counts
+  (pointwise 71, zero duplicate tab ids in the built HTML); `check:links` (20
+  pages), `check:theme` (14), build clean; zero `.rs` diffs; `v1/` untouched.
+- **Spot honesty**: for `full` (creation), `smooth_l1_loss` (loss), and `matmul`
+  (linalg), the bash fence equals the live `torch <op> --help` usage line minus
+  the prefix, and the nu fence is the exact one-token mirror.
+- **By eye**: pointwise renders correctly in both modes with the Nushell tab
+  active. Screenshots:
+  `logs/issue-0017/reference-pointwise-nu-{light,dark}.png`.
+
+## Conclusion
+
+The reference is no longer a flat appendix: all 185 ops carry the same
+two-shell, syntax-highlighted treatment as the editorial pages, produced and
+guaranteed by the generator and its gates rather than by hand. The letter-first
+verb class is the durable lesson — "widen the character class" designs should
+state what must NOT match, not only what must. With all three experiments Pass,
+the issue is ready to close.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit. **Verdict: APPROVED — no findings.** Everything reproduced
+independently: scope exactly the 4 scripts + 9 pages + 2 issue files (zero `.rs`
+diffs, `v1/` untouched); staleness and dprint clean; coverage counted by the
+reviewer's own script (185 headings = the op table, one bash + one nu fence per
+op, 0 violations); the recorded regex deviation confirmed honest (the design's
+`[a-z0-9_-]+` reproducibly extracts verbs `2` and `0` from the install page's
+version mentions; the landed letter-first class excludes both and matches all 11
+digit-bearing ops in full); the reviewer's own injection test failed
+`check:content` by relative path and was restored byte-exact; `check:mirror` at
+200 ok lines; the full `check:tabs` CDP matrix re-run green against a live
+preview; spot honesty on the reviewer's own picks (`clamp`, `neg`, `trunc`);
+screenshots present and the README line at Pass. One unsubstantiated number the
+reviewer flagged as a note (the Result's "`check:tabs` 34 assertions") was
+re-counted before commit: the gate prints 27 ok lines; the Result now says 27.

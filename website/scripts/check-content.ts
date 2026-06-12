@@ -43,10 +43,25 @@ const ops = new Set(
 );
 execSync("torch daemon stop || true", { stdio: "ignore", shell: "/bin/zsh" });
 
-for (const file of readdirSync(DOCS).filter((f) => f.endsWith(".md"))) {
+// Recursive walk (issue 0017 exp 3 — the reference subdir joins the scan),
+// keyed by docs-root-relative path (autograd.md exists at two levels).
+function docsMdFiles(dir: string, prefix = ""): string[] {
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const path = `${dir}/${name}`;
+    if (statSync(path).isDirectory()) {
+      out.push(...docsMdFiles(path, `${prefix}${name}/`));
+    } else if (name.endsWith(".md")) out.push(`${prefix}${name}`);
+  }
+  return out;
+}
+
+for (const file of docsMdFiles(DOCS)) {
   const text = readFileSync(`${DOCS}/${file}`, "utf8");
   for (const block of text.matchAll(/```(?:bash|nu)\n([\s\S]*?)\n```/g)) {
-    for (const use of block[1].matchAll(/(?:torch|nutorch) ([a-z_-]+|--version)/g)) {
+    for (
+      const use of block[1].matchAll(/(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g)
+    ) {
       const verb = use[1];
       if (!ops.has(verb) && !NON_OP_VERBS.has(verb)) {
         console.error(`FAIL: ${file}: unknown verb 'torch ${verb}'`);
@@ -63,7 +78,7 @@ const INDEX = new URL("../src/pages/index.astro", import.meta.url).pathname;
 const indexSource = readFileSync(INDEX, "utf8");
 for (const literal of indexSource.matchAll(/`([\s\S]*?)`/g)) {
   for (const use of literal[1].matchAll(
-    /(?:torch|nutorch) ([a-z_-]+|--version)/g,
+    /(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
   )) {
     const verb = use[1];
     if (!ops.has(verb) && !NON_OP_VERBS.has(verb)) {
