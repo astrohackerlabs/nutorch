@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-12"
+closed = "2026-06-12"
 +++
 
 # Issue 14: `nutorch` in Nushell, with nothing to type
@@ -68,7 +69,23 @@ Open questions for the experiment design:
 
 ## Experiments
 
-- [Experiment 1: The vendor-autoload stub](01-vendor-autoload.md) — **Designed**
+- [Experiment 1: The vendor-autoload stub](01-vendor-autoload.md) — **Pass**
+  (formula-written stub, brew-linked; fresh unconfigured nu session ran the
+  module; fallback documented and printed by install.sh)
+
+## Conclusion
+
+**The goal is met.** A new Nushell session has `nutorch` commands with zero user
+configuration: the formula ships a one-line vendor-autoload stub that Nushell
+sources at startup, resting on the prefix-relative contract (both the stub's
+location and Nushell's search path derive from `HOMEBREW_PREFIX` by
+construction). Proven end to end by a rebuilt keg and a fresh unconfigured
+session on this machine. Users outside the contract (non-brew Nushell,
+from-source installs) get a documented one-line fallback, printed by
+`install.sh` and spelled out on the Nushell docs page. The published tap picks
+the stub up with the next tagged release. (The issue's first draft — a CLI
+symlink built on a misread request — was removed at user direction; its code
+remains harmlessly in the tree, now brew-managed after the rebuild.)
 
 ## Scope
 
