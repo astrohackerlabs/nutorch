@@ -64,6 +64,11 @@ Decisions taken with the user before opening (2026-06-12):
   byte-integrity arguments are unaffected because the plugin works on the BUILT
   tree, not the markdown source.
 
+## Experiments
+
+- [Experiment 1: The mechanism — paired fences become synced tabs](01-the-mechanism.md)
+  — **Designed**
+
 ## Scope
 
 In: the rehype tab-group plugin; the shared toggle script + unified storage key
