@@ -78,14 +78,51 @@ try {
 
   await send("Page.enable");
 
+  // Page sweep: every page's tab-group count must equal the inventory
+  // (issue 0015 exp 2 — the executable exemption table). Non-inventoried
+  // pages assert zero.
+  const EXPECTED: Record<string, number> = {
+    "": 1, // the hero
+    "docs/": 3, // renders getting-started
+    "docs/getting-started/": 3,
+    "docs/daemon/": 1,
+    "docs/tensors/": 3,
+    "docs/ops/": 2,
+    "docs/autograd/": 2,
+    "docs/neural-networks/": 3,
+    "docs/nushell/": 0,
+    "docs/install-from-source/": 0,
+    "docs/reference/creation/": 0,
+    "docs/reference/pointwise/": 0,
+    "docs/reference/comparison/": 0,
+    "docs/reference/reduction/": 0,
+    "docs/reference/linalg/": 0,
+    "docs/reference/shape/": 0,
+    "docs/reference/loss/": 0,
+    "docs/reference/autograd/": 0,
+    "docs/reference/utility/": 0,
+    "404.html": 0,
+  };
+  for (const [page, expected] of Object.entries(EXPECTED)) {
+    const html = await (
+      await fetch(`http://localhost:4399/${page}`)
+    ).text();
+    const count = (html.match(/class="shell-tabs/g) ?? []).length;
+    check(
+      `count map: /${page || "(home)"} has ${expected} group(s)`,
+      count === expected,
+      `found ${count}`,
+    );
+  }
+
   // Fresh visit: bash everywhere, nothing stored.
   await nav(DOCS);
   await evl("localStorage.clear()");
   await nav(DOCS);
   let s = await state();
   check(
-    "docs page has two groups",
-    s.groups.length === 2,
+    "docs page has three groups",
+    s.groups.length === 3,
     `groups=${s.groups.length}`,
   );
   check(
@@ -103,8 +140,8 @@ try {
   );
   s = await state();
   check(
-    "one click flips BOTH groups",
-    s.groups.length === 2
+    "one click flips ALL groups",
+    s.groups.length === 3
       && s.groups.every(
         (g: any) => g.nuSelected === "true" && !g.nuHidden && g.posixHidden,
       ),

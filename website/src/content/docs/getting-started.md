@@ -48,12 +48,16 @@ Three things just happened:
 3. **The pipeline composed.** `torch add $a $b` printed a new handle;
    `torch value` read it from stdin and printed the data as JSON.
 
-Every operation accepts its leftmost tensor from stdin or as an argument — both
-of these work:
+Every operation accepts its leftmost tensor from the pipeline or as an argument
+(the Nushell module is pipeline-first by design):
 
 ```bash
 torch add $a $b           # argument form
 echo $a | torch add $b    # pipeline form: stdin fills the leftmost slot
+```
+
+```nu
+$a | nutorch add $b   # pipeline-first: $in fills the leftmost slot
 ```
 
 ## A taste of more

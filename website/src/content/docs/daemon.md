@@ -33,6 +33,14 @@ torch daemon restart     # fresh daemon, empty registry
 torch daemon start       # start without running an op
 ```
 
+```nu
+nutorch daemon status    # same verbs, from the module
+nutorch daemon ttl 4h
+nutorch daemon stop
+nutorch daemon restart
+nutorch daemon start
+```
+
 `torch daemon status --json` emits the same record as JSON for scripts.
 
 A status report looks like:

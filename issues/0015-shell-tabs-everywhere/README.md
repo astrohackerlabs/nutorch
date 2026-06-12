@@ -71,7 +71,9 @@ Decisions taken with the user before opening (2026-06-12):
   across all 20 pages; CDP matrix incl. both-groups-one-click, hero cross-page,
   legacy migration; the node_modules/.astro cache surprise recorded)
 - [Experiment 2: The twins — Nushell pairs for the remaining examples](02-the-twins.md)
-  — **Designed**
+  — **Pass** (twelve live-verified twins; the count map enforces the exemption
+  table on all 20 pages; the seeded training twin prints the displayed 2.46e-7;
+  dual-input prose rewritten to stay accurate over both panels)
 
 ## Scope
 

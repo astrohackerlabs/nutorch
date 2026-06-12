@@ -20,6 +20,14 @@ torch nn info $m                                 # architecture, param counts
 torch nn info $m --json                          # the same, as JSON
 ```
 
+```nu
+let l = (nutorch nn linear 2 3)                  # PyTorch-default init, seeded
+let m = (nutorch nn sequential $l (nutorch nn relu))
+let y = ($x | nutorch forward $m)
+nutorch nn parameters $m                         # tensor:// handles — LIVE views
+nutorch nn info $m                               # architecture, param counts
+```
+
 Module kinds (19): `linear`, `conv1d`, `conv2d`, `conv_transpose2d`,
 `embedding`, `layer_norm`, `batch_norm`, `group_norm`, `dropout`, `relu`,
 `sigmoid`, `tanh`, `gelu`, `leaky_relu`, `softmax`, `max_pool2d`, `avg_pool2d`,
@@ -57,6 +65,23 @@ done
 torch value $loss     # 6.0012 → 2.46e-7 on the reference run
 ```
 
+```nu
+nutorch manual_seed 42 | ignore
+let x = ([[0.0] [1.0] [2.0] [3.0]] | nutorch tensor)
+let y = ([[1.0] [3.0] [5.0] [7.0]] | nutorch tensor)
+let model = (nutorch nn linear 1 1)
+let opt = (nutorch nn sgd $model --lr 0.05)
+
+mut loss = ""
+for i in 1..200 {
+  $loss = ($x | nutorch forward $model | nutorch mse_loss $y)
+  $loss | nutorch backward
+  $opt | nutorch step
+  nutorch nn zero_grad $opt | ignore
+}
+print ($loss | nutorch value)   # 6.0012 → 2.46e-7 on the reference run
+```
+
 Optimizers: `sgd`, `adam`, `adamw`, `rmsprop` — with the PyTorch defaults and
 flags (momentum, weight decay, betas, …); usage errors show each one's
 parameters.
@@ -66,6 +91,11 @@ parameters.
 ```bash
 torch nn save $m model.safetensors        # state_dict, buffers included
 torch nn load $fresh model.safetensors    # into a same-architecture module
+```
+
+```nu
+nutorch nn save $m model.safetensors      # state_dict, buffers included
+nutorch nn load $fresh model.safetensors  # into a same-architecture module
 ```
 
 The format is safetensors with PyTorch's state-dict naming (including

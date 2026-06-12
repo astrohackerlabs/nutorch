@@ -13,11 +13,16 @@ a named error rather than a mystery.
 
 ## The dual input pattern
 
-Every operation accepts tensors both ways:
+Every operation accepts its leftmost tensor from the pipeline or as an argument;
+the Nushell module is pipeline-first by design:
 
 ```bash
 torch add $a $b                   # argument form
 cat handles.txt | torch add $b    # pipeline form
+```
+
+```nu
+$a | nutorch add $b   # pipeline-first: $in is the leftmost tensor
 ```
 
 The rule is the **stdin prefix grammar**: stdin fills the leftmost missing
@@ -32,6 +37,13 @@ torch tensor '[[1,2],[3,4]]'        # from JSON (nested lists)
 torch full '[2,3]' 7                # shape, fill value
 torch randn '[3,3]'                 # seeded RNG ops: also rand, randint, …
 torch arange 10 --start 0 --step 2  # [0.0,2.0,4.0,6.0,8.0]
+```
+
+```nu
+[[1 2] [3 4]] | nutorch tensor        # from native nested lists
+nutorch full [2 3] 7                  # shape, fill value
+nutorch randn [3 3]                   # seeded RNG ops: also rand, randint, …
+nutorch arange 10 --start 0 --step 2  # handle for [0, 2, 4, 6, 8]
 ```
 
 Run `torch ops` and look at the `creation` category for the full set; every op
@@ -59,6 +71,13 @@ torch tensors --json     # the same, as JSON
 torch free $t1 $t2       # free specific tensors (or pipe handles in)
 torch free --all         # empty the registry
 torch daemon restart     # the coarse valve: export, restart, re-import
+```
+
+```nu
+nutorch tensors          # a NATIVE table: filter and sort it directly
+nutorch free $t1 $t2     # free specific tensors
+nutorch free --all       # empty the registry
+nutorch daemon restart   # the coarse valve
 ```
 
 ## Errors that name things

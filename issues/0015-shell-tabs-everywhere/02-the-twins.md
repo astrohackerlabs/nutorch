@@ -123,3 +123,63 @@ forms diverge, the nu panel shows the idiom only and the prose is adjusted to
 stay accurate over both panels — the dual-input fences and the training loop's
 `2.46e-7` named explicitly). Nit folded: the page-sweep count map asserts zero
 for every non-inventoried page.
+
+## Result
+
+**Result:** Pass
+
+Twelve twins, all live-verified, all judged — the executable exemption table
+agrees with the inventory on every page.
+
+- **Every twin ran before display** via the discriminating explicit-`use` form,
+  in two consolidated stop-gate scripts covering all forms: dual input,
+  `add --alpha` (`[9, 12, 15]`), creation (tensor/full/randn/arange →
+  `[0, 2, 4, 6, 8]`), census/free, the full autograd block (backward → grad →
+  zero_grad → detach), losses (with a grad-tracking pred — the symbolic `$pred`
+  of the displayed fence needs `--requires_grad` to actually run; the harness
+  used one), daemon passthrough verbs, nn building/save/load, and the seeded
+  training loop — final loss `2.4584e-7`, matching the displayed `2.46e-7`.
+- **The same-observable-effect constraint applied**: the training twin uses
+  `mut loss` + `print` so the displayed final loss actually surfaces; the two
+  dual-input fences show the pipeline-first idiom only and their surrounding
+  prose was REWRITTEN to be accurate over both panels (no "both of these work"
+  hovering over a one-form panel); the nn-building twin drops the `--json` line
+  (native data needs no JSON escape hatch).
+- **The count map is green on all 20 pages** (`check:tabs`, now 27 assertions):
+  home 1; docs index and getting-started 3; daemon 1; tensors 3; ops 2; autograd
+  2; neural-networks 3; nushell, install-from-source, all nine reference pages,
+  and the 404 ZERO — the exemption table is now enforced, not prose. The flip
+  assertion covers three groups on one click; hero cross-page and legacy
+  migration unchanged.
+- **The fence-level baseline diff holds**: disabled vs enabled builds, `<pre>`
+  lists identical on every page.
+- **Gates**: `check:content` (all new nu fences scanned), `check:links`,
+  `check:ops-ref`, `check:theme` green; dprint clean; zero `.rs` diffs; `v1/`
+  untouched. Screenshots: `logs/issue-0015/tensors-{bash,nu}-{light,dark}.png` —
+  three groups switching together, the exempt export/import block untabbed, both
+  modes on-brand.
+
+## Conclusion
+
+The issue's goal is met: examples speak both shells everywhere it makes sense,
+one preference remembered everywhere, enforced by an executable count map rather
+than editorial discipline. With Experiment 1's mechanism and this experiment's
+content, issue 0015 is complete — close it.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit and gating the issue close. **First pass: CHANGES REQUIRED on
+one mechanical gap** — the README's Experiment 2 index line still said Designed
+(the result-recording step was incomplete); fixed to Pass before the result
+commit, exactly as prescribed. Everything substantive was verified and APPROVED:
+the reviewer ran seven twins verbatim with a private TMPDIR (training loop →
+`2.4584e-7` matching the displayed `2.46e-7`; `--alpha` → `[9, 12, 15]`; arange;
+the full autograd block; the losses one-liner; the `where category == "loss"`
+table; daemon status), judged the symbolic `$pred` honest (both panels equally
+illustrative under "losses are ordinary ops"), confirmed both dual-input prose
+rewrites, reproduced all 27 `check:tabs` assertions plus every other gate,
+re-ran the fence-level baseline diff (236 `<pre>` blocks across 20 pages,
+byte-identical), spot-checked the exemptions, viewed the screenshots, and
+confirmed the process state (plan commit d0c6504 plan-only; zero `.rs` diffs;
+`v1/` untouched). The close was judged justified once the index line was fixed.

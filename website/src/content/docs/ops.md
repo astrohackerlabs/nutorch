@@ -18,6 +18,10 @@ possible. If you know `torch.add(a, b, alpha=2)`, you know:
 torch add $a $b --alpha 2
 ```
 
+```nu
+$a | nutorch add $b --alpha 2
+```
+
 Broadcasting follows PyTorch's rules. Non-broadcastable shapes error with both
 shapes named — validation happens in Rust before any GPU call, so error messages
 talk about your tensors, not C++ internals.
@@ -28,6 +32,12 @@ talk about your tensors, not C++ internals.
 torch ops                # every op: name, category, one-line summary
 torch ops --json         # the same as JSON (name, category, summary)
 torch mean --help        # usage, parameters, defaults for any op
+```
+
+```nu
+nutorch ops                            # a native table — filter it
+nutorch ops | where category == "loss"
+torch mean --help                      # CLI help works here too
 ```
 
 Every op supports the dual input pattern — pipe the leftmost tensor in or pass
