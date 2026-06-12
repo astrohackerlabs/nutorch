@@ -77,3 +77,40 @@ put a real example at the very top so the code does the describing.
 
 **Pass** = all five. **Fail** = any shown command/output the binary disputes, or
 the hero code below the fold at 1440×900.
+
+## Result
+
+**Result:** Pass
+
+The code is the pitch now — visible without scrolling, true to the binary.
+
+- **The hero stack landed as approved**: H1 unchanged; the three-beat line
+  ("Tensors live on your GPU. Your shell passes handles. Pipes do the rest.");
+  the add pipeline in a Shiki block directly beneath; the caption; the buttons.
+  At 1440×900 the ENTIRE stack plus the start of the install section sits above
+  the fold in both modes (`logs/issue-0013/hero-{light,dark}.png`).
+- **The spec-sheet paragraph is gone everywhere** — including its second life as
+  the META DESCRIPTION, which the dist grep caught ("tensor daemon" hits: 1 →
+  0); the og:description now matches the new voice ("GPU tensors for every shell
+  — PyTorch semantics on Apple-silicon Metal, piped through bash, zsh, fish, or
+  Nushell.").
+- **The duplicate died**: "See it run"'s bash panel now shows the randn/mm/mean
+  pipeline instead of repeating the hero's add example.
+- **Both examples run live** against the brew binary before being shown:
+  `[5.0,7.0,9.0]` for the hero; the mm/mean pipeline returns a scalar as
+  depicted.
+- **The honesty gate now covers the landing page**: `check-content.ts` scans
+  index.astro's template LITERALS with the docs verb rule — scoped to backtick
+  strings after the whole-file first draft false-positived on the hero image's
+  alt text ("The nutorch logo: …" → verb "logo"); the scoped scan keeps prose
+  out and code in.
+- **Gates**: build clean (20 pages), `check:content`/`check:links`/
+  `check:ops-ref` green; dprint clean; no Rust changes; `v1/` untouched.
+
+## Conclusion
+
+Fix 2 and the banner reconsideration are done together: the first thing a
+visitor sees is tensors being added on a GPU from a shell prompt, with one plain
+sentence on either side. The checker false-positive was a good reminder that
+prose and code need different rules — the literal-scoped scan is the right
+boundary. The punch list is now clear pending new items from the user.

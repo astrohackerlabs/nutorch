@@ -39,7 +39,9 @@ fixes and reserved "other things I may want to fix."
   live: LICENSE, 3 manifests, both formula copies incl. the pushed tap, footer,
   README; the grep gate caught an AGENTS.md reference the inventory missed)
 - [Experiment 3: The hero rework — show, don't tell](03-hero-rework.md) —
-  **Designed**
+  **Pass** (the add pipeline leads the page above the fold in both modes; the
+  spec-sheet paragraph gone, meta description included; the honesty gate now
+  scans the landing page's template literals)
 
 ## Background
 

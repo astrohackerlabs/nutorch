@@ -56,5 +56,22 @@ for (const file of readdirSync(DOCS).filter((f) => f.endsWith(".md"))) {
   }
 }
 
+// The landing page's demo code lives in Astro template LITERALS, not
+// markdown fences — scan only the backtick strings (prose like the logo
+// alt text would otherwise false-positive).
+const INDEX = new URL("../src/pages/index.astro", import.meta.url).pathname;
+const indexSource = readFileSync(INDEX, "utf8");
+for (const literal of indexSource.matchAll(/`([\s\S]*?)`/g)) {
+  for (const use of literal[1].matchAll(
+    /(?:torch|nutorch) ([a-z_-]+|--version)/g,
+  )) {
+    const verb = use[1];
+    if (!ops.has(verb) && !NON_OP_VERBS.has(verb)) {
+      console.error(`FAIL: index.astro: unknown verb 'torch ${verb}'`);
+      failed = true;
+    }
+  }
+}
+
 if (failed) process.exit(1);
 console.log("content checks passed");

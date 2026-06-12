@@ -3,10 +3,14 @@ import CodeBlock from "../components/CodeBlock.astro";
 import Base from "../layouts/Base.astro";
 import { INSTALL as install } from "../lib/install";
 
-const bashDemo = `a=$(torch tensor '[1,2,3]')
+const heroDemo = `a=$(torch tensor '[1,2,3]')
 b=$(torch tensor '[4,5,6]')
 torch add $a $b | torch value
 # [5.0,7.0,9.0]   computed on the GPU`;
+
+const bashDemo = `m=$(torch randn '[3,3]')
+torch mm $m $m | torch mean | torch value
+# matrix product, then mean — one pipeline`;
 
 const nuDemo = `use nutorch.nu *
 let t = ([[1 2] [3 4]] | nutorch tensor)
@@ -48,7 +52,7 @@ const features = [
 
 <Base
   title="nutorch — GPU tensors for every shell"
-  description="A tensor daemon for Apple silicon: PyTorch semantics, Metal GPU compute, and string handles that flow through ordinary shell pipelines."
+  description="GPU tensors for every shell — PyTorch semantics on Apple-silicon Metal, piped through bash, zsh, fish, or Nushell."
 >
   <!-- Hero -->
   <section class="mx-auto max-w-5xl px-6 pt-16 pb-12 sm:pt-24">
@@ -64,19 +68,25 @@ const features = [
           class="relative w-52 sm:w-72"
         />
       </div>
-      <div class="text-center sm:text-left">
+      <div class="min-w-0 flex-1 text-center sm:text-left">
         <h1
           class="font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl"
         >
           GPU tensors for <span class="text-primary">every</span> shell
         </h1>
-        <p class="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-          nutorch is a tensor daemon for Apple silicon: PyTorch semantics,
-          Metal GPU compute, and plain string handles that flow through
-          ordinary pipelines — bash, zsh, fish, Nushell, anything.
+        <p class="mt-4 text-lg text-muted">
+          Tensors live on your GPU. Your shell passes handles. Pipes do the
+          rest.
+        </p>
+        <div class="mt-6 text-left">
+          <CodeBlock code={heroDemo} lang="bash" />
+        </div>
+        <p class="mt-3 text-sm text-muted">
+          PyTorch semantics on Apple-silicon Metal — from bash, zsh, fish, or
+          Nushell.
         </p>
         <div
-          class="mt-8 flex flex-wrap items-center justify-center gap-4 sm:justify-start"
+          class="mt-6 flex flex-wrap items-center justify-center gap-4 sm:justify-start"
         >
           <a
             href="#install"
