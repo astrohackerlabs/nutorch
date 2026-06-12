@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-12"
+closed = "2026-06-12"
 +++
 
 # Issue 15: Shell tabs on every example
@@ -74,6 +75,36 @@ Decisions taken with the user before opening (2026-06-12):
   — **Pass** (twelve live-verified twins; the count map enforces the exemption
   table on all 20 pages; the seeded training twin prints the displayed 2.46e-7;
   dual-input prose rewritten to stay accurate over both panels)
+
+## Conclusion
+
+**The goal is met.** Every applicable example on the site speaks both shells:
+fifteen tab groups across seven pages (the hero plus six docs pages), one
+`shell` preference toggled anywhere and remembered everywhere, default bash,
+every group on a page flipping in the same click — and the exemptions (install
+block, export/import, the nu-only page, the generated usage fences) enforced by
+an executable 20-page count map rather than editorial memory.
+
+What the two experiments built:
+
+1. **The mechanism**: a 100-line local rehype plugin pairs adjacent `bash`+`nu`
+   fences after Shiki highlighting (authoring is just two fences back to back);
+   one shared script in Base drives every group plus the hero; the preference
+   applies pre-paint via `:root[data-shell]` (no flash, no-JS safe); component
+   CSS classes immune to Tailwind's source scanning. Hard-won extras: the
+   `node_modules/.astro` content cache can serve stale renders — the build now
+   cleans it unconditionally after the result reviewer proved a disabled-plugin
+   build could pass every gate on cached HTML.
+2. **The twins**: twelve Nushell pairs, each run live via the discriminating
+   explicit-`use` form before display, under a same-observable-effect constraint
+   (the seeded training twin prints the identical `2.46e-7`; prose over
+   diverging dual-input panels rewritten to stay true for both).
+
+Six review passes across the two experiments caught: a vacuous one-group flip
+test, an impossible byte-diff method (twice refined to fence-level with a
+plugin-disabled baseline), a pre-paint flash, the stale-cache false-positive
+factory, a silent non-printing twin, and an unflipped index line. The CDP gate
+(`check:tabs`, 27 assertions) keeps all of it true.
 
 ## Scope
 
