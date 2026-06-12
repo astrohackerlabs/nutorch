@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-12"
+closed = "2026-06-12"
 +++
 
 # Issue 13: Website fixes — the punch list
@@ -54,6 +55,29 @@ fixes and reserved "other things I may want to fix."
   byte-untouched)
 - [Experiment 7: No dev toolbar, ever](07-no-dev-toolbar.md) — **Pass** (one
   config line, project-level; dev HTML asserted toolbar-free)
+
+## Conclusion
+
+**The punch list is cleared — seven fixes, seven passes**, all by user direction
+with adversarial reviews waived and executable verification carrying the weight:
+
+1. The Astrohacker footer (the house pattern, adapted to the data-theme toggle).
+2. Apache → MIT across the live project, including the pushed tap formula.
+3. The hero rework — the add-tensors example leads the page; the spec-sheet
+   paragraph (and its meta-description twin) gone.
+4. The three-state theme (system/light/dark), locked in by the 14-assertion
+   `check:theme` CDP gate.
+5. Hero shell tabs — bash/zsh and Nushell, the nu example reproduced via a
+   discriminating form before display.
+6. NuTorch the proper noun, enforced by a brand gate that out-performed the
+   manual inventory twice.
+7. The Astro dev toolbar disabled, project-level.
+
+The site leaves this issue with three more executable gates than it entered with
+(`check:theme`, the brand check, the index.astro literal scan) and a working
+habit the issue-0014 false positive taught: verification must use forms that
+DISCRIMINATE between mechanisms, not forms any path can satisfy. Deployment
+remains the next outward step, scoped to its own future issue.
 
 ## Background
 
