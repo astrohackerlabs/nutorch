@@ -96,3 +96,50 @@ decision 3's honesty gap closed (the manual prefix link is brew-untracked —
 orphaned on uninstall; "next release's upgrade," not "next upgrade," makes it
 official). Nit folded: gate 1 named as the MPS dev-machine gate, with the
 formula test staying GPU-free.
+
+## Result
+
+**Result:** Pass
+
+`nutorch` answers on the command line — one symlink, three layouts.
+
+- **From-source**: `install.sh` into a temp prefix produced
+  `bin/nutorch -> torch`; both `--version` lines print;
+  `nutorch tensor '[1,2]' | nutorch value` → `[1.0,2.0]` with a private TMPDIR —
+  the symlinked name spawned its sibling `nutorchd` exactly as the design argued
+  it would.
+- **Formula**: `bin.install_symlink "torch" => "nutorch"` + the GPU-free
+  `test do` assertion added to `dist/nutorch.rb`. `brew style` exercised against
+  the NEW line via a temporary copy over the local tap formula (then restored,
+  tap git-clean): the only offense is the PRE-EXISTING `std_cargo_args`
+  suggestion — nothing new. Published tap untouched, as scoped.
+- **The live machine**: keg symlink + prefix symlink created by hand; `torch`
+  made a tensor, `nutorch daemon status` answered from the SAME daemon (same
+  socket, same binary), `nutorch daemon stop` stopped it. Recorded: these two
+  links are brew-untracked until the next release's upgrade replaces them.
+- **Docs**: install-from-source page and README each carry one line naming both
+  CLI names; `torch` stays canonical in all examples.
+- **Gates**: website build + check:content + check:links green; dprint clean;
+  ZERO `.rs` diffs (git-verified); `v1/` untouched.
+
+## Conclusion
+
+The project's name now summons the project. The symlink approach cost four lines
+across two installers and survived every layout the reviewer enumerated. The
+published tap and bottle pick the link up with the next release — the recorded
+follow-up shared with the MIT license metadata.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit. **Verdict: APPROVED — no Required findings.** The reviewer
+reproduced gate 1 independently (temp-prefix install → `bin/nutorch -> torch` →
+`[1.0,2.0]` round-trip → daemon stop), confirmed the diff is exactly the six
+expected files with zero `.rs` changes, verified the formula DSL and the
+UNCHANGED published tap (raw GitHub curl; local tap git-clean), confirmed both
+live-machine links and the plan-only plan commit, and re-ran the brew style
+temp-copy check — the two new lines add zero offenses (the lone formula-content
+offense remains the pre-existing `std_cargo_args`; standalone-style Sorbet
+warnings are path-mode artifacts unrelated to this change). One Nit folded:
+"brew untracked" softened — the keg link IS visible to `brew list` but is not in
+the install receipt, which is the operative fact for uninstall orphaning.

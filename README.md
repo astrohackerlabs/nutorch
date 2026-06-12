@@ -162,8 +162,10 @@ brew install nutorch
 ```
 
 A prebuilt bottle pours in seconds where one matches your macOS; otherwise brew
-builds from the release tarball (needs Rust, ~1 minute). The formula's source of
-truth is `dist/nutorch.rb`; the tap lives at
+builds from the release tarball (needs Rust, ~1 minute). The CLI answers to both
+names — `torch` (PyTorch muscle memory) and `nutorch` (a symlink to the same
+binary, from the next release). The formula's source of truth is
+`dist/nutorch.rb`; the tap lives at
 [nutorch/homebrew-nutorch](https://github.com/nutorch/homebrew-nutorch).
 
 ### From source

@@ -22,8 +22,9 @@ torch --version
   2.11.0 wheel (the strict pairing for tch 0.24.0), symlinks `.libtorch` at the
   staged package, and runs the release build. It detects an existing valid venv
   and skips the download — safe to re-run.
-- **`install.sh`** copies the binaries, the four libtorch dylibs they need
-  (`libtorch`, `libtorch_cpu`, `libc10`, `libomp`), and `nutorch.nu` into a
+- **`install.sh`** copies the binaries (`torch`, `nutorchd`, and a `nutorch`
+  symlink — the two CLI names are the same tool), the four libtorch dylibs they
+  need (`libtorch`, `libtorch_cpu`, `libc10`, `libomp`), and `nutorch.nu` into a
   prefix (default `~/.nutorch`).
 
 The installed binaries are relocatable: libtorch's dylibs resolve through a

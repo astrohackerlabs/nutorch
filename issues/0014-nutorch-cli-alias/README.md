@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-12"
+closed = "2026-06-12"
 +++
 
 # Issue 14: `nutorch` on the command line
@@ -47,7 +48,20 @@ calls `^torch` underneath.
 
 ## Experiments
 
-- [Experiment 1: The symlink](01-the-symlink.md) — **Designed**
+- [Experiment 1: The symlink](01-the-symlink.md) — **Pass** (nutorch → torch in
+  install.sh, the formula, and the live machine; sibling daemon spawn proven
+  through the link; zero Rust changes)
+
+## Conclusion
+
+**The goal is met in one experiment.** `nutorch` is a symlink to `torch` in
+every install path the project owns: `install.sh` (proven end to end into a temp
+prefix), `dist/nutorch.rb` (`bin.install_symlink` + a GPU-free test assertion),
+and the user's live brew install (hand-applied keg + prefix links, official from
+the next release). The sibling daemon lookup survived the aliasing in every
+layout, exactly as the design review verified it would, and zero Rust changes
+were needed. The published tap and bottle pick the link up with the next tagged
+release — the same recorded follow-up that carries the MIT license metadata.
 
 ## Scope
 

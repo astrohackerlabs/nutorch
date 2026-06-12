@@ -38,6 +38,7 @@ class Nutorch < Formula
     system "cargo", "build", "--release"
 
     bin.install "target/release/torch", "target/release/nutorchd"
+    bin.install_symlink "torch" => "nutorch"
     # The measured dylib closure (issue 0011 exp 1; mirrors
     # scripts/install.sh): libtorch/libtorch_cpu/libc10 are direct @rpath
     # links; libomp is REQUIRED transitively via libtorch_cpu.
@@ -51,6 +52,7 @@ class Nutorch < Formula
     # GPU-free by design: --version short-circuits before the MPS gate.
     assert_match "nutorch #{version}", shell_output("#{bin}/torch --version")
     assert_match "nutorch #{version}", shell_output("#{bin}/nutorchd --version")
+    assert_match "nutorch #{version}", shell_output("#{bin}/nutorch --version")
     ops = JSON.parse(shell_output("#{bin}/torch ops --json"))
     assert ops.length > 100, "op table suspiciously small"
   end

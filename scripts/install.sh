@@ -20,6 +20,7 @@ DYLIBS=(libtorch.dylib libtorch_cpu.dylib libc10.dylib libomp.dylib)
 
 mkdir -p "$PREFIX/bin" "$PREFIX/libexec/libtorch/lib" "$PREFIX/share/nutorch"
 cp target/release/torch target/release/nutorchd "$PREFIX/bin/"
+ln -sf torch "$PREFIX/bin/nutorch"
 for dylib in $DYLIBS; do
   cp ".libtorch/lib/$dylib" "$PREFIX/libexec/libtorch/lib/"
 done
@@ -29,3 +30,4 @@ echo "installed to $PREFIX"
 echo "  binaries:   $PREFIX/bin (add to PATH)"
 echo "  nushell:    use $PREFIX/share/nutorch/nutorch.nu *"
 "$PREFIX/bin/torch" --version
+"$PREFIX/bin/nutorch" --version

@@ -2,15 +2,15 @@
 
 ## Open
 
-| #                                        | Title                          | Opened     |
-| ---------------------------------------- | ------------------------------ | ---------- |
-| [0013](0013-website-fixes/README.md)     | Website fixes — the punch list | 2026-06-12 |
-| [0014](0014-nutorch-cli-alias/README.md) | `nutorch` on the command line  | 2026-06-12 |
+| #                                    | Title                          | Opened     |
+| ------------------------------------ | ------------------------------ | ---------- |
+| [0013](0013-website-fixes/README.md) | Website fixes — the punch list | 2026-06-12 |
 
 ## Closed
 
 | #                                                     | Title                                                                              | Opened     | Closed     |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------- | ---------- |
+| [0014](0014-nutorch-cli-alias/README.md)              | `nutorch` on the command line                                                      | 2026-06-12 | 2026-06-12 |
 | [0012](0012-nutorch-dot-com/README.md)                | nutorch.com — a beautiful documentation website                                    | 2026-06-11 | 2026-06-11 |
 | [0011](0011-homebrew-distribution/README.md)          | Homebrew distribution — nutorch installs like a normal package                     | 2026-06-11 | 2026-06-11 |
 | [0010](0010-nushell-module/README.md)                 | The Nushell module — native data over the same thin CLI                            | 2026-06-11 | 2026-06-11 |
