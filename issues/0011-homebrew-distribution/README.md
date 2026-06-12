@@ -99,4 +99,5 @@ beyond what brew gives for free.
   — **Pass** (local tap + 32s keg build + MPS live from /opt/homebrew/bin with
   zero env vars; brew test green; brew 6.0's no-loose-formulae rule absorbed)
 - [Experiment 3: Publication — the tap goes live and pours a bottle](03-publication.md)
-  — **Designed**
+  — **Pass** (tap + trust + install pours the arm64_tahoe bottle from GitHub in
+  5.4s; source fallback proven; zero relocation rewrites; quarantine-free)

@@ -161,3 +161,96 @@ chicken-and-egg is structurally gone. One Optional folded
 (`make-source-tarball.sh`'s sha-patch step becomes obsolete post-retarget —
 removed in the result commit) and one Nit (the `dist/nutorch.rb` header comment
 still promising the `/archive/` URL must be rewritten with it).
+
+## Result
+
+**Result:** Pass
+
+`brew tap nutorch/nutorch && brew trust nutorch/nutorch && brew install
+nutorch`
+is live. The bottle pours from GitHub in **5.4 seconds**.
+
+**The publication, in the pinned order — every step as designed:**
+
+- main pushed (`ec32998..9832011`, the plan commit at the tip); tag `v0.1.0` cut
+  on the plan commit and pushed.
+- Release `v0.1.0` on `nutorch/nutorch` with the source tarball built by the
+  retargeted `make-source-tarball.sh` from the tag; sha
+  `a50d68d4ec770b0b742cf07e89c9947597b7989d6be9597c8f183a17bbfd6c21`; the
+  downloaded asset re-hashed BYTE-IDENTICAL (the immutability check).
+- The local tap from Experiment 2 became the venue: formula (release-asset url +
+  sha, `version` line dropped — brew reads 0.1.0 off the asset name) and a
+  README with the three-command install committed (`f6c6346`), then
+  `gh repo create nutorch/homebrew-nutorch --source . --push`. `tap-new`'s stock
+  CI workflows kept (push runs tap-syntax only — safe).
+- `brew install --build-bottle nutorch/nutorch/nutorch` built from the LIVE
+  release asset in 31s (proving url+sha in the act of bottling);
+  `brew bottle --json --no-rebuild --root-url=…` emitted
+  `nutorch--0.1.0.arm64_tahoe.bottle.tar.gz` (47.9MB) — uploaded single-dash to
+  Release `nutorch-0.1.0` on the tap repo (the double-dash rename, as scripted);
+  bottle block merged manually, tap pushed (`b31c7fb`).
+- **The bottle tag is `arm64_tahoe`** (macOS 26.5). **The emitted block has NO
+  `cellar` line** (default `/opt/homebrew/Cellar`), and the bottle JSON's
+  `changed_files` is **empty** — zero install-name rewrites at bottling, the
+  `@loader_path` rpath design earning its keep one last time.
+
+**The cold-user acceptance (verification 1):** uninstall + untap + untrust +
+cache purged → `brew tap nutorch/nutorch` cloned from GitHub →
+`brew install nutorch` **REFUSED** (the trust gate, observed exactly as the
+design review predicted) → `brew trust nutorch/nutorch` → `brew install nutorch`
+→ output `Pouring
+nutorch-0.1.0.arm64_tahoe.bottle.tar.gz`, **5.41s wall**, no
+cargo/Building lines, rust NOT installed → `torch --version` =
+`nutorch 0.1.0 (unknown)` → MPS pipeline `[1,2]+[3,4] = [4.0,6.0]` with a
+private TMPDIR, daemon status `device: mps`, version 0.1.0 → `brew test nutorch`
+green.
+
+**Source-build fallback (verification 2):**
+`brew install
+--build-from-source nutorch` from the same release asset: 45.9s
+including dependency pours — works; the bottle install restored afterward.
+
+**Gatekeeper (verification 3, issue design question 5 answered):** poured
+binaries are `Signature=adhoc` `linker-signed`; `xattr -l` is EMPTY on both the
+binary and the dylibs (brew strips quarantine on pour); everything ran with zero
+prompts.
+
+**Hygiene (verification 4):** build 0 warnings, `cargo fmt --check` clean, all
+suites green (3+79+1+3+1+1 tests), dprint clean on touched files (pre-existing
+unformatted files under frozen `v1/` and `docs/archive/` are outside the
+touched-files gate), `v1/` untouched.
+
+Repo-side result edits: `dist/nutorch.rb` to the published form (header comment
+rewritten — the `/archive/` promise excised), `make-source-tarball.sh`
+retargeted as the release-asset builder (sha-patch step removed), README's
+install section now leads with the three brew commands.
+
+## Conclusion
+
+Nutorch is distributed. The full path — clone-free install, trust gate and all —
+is three commands and ~6 seconds on a bottled platform, with a working source
+build behind it for unbottled macOS versions. The vendoring chain is immutable
+end to end: PyPI wheel (hash-pinned) → release-asset tarball (hash-pinned,
+upload-once) → bottle (hash-pinned, upload-once). What remains is operational,
+not architectural: bottles for more macOS versions (CI), and a release-cutting
+script to mechanize the order this experiment executed by hand. The issue's goal
+is met; close it.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit (the gate ordering restored after Experiment 2's lapse — the
+reviewer confirmed the working tree held the uncommitted result). **Verdict:
+APPROVED — no Required findings.** The reviewer independently re-verified every
+load-bearing claim against the live artifacts: both release assets downloaded
+and re-hashed to exact sha matches; the tap formula equals `dist/nutorch.rb`
+plus only the bottle block, with url/sha/root_url/bottle-sha all
+self-consistent; version inference from the asset name confirmed via `brew list`
+and `brew test`; the poured keg's MPS pipeline, adhoc signature, empty xattrs,
+and absent rust all reproduced; the trust step present in both READMEs;
+fmt/dprint clean. The reviewer attempted to break the formula consistency, sha
+pins, version inference, bottle naming, and process ordering — each held. **One
+Nit, acknowledged here**: "release assets are upload-once-immutable" overstates
+GitHub's guarantee (the releases report `immutable: false`); the operative
+integrity guarantee is the formula's sha256 pin — a mutated asset fails the
+hash. The design phrase describes workflow practice, not platform enforcement.

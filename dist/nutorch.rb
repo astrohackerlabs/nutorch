@@ -1,16 +1,13 @@
-# Nutorch Homebrew formula (issue 0011). The committed sha256 below is a
-# LAST-KNOWN value: a tarball of HEAD contains this file, so a committed
-# sha can never match a re-archive of its own commit. For the hermetic
-# local test, scripts/make-source-tarball.sh regenerates the tarball and
-# patches the fresh sha in-place. Experiment 3 swaps `url` to
-# https://github.com/nutorch/nutorch/archive/refs/tags/v0.1.0.tar.gz in
-# the tap repo (no self-reference there).
+# Nutorch Homebrew formula (issue 0011). This is the source of truth; the
+# published copy lives in the tap repo (nutorch/homebrew-nutorch) with a
+# bottle block appended at release time. The url points at the immutable
+# source-tarball asset on the GitHub Release (scripts/make-source-tarball.sh
+# builds it from the tag) — never at GitHub's regenerable /archive/ tarballs.
 class Nutorch < Formula
   desc "GPU tensor daemon and CLI for any shell (Apple-silicon MPS, PyTorch-powered)"
   homepage "https://github.com/nutorch/nutorch"
-  url "file:///tmp/nutorch-src/nutorch-0.1.0.tar.gz"
-  version "0.1.0"
-  sha256 "063bc16ec5d548c1022f3edec0f524198789d9b2d29ecf4aa1a38f791a28e749"
+  url "https://github.com/nutorch/nutorch/releases/download/v0.1.0/nutorch-0.1.0.tar.gz"
+  sha256 "a50d68d4ec770b0b742cf07e89c9947597b7989d6be9597c8f183a17bbfd6c21"
   license "Apache-2.0"
 
   depends_on "rust" => :build

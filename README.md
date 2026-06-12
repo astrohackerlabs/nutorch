@@ -151,7 +151,22 @@ Note: JSON has no NaN/Infinity, so `torch value` writes the string tokens
 `"NaN"`, `"Infinity"`, and `"-Infinity"` for non-finite values, and
 `torch tensor` reads them back — round-trips are lossless.
 
-## Installing from source
+## Installing
+
+With [Homebrew](https://brew.sh) (Apple silicon):
+
+```bash
+brew tap nutorch/nutorch
+brew trust nutorch/nutorch   # brew 6.0+ requires trusting third-party taps
+brew install nutorch
+```
+
+A prebuilt bottle pours in seconds where one matches your macOS; otherwise brew
+builds from the release tarball (needs Rust, ~1 minute). The formula's source of
+truth is `dist/nutorch.rb`; the tap lives at
+[nutorch/homebrew-nutorch](https://github.com/nutorch/homebrew-nutorch).
+
+### From source
 
 ```bash
 git clone https://github.com/nutorch/nutorch
@@ -163,9 +178,7 @@ torch --version
 
 The installed binaries are relocatable: libtorch's required dylibs are copied
 into the prefix and resolved by a baked relative rpath — no environment
-variables, no checkout needed at runtime. A Homebrew tap
-(`brew tap nutorch/nutorch`) is in progress — issue 0011; the formula lives at
-`dist/nutorch.rb`.
+variables, no checkout needed at runtime.
 
 ## Status
 
