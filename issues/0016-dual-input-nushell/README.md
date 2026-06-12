@@ -68,6 +68,8 @@ contract than bash.
   — **Pass** (173 wrappers regenerated incl. the prelude's forward; 11/11 parity
   checks; CLI arity errors surface through the module; variadic and creation
   wrappers byte-untouched)
+- [Experiment 2: The docs straighten — both forms, both shells](02-the-docs-straighten.md)
+  — **Designed**
 
 ## Scope
 
