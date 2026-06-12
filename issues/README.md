@@ -2,9 +2,10 @@
 
 ## Open
 
-| #                                    | Title                          | Opened     |
-| ------------------------------------ | ------------------------------ | ---------- |
-| [0013](0013-website-fixes/README.md) | Website fixes — the punch list | 2026-06-12 |
+| #                                        | Title                          | Opened     |
+| ---------------------------------------- | ------------------------------ | ---------- |
+| [0013](0013-website-fixes/README.md)     | Website fixes — the punch list | 2026-06-12 |
+| [0014](0014-nutorch-cli-alias/README.md) | `nutorch` on the command line  | 2026-06-12 |
 
 ## Closed
 
