@@ -20,6 +20,14 @@ Beauty is a first-class requirement, not a nice-to-have. The bar is: a stranger
 landing on nutorch.com immediately understands what nutorch is, wants it, and
 can be running GPU pipelines in their shell within a minute.
 
+Two hard requirements, stated up front:
+
+- **Both dark mode and light mode are fully supported** — the whole site
+  (layout, brand colors, logo variants if needed, and Shiki code themes) renders
+  beautifully in each.
+- **Tailwind CSS v4** is the styling system (via the Vite plugin, with brand
+  tokens as CSS variables).
+
 ## Background
 
 ### The role model (researched 2026-06-11)
@@ -121,9 +129,12 @@ nutorch/website/              ← lives in THIS repo (like termsurf)
 
 ## Design Questions (settled per-experiment)
 
-1. **The look**: palette derived from the logo's green/orange, typography,
-   light/dark behavior, hero treatment (2D mark vs 3D render), and which Shiki
-   theme pair harmonizes. Beauty gets its own design pass, not a leftover.
+1. **The look**: palette derived from the logo's green/orange, typography, hero
+   treatment (2D mark vs 3D render), and which Shiki light/dark theme pair
+   harmonizes. Dark and light mode are both required (see Goal); the open
+   question is only the mechanism — `prefers-color-scheme` alone
+   (termsurf-style) or a user toggle on top. Beauty gets its own design pass,
+   not a leftover.
 2. **Ops reference shape**: one page per op vs grouped category pages; how much
    per-op prose the OpSpec table can supply vs needs adding; whether the
    generator runs as a build step or commits generated markdown (staleness check
