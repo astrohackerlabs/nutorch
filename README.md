@@ -206,4 +206,5 @@ The original pre-archive layout is available at the git tag `v1-final`.
 
 ## Copyright
 
-Copyright (C) 2025-2026 Identellica LLC
+Copyright (c) 2026 [Astrohacker](https://astrohacker.com) — MIT License (see
+[LICENSE](LICENSE)).

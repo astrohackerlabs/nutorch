@@ -8,7 +8,7 @@ class Nutorch < Formula
   homepage "https://github.com/nutorch/nutorch"
   url "https://github.com/nutorch/nutorch/releases/download/v0.1.0/nutorch-0.1.0.tar.gz"
   sha256 "a50d68d4ec770b0b742cf07e89c9947597b7989d6be9597c8f183a17bbfd6c21"
-  license "Apache-2.0"
+  license "MIT"
 
   depends_on "rust" => :build
   depends_on arch: :arm64

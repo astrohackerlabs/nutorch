@@ -101,3 +101,44 @@ records that the project WAS Apache through v0.1.0).
 
 **Pass** = all five. **Fail** = any live Apache string survives outside frozen
 history, or the tap push changes anything beyond the one line.
+
+## Result
+
+**Result:** Pass
+
+nutorch is MIT, everywhere it lives.
+
+- **`LICENSE`**: now the house MIT text, byte-identical to shannon's
+  (`MIT License` / `Copyright (c) 2026 Astrohacker`).
+- **Manifests**: all three crates carry `license = "MIT"`;
+  `cargo build --release` clean (0 warnings), `cargo fmt -- --check` clean.
+- **Formula, both copies**: `dist/nutorch.rb` and the published tap's
+  `Formula/nutorch.rb` (tap commit `10d3356`, pushed; the raw GitHub formula
+  shows `license "MIT"` at line 11). `brew style` reports only the PRE-EXISTING
+  `std_cargo_args` suggestion (our install deliberately uses `cargo build` for
+  the `.libtorch` symlink layout — issue 0011) — nothing introduced by this
+  change. One operational note: `brew tap` had re-cloned the local tap over
+  HTTPS during issue 0011's cold-user test, so the push needed the remote
+  switched back to SSH first.
+- **Website**: footer renders `nutorch · MIT` and
+  `© 2026 Astrohacker · MIT License` (asserted in built HTML + both-mode
+  screenshots, `logs/issue-0013/mit-footer-{light,dark}.png`); all site gates
+  green (20 pages, check:links/content/ops-ref).
+- **README**: `## Copyright` now
+  `Copyright (c) 2026 Astrohacker — MIT
+  License` with links to astrohacker.com
+  and LICENSE.
+- **One inventory miss, caught by the gate**: the zero-Apache grep found
+  `AGENTS.md`'s directory-structure comment (`LICENSE  # Apache 2.0`) — fixed to
+  `# MIT`. The verification grep now returns ZERO live Apache references outside
+  `issues/` history and the frozen `v1/`.
+- **Untouched, as designed**: v0.1.0's tag/tarball/bottle remain Apache-licensed
+  history; no re-release; `v1/` frozen.
+
+## Conclusion
+
+Fix 3 is done — the license is MIT end to end in the live project, with the
+v0.1.0 artifacts left as honest Apache history. The grep gate proved its worth
+by catching the AGENTS.md reference the manual inventory missed. Remaining on
+the punch list: fix 2 (the top-of-page add-tensors example) and whatever the
+user names next.

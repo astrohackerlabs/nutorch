@@ -2,7 +2,7 @@
 name = "nutorchd"
 version.workspace = true
 edition = "2021"
-license = "Apache-2.0"
+license = "MIT"
 description = "Nutorch v2 daemon: a tensor database for the shell (PoC)"
 
 [dependencies]

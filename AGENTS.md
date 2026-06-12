@@ -104,7 +104,7 @@ nutorch/
 ├── README.md                    # Project overview (v2 direction, status)
 ├── AGENTS.md                    # This file (agent contract)
 ├── CLAUDE.md                    # Symlink to AGENTS.md
-├── LICENSE                      # Apache 2.0
+├── LICENSE                      # MIT
 ├── dprint.json                  # Formatter config (md/toml/json)
 │
 ├── Cargo.toml                   # ⭐ v2 Rust workspace (members below)
