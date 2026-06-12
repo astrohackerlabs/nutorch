@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                      | Title                                           | Opened     |
+| -------------------------------------- | ----------------------------------------------- | ---------- |
+| [0012](0012-nutorch-dot-com/README.md) | nutorch.com — a beautiful documentation website | 2026-06-11 |
 
 ## Closed
 
