@@ -30,6 +30,11 @@ fixes and reserved "other things I may want to fix."
    - the website footer ("Apache-2.0") and the tap/repo README mentions.
 4. _(Reserved for additions as the user names them.)_
 
+## Experiments
+
+- [Experiment 1: The Astrohacker footer](01-astrohacker-footer.md) —
+  **Designed**
+
 ## Background
 
 Issue 0012 built the site: Astro 6 static + Bun + Tailwind v4 under `website/`,
