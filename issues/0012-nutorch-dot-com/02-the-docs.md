@@ -164,3 +164,84 @@ bash/nu fences byte-preserved but `json` fences reformatted by the json plugin.
 Folded: decision 8 narrowed accordingly (json outputs shown dprint-formatted,
 not byte-faithful), and the `/docs` duplicate-URL pair gets a canonical link to
 the slug URL.
+
+## Result
+
+**Result:** Pass
+
+The docs exist: 8 written pages, a collection-driven sidebar, and the markdown
+Shiki path proven — 10 routes built.
+
+- **System**: `src/content.config.ts` (glob loader + zod schema:
+  title/description/order/section), `[...slug].astro` over the collection via
+  `render(entry)`, `/docs` rendering Getting Started directly with
+  `<link rel="canonical">` to the slug URL (asserted in built HTML).
+- **The pages** (all dprint-formatted per decision 8): getting-started, daemon,
+  tensors, ops, autograd, neural-networks, nushell, install-from-source —
+  sections Start / Core / Deep learning / Clients / Install, in `order` order
+  (asserted: sidebar link sequence, section labels, `aria-current` + brand-green
+  highlight on the current page, prev/next chain checked on a middle page).
+- **One real bug caught by the screenshot gate**: the single-`<details>` sidebar
+  was INVISIBLE on desktop — a closed `<details>` hides its children regardless
+  of CSS, so `md:block` could not resurrect it. Fixed by rendering the nav twice
+  through a shared `DocNav.astro`: a `md:hidden` disclosure for mobile and a
+  `hidden md:block` block for desktop. (The design's "details + md:block" sketch
+  was wrong; the reviewer's approval of it and my implementation both missed it
+  until the screenshots.)
+- **Markdown Shiki proven**: docs pages emit `.astro-code` blocks with
+  dual-theme spans (nushell page: 5 blocks, 185 `--shiki-dark` spans) from
+  `markdown.shikiConfig` — the Experiment-1 glue covers them, and the light/dark
+  screenshots show code visibly switching.
+- **Content honesty** (with one humbling result-review catch, below):
+  `check-content.ts` green — install block byte-identical to `install.ts`
+  (survived dprint, as predicted for bash fences), every `torch <verb>` in every
+  fence either in `torch ops --json` (185 names) or in the verified non-op set.
+  The checker CAUGHT a real error during writing: my drafted training loop used
+  `torch nn step`; the real verb is top-level `torch step` (and `torch nn sgd`
+  takes the MODULE handle, not parameters — fixed from the committed acceptance
+  script). Every documented non-op verb run live against the brew binary: daemon
+  start/status/ttl/restart/stop (+ --json), tensors (+ --json), free (+ --all),
+  value --meta, backward/grad/zero_grad/detach, nn
+  linear/sgd/parameters/info/zero_grad, forward, step, ops --json, nu-module,
+  --version — all OK.
+- **Screenshots**
+  (`logs/issue-0012/docs-{getting-started,neural-networks}-{light,dark}.png`):
+  sidebar, prose, inline code chips, and fenced blocks legible and on-brand in
+  both modes.
+- **Gates**: build 0 errors (10 pages; the known upstream DEP0205 only);
+  frozen-lockfile green; dprint clean on the docs markdown + package.json; Rust
+  tree untouched; `v1/` untouched.
+
+## Conclusion
+
+The documentation system is real and the eight core pages are live. Two lessons
+recorded: screenshot gates catch what HTML assertions cannot (the
+details-element sidebar bug), and the honesty checker pays for itself
+immediately (the `nn step` fiction never reached a commit). Experiment 3
+generates the ops reference from the table into this same collection — the
+sidebar will pick it up by construction. Experiment 4 finishes search, sitemap,
+and OG polish.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit. **First pass: CHANGES REQUIRED** — the reviewer found the
+experiment's own Fail condition triggered: `tensors.md` documented
+`torch arange 0 10 2`, which the real binary REJECTS (the true form is
+`torch arange 10 --start 0 --step 2`). The honesty checker could not catch it —
+it validates verb NAMES against `torch ops --json`, not argument grammar — and
+the live spot-checks had covered the non-op surface only. Both Required findings
+fixed: the line corrected and verified live (`[0.0,2.0,4.0,6.0,8.0]`), and the
+checker's name-only scope is now recorded here as a known limitation (op
+argument forms are verified by live execution, which the reviewer extended
+across the training loop, autograd verbs, all 19 module kinds, save/load, the
+dual-input pipe form, the `value --meta` and non-finite round-trips, and the
+185-op count — all confirmed honest). Nit folded: the nushell-page Shiki figures
+corrected to 5 blocks / 185 spans (the "10" had counted doubled class-string
+occurrences). The reviewer also adversarially tested the checker itself —
+corrupted copies fail on both install-block drift and unknown verbs, so the gate
+can actually fail — and confirmed the details-element bug narrative, the
+canonical link, both navs, the prev/next chain ends, the screenshots' genuine
+mode differences, and the process state (result uncommitted, plan commit
+`ab642d8` plan-only). **Second pass: APPROVED** — the corrected `arange` line
+re-verified live by the reviewer; no remaining findings.

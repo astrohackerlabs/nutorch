@@ -1,10 +1,7 @@
 ---
 import CodeBlock from "../components/CodeBlock.astro";
 import Base from "../layouts/Base.astro";
-
-const install = `brew tap nutorch/nutorch
-brew trust nutorch/nutorch   # brew 6.0+ requires trusting third-party taps
-brew install nutorch`;
+import { INSTALL as install } from "../lib/install";
 
 const bashDemo = `a=$(torch tensor '[1,2,3]')
 b=$(torch tensor '[4,5,6]')

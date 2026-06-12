@@ -151,7 +151,9 @@ nutorch/website/              ← lives in THIS repo (like termsurf)
   — **Pass** (skeleton + measured brand tokens + landing page, both modes proven
   by screenshot; Shiki dual themes switching via the !important glue)
 - [Experiment 2: The docs — content collections and the written pages](02-the-docs.md)
-  — **Designed**
+  — **Pass** (8 pages, collection-driven sidebar, markdown Shiki proven; the
+  honesty checker caught a fictional verb; screenshots caught the
+  details-element sidebar bug)
 
 ## Scope
 

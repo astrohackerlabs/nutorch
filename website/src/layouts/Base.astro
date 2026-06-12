@@ -9,10 +9,14 @@ import Header from "../components/Header.astro";
 interface Props {
   title: string;
   description: string;
+  canonical?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, canonical } = Astro.props;
 const ogImage = new URL("/images/og-nutorch.png", Astro.site ?? Astro.url);
+const canonicalUrl = canonical
+  ? new URL(canonical, Astro.site ?? Astro.url)
+  : undefined;
 ---
 
 <!doctype html>
@@ -24,6 +28,7 @@ const ogImage = new URL("/images/og-nutorch.png", Astro.site ?? Astro.url);
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/images/nutorch-2d-192.png" type="image/png" />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

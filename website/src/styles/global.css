@@ -101,6 +101,119 @@ body {
   font-family: var(--font-mono);
 }
 
+/* Documentation prose. Markdown output from the docs collection. */
+.prose-nutorch {
+  line-height: 1.75;
+}
+
+.prose-nutorch h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-nutorch h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-nutorch p {
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  text-underline-offset: 3px;
+}
+
+.prose-nutorch a:hover {
+  color: var(--primary-strong);
+  text-decoration-color: currentColor;
+}
+
+.prose-nutorch code:not(.astro-code code) {
+  background-color: var(--surface-edge);
+  border-radius: 0.3rem;
+  padding: 0.125rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.prose-nutorch ul,
+.prose-nutorch ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose-nutorch ul {
+  list-style: disc;
+}
+
+.prose-nutorch ol {
+  list-style: decimal;
+}
+
+.prose-nutorch li {
+  margin-bottom: 0.375rem;
+}
+
+.prose-nutorch .astro-code {
+  margin-bottom: 1.25rem;
+}
+
+.prose-nutorch blockquote {
+  border-left: 3px solid var(--shell);
+  padding-left: 1rem;
+  color: var(--fg-muted);
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.prose-nutorch th,
+.prose-nutorch td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose-nutorch th {
+  font-family: var(--font-display);
+  font-weight: 500;
+  background-color: var(--surface-edge);
+}
+
+.prose-nutorch strong {
+  font-weight: 600;
+}
+
+.prose-nutorch hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
 /* Soft brand glow behind the hero shell; reads in both modes. */
 .hero-glow {
   background: radial-gradient(
