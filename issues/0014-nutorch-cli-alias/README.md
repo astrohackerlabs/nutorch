@@ -46,13 +46,23 @@ Two mechanisms, not mutually exclusive:
 
 Open questions for the experiment design:
 
-- The exact autoload-dir contract on this machine's Nushell version (verify
-  `$nu.vendor-autoload-dirs` includes the brew prefix path; verify a sourced
-  `use … *` at autoload time exports into the session scope).
-- `install.sh` parity: from-source installs should get the same behavior where
-  reasonable (the prefix's autoload dir is only consulted if it is on the user's
-  autoload path — may reduce to a documented `config.nu` line for non-brew
-  installs).
+- **The contract the design rests on is prefix-relative, not machine-specific**:
+  Homebrew builds Nushell with its vendor-autoload directory pinned to the same
+  `HOMEBREW_PREFIX` every formula installs into, so the stub's location and
+  Nushell's search path are derived from one variable that brew resolves per
+  machine (`/opt/homebrew` on Apple silicon, `/usr/local` on Intel). The
+  agreement holds on every brew-installed pairing BY CONSTRUCTION. (Verified
+  once locally as a premise smoke test — `$nu.vendor-autoload-dirs` includes the
+  brew prefix path and an autoloaded `use … *` exports into session scope; the
+  local check can falsify the claim, not prove it.)
+- **The fallback story for machines outside that contract**: Nushell installed
+  NOT via brew (cargo, MacPorts, nightly) may never scan the brew prefix, and
+  versions predating vendor autoload lack the mechanism entirely. The design
+  must say what those users do (the documented one-line `use` in `config.nu`, or
+  a file in `$nu.user-autoload-dirs`) and the docs must say which mechanism
+  applies when.
+- `install.sh` parity: from-source installs have no brew-built Nushell guarantee
+  at all — likely reduces to the documented fallback above.
 - The published tap and bottle pick the stub up with the next release (same
   precedent as the MIT metadata and the CLI symlink).
 
