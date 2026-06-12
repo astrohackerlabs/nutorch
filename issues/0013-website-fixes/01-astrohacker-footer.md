@@ -96,3 +96,38 @@ below.
 
 **Pass** = all six. **Fail** = the logo follows the OS instead of the toggle,
 any RXC remnant in `dist/`, or asset drift from the donor set.
+
+## Result
+
+**Result:** Pass
+
+The house footer is on nutorch.com, toggle-correct.
+
+- **Assets**: all four `astrohacker-6-{light,dark}-{32,64}.webp` copied from
+  termsurf, shasums byte-identical to the donor set (and to shannon's — verified
+  identical across both donors first): `ef9090d0…` (dark-32), `db096248…`
+  (dark-64), `46f0b01b…` (light-32), `69e33624…` (light-64).
+- **Footer**: row 1 keeps the nutorch identity (mark + "nutorch · Apache-2.0",
+  github link); row 2 is the centered house block — linked Astrohacker logo +
+  "An Astrohacker Project" → https://astrohacker.com, then
+  `© 2026 Astrohacker · Apache-2.0`. "Ryan X. Charles" appears in ZERO files
+  under `dist/` (grep).
+- **The toggle-correct switch**: both variants render with
+  `.astrohacker-light`/`.astrohacker-dark` classes; the global.css rules mirror
+  the sun/moon pattern; screenshots with `data-theme` pinned show the light
+  variant in light mode and the dark variant in dark mode
+  (`logs/issue-0013/issue-0013-footer-{light,dark}.png`) — independent of the OS
+  preference, which the donor sites' `prefers-color-scheme` picture could not
+  have guaranteed under our toggle.
+- **Gates**: clean rebuild 20 pages / 17 indexed; `check:links` green
+  (astrohacker.com is the 4th external link, not fetched); `check:content` and
+  `check:ops-ref` green; dprint clean on the experiment file; no Rust changes;
+  `v1/` untouched.
+
+## Conclusion
+
+Fix 1 of the punch list is done — the family crest sits the same on nutorch as
+on shannon, termsurf, and keypears, with the one adaptation our theme system
+required. The footer's two "Apache-2.0" strings are the exact hooks fix 3 (the
+MIT change) will flip. Reviews waived for this issue by user decision;
+verification carried the weight instead.

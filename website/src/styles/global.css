@@ -247,3 +247,15 @@ body {
 :root[data-theme="dark"] .toggle-moon {
   display: none;
 }
+
+/* Astrohacker footer logo: variant follows the data-theme toggle (the
+ * donor sites' prefers-color-scheme picture would ignore it). */
+:root .astrohacker-light,
+:root[data-theme="dark"] .astrohacker-dark {
+  display: block;
+}
+
+:root .astrohacker-dark,
+:root[data-theme="dark"] .astrohacker-light {
+  display: none;
+}
