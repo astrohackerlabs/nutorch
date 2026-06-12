@@ -38,20 +38,30 @@ const ogUrl = canonicalUrl ?? new URL(Astro.url.pathname, site);
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <script is:inline>
-      // Theme init, before first paint. Respects an explicitly set
-      // data-theme attribute (used by tests); otherwise localStorage,
-      // falling back to the system preference.
+      // Theme init, before first paint. Two layers: the SETTING
+      // (system|light|dark, localStorage) and the RESOLVED mode
+      // (light|dark, data-theme — what all CSS keys on). A pre-set
+      // data-theme attribute short-circuits everything (test harness /
+      // SSR escape hatch). In system mode the OS preference is tracked
+      // LIVE via the matchMedia change listener.
       (() => {
         const root = document.documentElement;
         if (root.dataset.theme) return;
-        let stored = null;
+        const media = matchMedia("(prefers-color-scheme: dark)");
+        let setting = null;
         try {
-          stored = localStorage.getItem("theme");
+          setting = localStorage.getItem("theme");
         } catch {}
-        root.dataset.theme = stored
-          ?? (matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
+        if (setting !== "light" && setting !== "dark") setting = "system";
+        root.dataset.themeSetting = setting;
+        root.dataset.theme = setting === "system"
+          ? (media.matches ? "dark" : "light")
+          : setting;
+        media.addEventListener("change", () => {
+          if (root.dataset.themeSetting === "system") {
+            root.dataset.theme = media.matches ? "dark" : "light";
+          }
+        });
       })();
     </script>
   </head>

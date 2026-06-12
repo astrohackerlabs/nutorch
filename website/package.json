@@ -11,7 +11,8 @@
     "check:content": "bun run scripts/check-content.ts",
     "gen:ops-ref": "bun run scripts/gen-ops-reference.ts",
     "check:ops-ref": "bun run scripts/gen-ops-reference.ts --check",
-    "check:links": "bun run scripts/check-links.ts"
+    "check:links": "bun run scripts/check-links.ts",
+    "check:theme": "bun run scripts/check-theme.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

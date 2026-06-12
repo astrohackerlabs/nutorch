@@ -43,7 +43,8 @@ fixes and reserved "other things I may want to fix."
   spec-sheet paragraph gone, meta description included; the honesty gate now
   scans the landing page's template literals)
 - [Experiment 4: The three-state theme — system / light / dark](04-three-state-theme.md)
-  — **Designed**
+  — **Pass** (two-layer state; system mode follows an emulated OS flip live with
+  no reload; pinned modes ignore it; 14-assertion CDP gate `check:theme`)
 
 ## Background
 

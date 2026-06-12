@@ -90,3 +90,42 @@ and from then on the OS preference is dead to the site. There is no way back to
 **Pass** = all five, with every CDP matrix row green. **Fail** = any pinned mode
 that follows the OS, a system mode that needs a reload, or a localStorage value
 that leaks a resolved mode instead of the setting.
+
+## Result
+
+**Result:** Pass
+
+System / light / dark, with the system state proven live by an emulated OS.
+
+- **The two-layer model landed as designed**: localStorage holds the SETTING
+  (`system` stored explicitly), `data-theme` only ever holds a RESOLVED mode,
+  and `data-theme-setting` drives the icon — the token sheet, Shiki glue, and
+  Astrohacker logo rules needed zero changes.
+- **The CDP matrix is all green** (`check:theme`, 14 assertions): fresh visit
+  defaults to system with empty storage; an emulated OS flip moves the page LIVE
+  in system mode (no reload); pinned light and dark each ignore OS flips and
+  persist across reloads; the third click returns to system, stores it
+  explicitly, and tracking resumes live; `data-theme` never leaks a setting; the
+  button's `aria-label` names the state and the next action ("Theme: system —
+  click for light").
+- **The control**: one cycling button, monitor/sun/moon showing the CURRENT
+  setting, icons `aria-hidden`, label updated per click.
+- **The harness contract held**: pre-set `data-theme` pages still short-circuit
+  the init script; the re-taken landing screenshots render both modes distinctly
+  (the pre-resolved pages show the system icon — the designed default when no
+  setting attribute exists).
+- **Two implementation notes**: Chrome's DevTools endpoint needs an isolated
+  `--user-data-dir` (a bare launch can delegate to a running Chrome and exit)
+  and a startup POLL rather than a fixed sleep — both now baked into
+  `check-theme.ts`.
+- **Gates**: build clean (20 pages); `check:content`/`check:links`/
+  `check:ops-ref`/`check:theme` green; dprint clean; zero `.rs` diffs; `v1/`
+  untouched.
+
+## Conclusion
+
+The theme control now does what every well-behaved site control does: defaults
+to the OS, follows it live, and pins only when asked — with the behavior locked
+in by an executable gate (`check:theme`) rather than a promise. The CDP harness
+pattern has now paid for itself twice; it is the house tool for anything
+screenshots can't assert.

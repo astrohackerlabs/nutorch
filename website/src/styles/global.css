@@ -237,15 +237,26 @@ body {
   --pagefind-ui-font: inherit;
 }
 
-/* Theme toggle: show the icon for the mode you would switch TO. */
-:root .toggle-moon,
-:root[data-theme="dark"] .toggle-sun {
+/* Theme toggle: show the CURRENT setting's icon (system/light/dark),
+ * keyed on data-theme-setting; system is the default when the attribute
+ * is absent (e.g. pre-resolved harness pages). */
+.toggle-system,
+.toggle-sun,
+.toggle-moon {
+  display: none;
+}
+
+:root[data-theme-setting="system"] .toggle-system,
+:root:not([data-theme-setting]) .toggle-system {
   display: block;
 }
 
-:root .toggle-sun,
-:root[data-theme="dark"] .toggle-moon {
-  display: none;
+:root[data-theme-setting="light"] .toggle-sun {
+  display: block;
+}
+
+:root[data-theme-setting="dark"] .toggle-moon {
+  display: block;
 }
 
 /* Astrohacker footer logo: variant follows the data-theme toggle (the
