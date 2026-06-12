@@ -98,3 +98,5 @@ beyond what brew gives for free.
 - [Experiment 2: The formula — `brew install` proven hermetically](02-the-formula.md)
   — **Pass** (local tap + 32s keg build + MPS live from /opt/homebrew/bin with
   zero env vars; brew test green; brew 6.0's no-loose-formulae rule absorbed)
+- [Experiment 3: Publication — the tap goes live and pours a bottle](03-publication.md)
+  — **Designed**
