@@ -69,9 +69,11 @@ Open questions for the experiment design:
 
 ## Experiments
 
-- [Experiment 1: The vendor-autoload stub](01-vendor-autoload.md) — **Pass**
-  (formula-written stub, brew-linked; fresh unconfigured nu session ran the
-  module; fallback documented and printed by install.sh)
+- [Experiment 1: The vendor-autoload stub](01-vendor-autoload.md) — **Pass,
+  corrected** (formula-written stub, brew-linked; the original `nu -c` proof was
+  a false positive satisfied by the same-named CLI symlink — autoload applies to
+  interactive sessions, confirmed in the user's REPL; see the experiment's
+  Correction)
 
 ## Conclusion
 
