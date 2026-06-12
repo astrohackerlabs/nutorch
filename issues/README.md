@@ -2,14 +2,14 @@
 
 ## Open
 
-| #                                        | Title                                                   | Opened     |
-| ---------------------------------------- | ------------------------------------------------------- | ---------- |
-| [0017](0017-mirrored-examples/README.md) | Mirrored examples, everywhere — including the reference | 2026-06-12 |
+| # | Title | Opened |
+| - | ----- | ------ |
 
 ## Closed
 
 | #                                                     | Title                                                                              | Opened     | Closed     |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------- | ---------- |
+| [0017](0017-mirrored-examples/README.md)              | Mirrored examples, everywhere — including the reference                            | 2026-06-12 | 2026-06-12 |
 | [0016](0016-dual-input-nushell/README.md)             | The Dual Input Pattern reaches Nushell                                             | 2026-06-12 | 2026-06-12 |
 | [0015](0015-shell-tabs-everywhere/README.md)          | Shell tabs on every example                                                        | 2026-06-12 | 2026-06-12 |
 | [0014](0014-nutorch-cli-alias/README.md)              | `nutorch` in Nushell, with nothing to type                                         | 2026-06-12 | 2026-06-12 |

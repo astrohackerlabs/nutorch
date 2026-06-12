@@ -1,6 +1,7 @@
 +++
-status = "open"
+status = "closed"
 opened = "2026-06-12"
+closed = "2026-06-12"
 +++
 
 # Issue 17: Mirrored examples, everywhere — including the reference
@@ -78,6 +79,30 @@ rendered as flat text while everything else got the two-shell treatment.
   — **Pass** (185 generated pairs across nine pages; all gates recursive and
   green; the verb class landed letter-first after the digit widening
   false-positived on version numbers)
+
+## Conclusion
+
+Both example-quality problems are solved, and the fixes are gate-enforced rather
+than editorial promises:
+
+- **Mirroring**: the prelude's last two pipeline-only verbs (`tensor`, `value`)
+  became dual-input (experiment 1), which unlocked rewriting all fifteen
+  editorial pairs as line-for-line translations (experiment 2) — same structure,
+  same forms, same comments, with the two shell-forced divergences documented as
+  explicit exceptions instead of silent drift. Every rewritten panel ran live
+  verbatim, and the committed `check:mirror` gate keeps the pairs structurally
+  equal.
+- **The reference**: the generator now emits each op's usage shape as a
+  highlighted bash/nu pair, so all 185 ops get the same two-shell tab treatment
+  as the rest of the site (experiment 3), with the count map, mirror gate, and
+  (newly recursive) honesty scan covering the generated pages.
+
+Two pre-existing bugs surfaced along the way and were fixed: the vacuous
+`where bytes > 1mb` filter (int vs filesize comparison, three sites) and the
+verb scanner's digit-blind character class — which, when widened per the design,
+false-positived on version numbers and landed letter-first (`[a-z][a-z0-9_-]*`)
+instead. The site's gate count grew again; the published tap/bottle pick up the
+module changes at the next tagged release.
 
 ## Scope
 
