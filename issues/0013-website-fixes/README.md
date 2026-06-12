@@ -35,6 +35,7 @@ fixes and reserved "other things I may want to fix."
 - [Experiment 1: The Astrohacker footer](01-astrohacker-footer.md) — **Pass**
   (house pattern adopted; logo variants follow the data-theme toggle; RXC absent
   from dist; reviews waived by user for this issue)
+- [Experiment 2: Apache → MIT](02-mit-license.md) — **Designed**
 
 ## Background
 
