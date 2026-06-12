@@ -214,11 +214,49 @@ body {
   margin: 2rem 0;
 }
 
-/* Hero shell tabs: active tab keyed on aria-selected (set by JS). */
-.hero-shell-tab[aria-selected="true"] {
+/* Shell tabs (issue 0015): component classes, NOT Tailwind utilities —
+ * the rehype plugin injects this markup from a file Tailwind never scans.
+ * Active state and pre-paint panel visibility key on :root[data-shell]
+ * (set by the head script before first paint; absent = posix default, so
+ * a no-JS visitor sees bash via the static hidden attributes). */
+.shell-tablist {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.shell-tab {
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  cursor: pointer;
+}
+
+:root:not([data-shell="nu"]) .shell-tab[data-shell-tab="posix"],
+:root[data-shell="nu"] .shell-tab[data-shell-tab="nu"] {
   color: var(--fg);
   border-color: var(--primary);
   background-color: var(--surface-edge);
+}
+
+:root[data-shell="nu"] [data-shell-panel="posix"] {
+  display: none;
+}
+
+:root[data-shell="nu"] [data-shell-panel="nu"] {
+  display: block;
+}
+
+.shell-tabs .astro-code {
+  margin-bottom: 0;
+}
+
+.prose-nutorch .shell-tabs {
+  margin-bottom: 1.25rem;
 }
 
 /* Soft brand glow behind the hero shell; reads in both modes. */

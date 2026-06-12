@@ -83,36 +83,40 @@ const features = [
           Tensors live on your GPU. Your shell passes handles. Pipes do the
           rest.
         </p>
-        <div class="mt-6 text-left">
-          <div class="mb-2 flex gap-1.5" role="tablist" aria-label="Shell">
+        <div class="shell-tabs mt-6 text-left">
+          <div class="shell-tablist" role="tablist" aria-label="Shell">
             <button
-              id="hero-tab-posix"
+              type="button"
+              id="shell-tab-hero-posix"
               role="tab"
               aria-selected="true"
-              aria-controls="hero-panel-posix"
-              data-shell="posix"
-              class="hero-shell-tab rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors"
+              aria-controls="shell-panel-hero-posix"
+              data-shell-tab="posix"
+              class="shell-tab"
             >bash / zsh</button>
             <button
-              id="hero-tab-nu"
+              type="button"
+              id="shell-tab-hero-nu"
               role="tab"
               aria-selected="false"
-              aria-controls="hero-panel-nu"
-              data-shell="nu"
-              class="hero-shell-tab rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors"
+              aria-controls="shell-panel-hero-nu"
+              data-shell-tab="nu"
+              class="shell-tab"
             >Nushell</button>
           </div>
           <div
-            id="hero-panel-posix"
+            id="shell-panel-hero-posix"
             role="tabpanel"
-            aria-labelledby="hero-tab-posix"
+            aria-labelledby="shell-tab-hero-posix"
+            data-shell-panel="posix"
           >
             <CodeBlock code={heroDemo} lang="bash" />
           </div>
           <div
-            id="hero-panel-nu"
+            id="shell-panel-hero-nu"
             role="tabpanel"
-            aria-labelledby="hero-tab-nu"
+            aria-labelledby="shell-tab-hero-nu"
+            data-shell-panel="nu"
             hidden
           >
             <CodeBlock code={heroDemoNu} lang="nu" />
@@ -199,31 +203,6 @@ const features = [
 </Base>
 
 <script>
-  // Hero shell tabs: swap panels, persist the visitor's shell choice.
-  const shellTabs = document.querySelectorAll<HTMLButtonElement>("[data-shell]");
-  const applyShell = (shell: string) => {
-    for (const tab of shellTabs) {
-      const active = tab.dataset.shell === shell;
-      tab.setAttribute("aria-selected", String(active));
-      document
-        .getElementById(`hero-panel-${tab.dataset.shell}`)
-        ?.toggleAttribute("hidden", !active);
-    }
-  };
-  let savedShell = null;
-  try {
-    savedShell = localStorage.getItem("hero-shell");
-  } catch {}
-  if (savedShell === "nu" || savedShell === "posix") applyShell(savedShell);
-  for (const tab of shellTabs) {
-    tab.addEventListener("click", () => {
-      applyShell(tab.dataset.shell!);
-      try {
-        localStorage.setItem("hero-shell", tab.dataset.shell!);
-      } catch {}
-    });
-  }
-
   const button = document.getElementById("copy-install");
   button?.addEventListener("click", async () => {
     const text = button.dataset.copy;

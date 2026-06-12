@@ -2,6 +2,7 @@
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+import rehypeShellTabs from "./plugins/rehype-shell-tabs.mjs";
 
 export default defineConfig({
   output: "static",
@@ -26,5 +27,7 @@ export default defineConfig({
     shikiConfig: {
       themes: { light: "vitesse-light", dark: "vitesse-dark" },
     },
+    // Runs after Shiki: pairs adjacent bash+nu fences into shell tabs.
+    rehypePlugins: [rehypeShellTabs],
   },
 });

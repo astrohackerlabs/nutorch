@@ -163,3 +163,78 @@ form of the actual claim. Nit folded: the no-JS outcome stated explicitly (no
 APPROVED** — fence-level method confirmed coherent; one Optional folded: the
 baseline is the identical source with only the plugin unregistered, isolating
 the plugin as the sole delta.
+
+## Result
+
+**Result:** Pass
+
+Paired fences become synced tabs, and every claim in the design held — after one
+build-system surprise.
+
+- **The twins reproduced first**: both nu snippets ran via the discriminating
+  explicit-`use` form before being written into the page (`[5.0, 7.0, 9.0]`; the
+  mm/mean scalar; the gradient vector — and the module flag is
+  `--requires_grad`, underscore, matching the displayed code).
+- **The plugin works as designed** — but the first build LIED: Astro's content
+  layer caches rendered markdown in `node_modules/.astro` (not just `.astro/`),
+  so the new plugin appeared to do nothing until BOTH cache locations were
+  cleared. The result reviewer then proved the hazard was still LIVE (a
+  stale-cache build with the plugin disabled kept serving tabs — a green
+  false-positive factory), so the lesson is now ENFORCED IN CODE:
+  `bun run build` cleans both cache dirs first (a full 20-page re-render costs
+  ~1s). Adversarially re-proven: a disabled build right after a normal one emits
+  zero tab groups.
+- **Structure asserted**: getting-started emits exactly 2 tablists / 4 panels /
+  2 hidden nu panels / 8 unique ids; the nushell page (all unpaired fences)
+  gains zero wrappers.
+- **The fence-level baseline diff holds everywhere**: with the identical tree
+  built once with `SHELL_TABS_DISABLE=1` and once live (caches cleared both
+  sides), the ordered `<pre>` lists of ALL 20 pages are identical — the plugin
+  moves nodes, never alters bytes.
+- **The CDP matrix (`check:tabs`) is all green**: fresh visit → bash everywhere,
+  nothing stored; ONE click flips BOTH docs groups in the same action;
+  `shell=nu` stored; the HERO follows on the homepage (cross-page, shared key);
+  click back → `posix`; legacy `hero-shell=nu` migrates to `shell=nu` with the
+  old key removed.
+- **Pre-paint proven**: a page served with `data-shell="nu"` pre-set renders nu
+  panels and active nu tabs from CSS alone
+  (`logs/issue-0015/tabs-{bash,nu}-{light,dark}.png` — all four states, on-brand
+  in both modes).
+- **Gates**: `check:content` (the twins scanned automatically), `check:links`,
+  `check:ops-ref`, `check:theme`, the brand gate — all green; dprint clean; zero
+  `.rs` diffs; `v1/` untouched.
+
+## Conclusion
+
+The mechanism is real: authors write two adjacent fences and the site does the
+rest — one plugin, one script, one preference, pre-paint correct, no-JS safe.
+The cache discovery (`node_modules/.astro`) is the lesson worth remembering.
+Experiment 2 is now pure content: Nushell twins for the remaining docs examples,
+each judged against the exemption list and verified live before display.
+
+## Result Review
+
+**Reviewer:** `adversarial-reviewer` subagent (fresh context), reviewing BEFORE
+the result commit. **First pass: CHANGES REQUIRED** — 1 Required: the cache
+lesson lived only in prose — the reviewer demonstrated that with a populated
+cache, a build with the plugin DISABLED still served tab markup, meaning the
+whole gate suite could certify stale HTML. Fixed in code: the `build` script now
+removes `node_modules/.astro` and `.astro` before every build, and the
+adversarial disabled-build check now yields zero tab groups. 1 Optional: the
+second nu twin's mean line printed nothing when the fence ran as a script
+(Nushell auto-prints only the last pipeline), breaking output parity with its
+bash twin — fixed with an explicit `print`, and the exact shipped snippet
+re-verified live (scalar AND gradient vector both print). 1 Nit: the legacy
+`hero-shell` key now gets removed unconditionally (previously a visitor with
+`shell` already set kept the stale key forever). The reviewer independently
+reproduced everything else: both twins, the 20-page fence-level identity, all
+five structural assertions, the hero migration with `hero-shell` surviving only
+in the migration code, the 7/7 CDP matrix, all gates, the screenshots, and the
+process state (plan commit a3d2ba2 plan-only; zero `.rs` diffs; `v1/`
+untouched).
+
+**Second pass: APPROVED** — the reviewer reproduced all three fixes: the
+adversarial disabled-build now emits zero tab groups (the stale-cache
+false-positive factory is dead, enforced by the build script); the exact shipped
+second twin prints BOTH results; the legacy key is removed unconditionally with
+the 7/7 CDP matrix still green.

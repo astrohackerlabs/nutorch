@@ -5,14 +5,15 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build": "rm -rf node_modules/.astro .astro && astro build && pagefind --site dist",
     "preview": "astro preview",
     "build:images": "bun run scripts/process-images.ts",
     "check:content": "bun run scripts/check-content.ts",
     "gen:ops-ref": "bun run scripts/gen-ops-reference.ts",
     "check:ops-ref": "bun run scripts/gen-ops-reference.ts --check",
     "check:links": "bun run scripts/check-links.ts",
-    "check:theme": "bun run scripts/check-theme.ts"
+    "check:theme": "bun run scripts/check-theme.ts",
+    "check:tabs": "bun run scripts/check-shell-tabs.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

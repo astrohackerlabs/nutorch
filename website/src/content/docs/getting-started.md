@@ -31,6 +31,13 @@ torch add $a $b | torch value
 # [5.0,7.0,9.0]   computed on the GPU
 ```
 
+```nu
+let a = ([1 2 3] | nutorch tensor)
+let b = ([4 5 6] | nutorch tensor)
+$a | nutorch add $b | nutorch value
+# [5.0, 7.0, 9.0] — a native list, on the GPU
+```
+
 Three things just happened:
 
 1. **The daemon started itself.** Any `torch` command auto-starts `nutorchd` if
@@ -59,6 +66,16 @@ w=$(torch randn '[3]' --requires_grad)        # autograd is built in
 loss=$(torch mul $w $w | torch sum)
 torch backward $loss
 torch grad $w | torch value
+```
+
+```nu
+let m = (nutorch randn [3 3])
+print ($m | nutorch mm $m | nutorch mean | nutorch value)   # matrix product, then mean
+
+let w = (nutorch randn [3] --requires_grad)         # autograd is built in
+let loss = ($w | nutorch mul $w | nutorch sum)
+$loss | nutorch backward
+$w | nutorch grad | nutorch value
 ```
 
 Run `torch ops` to list every operation (185 of them) and `torch <op> --help`
