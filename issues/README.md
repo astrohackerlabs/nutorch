@@ -2,8 +2,9 @@
 
 ## Open
 
-| # | Title | Opened |
-| - | ----- | ------ |
+| #                                            | Title                       | Opened     |
+| -------------------------------------------- | --------------------------- | ---------- |
+| [0015](0015-shell-tabs-everywhere/README.md) | Shell tabs on every example | 2026-06-12 |
 
 ## Closed
 
