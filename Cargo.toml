@@ -1,14 +1,11 @@
-# Nutorch v2 workspace. v1/cargo is the archived v1 crate and is NOT a member.
-#
-# Build note: libtorch comes from the repo-local torch 2.11.0 venv via the
-# `.libtorch` symlink, pinned (force-override) in .cargo/config.toml.
-# One-time setup AND build: scripts/bootstrap.sh (idempotent — skips the
-# torch download when .venv-torch already exists). Install with
-# scripts/install.sh. See issues/0011-homebrew-distribution/.
+# NuTorch's isolated Rust workspace; the archived v1 crate is not a member.
+# Run Cargo from this directory so .cargo/config.toml is loaded. LibTorch
+# 2.11.0 headers/libraries must be available through the local .libtorch path.
+# Operator setup and publishing instructions live in Astrohacker's product docs.
 
 [workspace]
 members = ["nutorchd", "ops", "torch-cli"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.1"
+version = "1.0.2"

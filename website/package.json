@@ -1,12 +1,11 @@
 {
-  "name": "nutorch-website",
+  "name": "@astrohacker/ntcom",
   "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "astro dev",
     "build": "rm -rf node_modules/.astro .astro && astro build && pagefind --site dist",
-    "deploy": "bun run build && wrangler pages deploy dist",
     "preview": "astro preview",
     "build:images": "bun run scripts/process-images.ts",
     "check:content": "bun run scripts/check-content.ts",
@@ -18,17 +17,18 @@
     "check:mirror": "bun run scripts/check-mirror.ts"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.3",
-    "@fontsource/jetbrains-mono": "^5.2.8",
-    "@fontsource/space-grotesk": "^5.2.8",
-    "@tailwindcss/vite": "^4.2.1",
-    "astro": "^6.1.1",
-    "tailwindcss": "^4.2.1"
+    "@astrojs/sitemap": "3.7.3",
+    "@fontsource/jetbrains-mono": "5.2.8",
+    "@fontsource/space-grotesk": "5.2.10",
+    "@tailwindcss/vite": "4.3.0",
+    "astro": "6.4.6",
+    "tailwindcss": "4.3.0"
   },
   "devDependencies": {
-    "pagefind": "^1.5.2",
-    "png-to-ico": "^3.0.1",
-    "sharp": "^0.34.5",
-    "wrangler": "^4.100.0"
+    "vite": "7.3.5",
+    "pagefind": "1.5.2",
+    "png-to-ico": "3.0.1",
+    "sharp": "0.34.5",
+    "wrangler": "4.100.0"
   }
 }
