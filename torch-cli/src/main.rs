@@ -953,11 +953,7 @@ fn run() -> Result<(), String> {
         return Ok(());
     }
     if op_name == "--version" || op_name == "version" {
-        println!(
-            "nutorch {} ({})",
-            env!("CARGO_PKG_VERSION"),
-            env!("NUTORCH_GIT_SHA")
-        );
+        println!("nutorch {}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 

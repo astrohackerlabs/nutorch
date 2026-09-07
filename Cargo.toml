@@ -8,4 +8,4 @@ members = ["nutorchd", "ops", "torch-cli"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.3"
+version = "1.0.4"
