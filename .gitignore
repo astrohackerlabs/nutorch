@@ -15,3 +15,9 @@ target/
 /website/node_modules/
 /website/.astro/
 /website/dist/
+.venv-torch/
+.libtorch
+target/
+/website/node_modules/
+/website/.astro/
+/website/dist/
