@@ -1,13 +1,13 @@
 ---
 title: Install from source
-description: Build the development shell from the Astrohacker checkout while standalone distribution remains unqualified.
+description: Build NuTorch from the Astrohacker checkout for local development.
 order: 8
 section: Start
 ---
 
-The native shell is unreleased. Its standalone public-source export, Homebrew
-installation and TermSurf default-shell integration remain unqualified.
-Current Homebrew packages are the earlier tensor-tool product.
+For normal use, [install the released native shell with Homebrew](/docs/getting-started/#install-with-homebrew).
+It includes LibTorch. The instructions below are an optional development path
+for working on NuTorch in the Astrohacker source checkout.
 
 ## Development checkout
 
@@ -39,5 +39,4 @@ do {
 The workspace builds one product executable, `nutorch`. Its `torch` command
 family is available through `use torch`. There is no external tensor CLI, daemon
 or filesystem client module.
-Source-export and publication helpers refuse before external effects until the
-shell/fork distribution is qualified. A local build is not installation proof.
+A local development build does not replace or upgrade the Homebrew installation.

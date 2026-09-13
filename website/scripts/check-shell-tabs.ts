@@ -6,9 +6,10 @@ import {
   readdirSync,
   rmSync,
   readFileSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { delimiter } from "node:path";
+import { delimiter, join } from "node:path";
 import assert from "node:assert/strict";
 
 function record(value: unknown): Record<string, unknown> {
@@ -35,6 +36,9 @@ const PATH_BROWSERS = [
 const PORT = 9226;
 const urlFlag = process.argv.indexOf("--url");
 const SITE = urlFlag < 0 ? "http://127.0.0.1:4398/" : process.argv[urlFlag + 1];
+const screenshotFlag = process.argv.indexOf("--screenshots");
+const screenshotDirectory =
+  screenshotFlag < 0 ? undefined : process.argv[screenshotFlag + 1];
 if (!SITE || new URL(SITE).hostname !== "127.0.0.1")
   throw new Error("Local preview URL required");
 
@@ -298,53 +302,92 @@ try {
   }
   await send("Emulation.setScriptExecutionDisabled", { value: false });
 
-  // Verify the real clipboard handler and keyboard activation on the launch control.
-  await send("Emulation.setDeviceMetricsOverride", {
-    width: 1280,
-    height: 900,
-    deviceScaleFactor: 1,
-    mobile: false,
-  });
-  await nav(SITE);
-  await waitFor(
-    "Object.keys(document.querySelector('[data-copy]')).some(k => k.startsWith('__reactProps'))",
-  );
-  await evl(
-    "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))",
-  );
-  await send("Emulation.setFocusEmulationEnabled", { enabled: true });
-  await send("Browser.grantPermissions", {
-    origin: new URL(SITE).origin,
-    permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
-  });
-  await evl("document.querySelector('[data-copy]').focus()");
-  check(
-    "launch control receives focus",
-    (await evl(
-      "document.activeElement === document.querySelector('[data-copy]')",
-    )) === true,
-  );
-  await send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Enter",
-    code: "Enter",
-    text: "\r",
-    windowsVirtualKeyCode: 13,
-  });
-  await send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Enter",
-    code: "Enter",
-    windowsVirtualKeyCode: 13,
-  });
-  await waitFor(
-    "document.querySelector('[data-copy]').textContent === 'copied'",
-  );
-  check(
-    "copy launch command",
-    (await evl("navigator.clipboard.readText()")) ===
-      "./code/nutorch/rs/target/release/nutorch",
-  );
+  // Verify both real clipboard handlers at desktop and narrow-screen widths.
+  const installCommands =
+    "brew tap astrohackerlabs/astrohacker\nbrew trust astrohackerlabs/astrohacker\nbrew install astrohackerlabs/astrohacker/nutorch";
+  for (const width of [1280, 390]) {
+    await send("Emulation.setDeviceMetricsOverride", {
+      width,
+      height: 900,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await nav(SITE);
+    await waitFor(
+      "Object.keys(document.querySelector('[data-copy]')).some(k => k.startsWith('__reactProps'))",
+    );
+    await evl(
+      "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))",
+    );
+    await send("Emulation.setFocusEmulationEnabled", { enabled: true });
+    await send("Browser.grantPermissions", {
+      origin: new URL(SITE).origin,
+      permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
+    });
+    await evl("document.querySelector('a[href=\"#install\"]').click()");
+    await waitFor("location.hash === '#install'");
+    check(
+      "Homebrew installation heading",
+      (await evl(
+        "document.querySelector('#install h2').textContent.trim()",
+      )) === "Install NuTorch with Homebrew",
+    );
+    for (const [selector, expected] of [
+      ["#copy-install", installCommands],
+      ["#copy-launch", "nutorch"],
+    ]) {
+      assert(selector && expected);
+      check(
+        `displayed command matches copy payload ${selector}`,
+        (await evl(`(() => {
+    const button = document.querySelector(${JSON.stringify(selector)});
+    const shown = button.parentElement.parentElement.querySelector('pre').textContent.trim();
+    return shown === button.dataset.copy && shown === ${JSON.stringify(expected)};
+  })()`)) === true,
+      );
+      await evl(`document.querySelector(${JSON.stringify(selector)}).focus()`);
+      check(
+        `${String(width)}/${selector} receives focus`,
+        (await evl(
+          `document.activeElement === document.querySelector(${JSON.stringify(selector)})`,
+        )) === true,
+      );
+      await send("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        key: "Enter",
+        code: "Enter",
+        text: "\r",
+        windowsVirtualKeyCode: 13,
+      });
+      await send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key: "Enter",
+        code: "Enter",
+        windowsVirtualKeyCode: 13,
+      });
+      await waitFor(
+        `document.querySelector(${JSON.stringify(selector)}).textContent === 'copied'`,
+      );
+      check(
+        `${String(width)}/${selector} copies expected commands`,
+        (await evl("navigator.clipboard.readText()")) === expected,
+      );
+    }
+    check(
+      `${String(width)}/install has no page overflow`,
+      (await evl("document.documentElement.scrollWidth <= innerWidth + 1")) ===
+        true,
+    );
+    if (screenshotDirectory) {
+      await evl("document.querySelector('#install').scrollIntoView()");
+      const shot = await send("Page.captureScreenshot", { format: "png" });
+      assert(typeof shot.data === "string");
+      writeFileSync(
+        join(screenshotDirectory, `homebrew-${String(width)}.png`),
+        Buffer.from(shot.data, "base64"),
+      );
+    }
+  }
 
   // Client navigation and the actual Pagefind search UI.
   await evl("document.querySelector('header a[href=\"/docs/\"]').click()");

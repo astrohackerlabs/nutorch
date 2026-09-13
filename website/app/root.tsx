@@ -3,12 +3,20 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { SpaceRain } from "@astrohacker/ui/space-rain";
+import { MotionModeProvider, useMotionMode } from "@astrohacker/ui/motion-mode";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "./styles/global.css";
+
+function Background(): React.JSX.Element | null {
+  const { mode, ready } = useMotionMode();
+  return ready ? (
+    <SpaceRain motionMode={mode} data-testid="ntcom-space-rain" />
+  ) : null;
+}
 
 export function Layout({
   children,
@@ -44,25 +52,27 @@ export function Layout({
         <Links />
       </head>
       <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
-        <div
-          data-site-background
-          className="relative isolate min-h-dvh bg-background text-foreground"
-        >
-          <SpaceRain data-testid="ntcom-space-rain" />
+        <MotionModeProvider storageKey="ntcom.motion-mode.v1">
           <div
-            data-site-scrim
-            aria-hidden="true"
-            className="pointer-events-none fixed inset-0 z-2 bg-background/55"
-          />
-          <div
-            data-site-content
-            className="relative z-10 flex min-h-dvh flex-col"
+            data-site-background
+            className="relative isolate min-h-dvh bg-background text-foreground"
           >
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            <Background />
+            <div
+              data-site-scrim
+              aria-hidden="true"
+              className="pointer-events-none fixed inset-0 z-2 bg-background/55"
+            />
+            <div
+              data-site-content
+              className="relative z-10 flex min-h-dvh flex-col"
+            >
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
           </div>
-        </div>
+        </MotionModeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

@@ -1,26 +1,32 @@
 ---
 title: Getting started
-description: Build the unreleased NuTorch shell and run native GPU tensor pipelines.
+description: Install NuTorch with Homebrew and run native GPU tensor pipelines.
 order: 1
 section: Start
 ---
 
 NuTorch is a full Nushell-based shell with tensors built into its main process.
-These pages describe the **unreleased native shell**. Homebrew currently provides
-the earlier tensor-tool release; it does not install this new shell.
+The Homebrew package includes the native shell and LibTorch for Apple silicon
+on macOS Tahoe 26.x.
 
-## Build the development shell
+## Install with Homebrew
 
-From the Astrohacker checkout with its pinned dependencies:
+With [Homebrew](https://brew.sh) installed, run:
 
 ```nu
-nu scripts/build.nu nutorch --release
-./code/nutorch/rs/target/release/nutorch
+brew tap astrohackerlabs/astrohacker
+brew trust astrohackerlabs/astrohacker
+brew install astrohackerlabs/astrohacker/nutorch
 ```
 
-Use the local build explicitly. Do not import an old tensor client into it.
-See [source setup](/docs/install-from-source/) and
-[NuTorch shell setup](/docs/nushell/#setup).
+Then launch the installed shell:
+
+```nu
+nutorch
+```
+
+See [NuTorch shell setup](/docs/nushell/#setup) for import options.
+[Building from source](/docs/install-from-source/) is an optional development path.
 
 You are now at the NuTorch prompt. Ordinary shell commands work immediately.
 Type `use torch` to enable tensor commands. The examples below run inside NuTorch;

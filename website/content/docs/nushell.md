@@ -7,18 +7,17 @@ section: Start
 
 ## Setup
 
-Build and launch the unreleased shell from the Astrohacker checkout:
+Install NuTorch using the [Homebrew instructions](/docs/getting-started/#install-with-homebrew),
+then launch it in your current terminal:
 
 ```nu
-nu scripts/build.nu nutorch --release
-./code/nutorch/rs/target/release/nutorch
+nutorch
 ```
 
 Run `use torch` inside NuTorch to bring the native tensor commands into scope.
 Ordinary shell commands work immediately without this import.
 The embedded module needs no client file. Do not import `nutorch.nu` or
-edit `NU_LIB_DIRS`; the client module has been removed. An existing installed
-legacy executable is not this development shell.
+edit `NU_LIB_DIRS`; the client module has been removed.
 
 `use torch` keeps the `torch ...` prefix. `use torch tensor` imports just
 `tensor`, while `use torch *` imports unqualified names such as `add` and `sum`
@@ -50,11 +49,12 @@ rather than serializing a handle or copying the GPU data.
 ## Scripts
 
 ```nu
-./code/nutorch/rs/target/release/nutorch code/nutorch/examples/train-regression.nu
-./code/nutorch/rs/target/release/nutorch code/nutorch/examples/train-classify.nu
+nutorch code/nutorch/examples/train-regression.nu
+nutorch code/nutorch/examples/train-classify.nu
 ```
 
-Run scripts with the new shell so its native commands are present.
+These example script paths are relative to the Astrohacker source checkout.
+Run your own scripts with `nutorch path/to/script.nu` so its native commands are present.
 Plain Nushell does not gain tensor commands by installing a module.
 Live tensors, modules and optimizers belong to their process and cannot be
 passed to external programs as handles.

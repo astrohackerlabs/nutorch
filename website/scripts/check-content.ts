@@ -1,7 +1,7 @@
 // Content honesty checks (issue 0012 exp 2):
-// 1. Development docs distinguish the unreleased shell from the older package.
+// 1. Homepage and onboarding describe the released Homebrew shell.
 // 2. Every `torch <op>` used in docs fences is a real table op or a known
-//    native command, per metadata from the local release shell.
+//    native command, per metadata from the installed release shell.
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import assert from "node:assert/strict";
@@ -9,14 +9,17 @@ import assert from "node:assert/strict";
 const DOCS = new URL("../content/docs/", import.meta.url).pathname;
 let failed = false;
 
-// 1. The local shell is explicitly unreleased; no installed-upgrade claim.
+// 1. The public onboarding uses the released installation path.
 const gettingStarted = readFileSync(`${DOCS}/getting-started.md`, "utf8");
 if (
-  !gettingStarted.includes("**unreleased native shell**") ||
-  !gettingStarted.includes("earlier tensor-tool release")
+  !gettingStarted.includes(
+    "brew install astrohackerlabs/astrohacker/nutorch",
+  ) ||
+  !gettingStarted.includes("```nu\nnutorch\n```") ||
+  /unreleased|earlier tensor-tool release/.test(gettingStarted)
 ) {
   console.error(
-    "FAIL: getting-started must distinguish the unreleased shell from the installed product",
+    "FAIL: getting-started must explain Homebrew installation and installed shell launch",
   );
   failed = true;
 }
@@ -37,19 +40,16 @@ const NON_OP_VERBS = new Set([
 const ops = new Set(
   (
     JSON.parse(
-      execFileSync(
-        new URL("../../../rs/target/release/nutorch", import.meta.url).pathname,
-        [
-          "--no-config-file",
-          "--no-history",
-          "-c",
-          "use torch; torch ops | to json --raw",
-        ],
-      ).toString(),
+      execFileSync("nutorch", [
+        "--no-config-file",
+        "--no-history",
+        "-c",
+        "use torch; torch ops | to json --raw",
+      ]).toString(),
     ) as { name: string }[]
   ).map((o) => o.name),
 );
-// Metadata inspection does not create tensors or start an external process.
+// Metadata inspection creates no tensors and starts no daemon.
 
 // Recursive walk (issue 0017 exp 3 — the reference subdir joins the scan),
 // keyed by docs-root-relative path (autograd.md exists at two levels).
@@ -77,7 +77,7 @@ for (const file of docsMdFiles(DOCS)) {
       failed = true;
     }
     for (const use of block[1].matchAll(
-      /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
+      /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)(?![\w/.-])/g,
     )) {
       const verb = use[1];
       assert(verb !== undefined, "Missing command verb capture");
@@ -94,10 +94,30 @@ for (const file of docsMdFiles(DOCS)) {
 // alt text would otherwise false-positive).
 const INDEX = new URL("../app/routes/home.tsx", import.meta.url).pathname;
 const indexSource = readFileSync(INDEX, "utf8");
+for (const command of [
+  "brew tap astrohackerlabs/astrohacker",
+  "brew trust astrohackerlabs/astrohacker",
+  "brew install astrohackerlabs/astrohacker/nutorch",
+]) {
+  if (!indexSource.includes(command) || !gettingStarted.includes(command)) {
+    console.error(`FAIL: homepage/onboarding missing ${command}`);
+    failed = true;
+  }
+}
+if (
+  /unreleased|earlier tensor-tool|target\/release\/nutorch|Try the development shell/i.test(
+    indexSource,
+  )
+) {
+  console.error(
+    "FAIL: homepage still requires an unreleased development build",
+  );
+  failed = true;
+}
 const nushellSource = readFileSync(`${DOCS}/nushell.md`, "utf8");
 const requiredSetup = [
   "## Setup",
-  "./code/nutorch/rs/target/release/nutorch",
+  "```nu\nnutorch\n```",
   "Run `use torch` inside NuTorch",
   "It is not imported by default.",
   "Do not import `nutorch.nu`",
@@ -160,7 +180,7 @@ for (const literal of indexSource.matchAll(/`([\s\S]*?)`/g)) {
     failed = true;
   }
   for (const use of literal[1].matchAll(
-    /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
+    /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)(?![\w/.-])/g,
   )) {
     const verb = use[1];
     assert(verb !== undefined, "Missing command verb capture");

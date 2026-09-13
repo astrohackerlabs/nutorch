@@ -4,7 +4,10 @@ import { metadata } from "../lib/metadata";
 import { highlight } from "../lib/markdown.server";
 import { Button } from "@astrohacker/ui/button";
 import { Card } from "@astrohacker/ui/card";
-const launchDemo = `./code/nutorch/rs/target/release/nutorch`;
+const installDemo = `brew tap astrohackerlabs/astrohacker
+brew trust astrohackerlabs/astrohacker
+brew install astrohackerlabs/astrohacker/nutorch`;
+const launchDemo = `nutorch`;
 
 const heroDemo = `use torch
 let a = (torch tensor [1 2 3])
@@ -54,6 +57,7 @@ export async function loader(): Promise<Record<string, string>> {
   const entries = await Promise.all(
     (
       [
+        [installDemo, "nu"],
         [launchDemo, "nu"],
         [heroDemo, "nu"],
         [nuDemo, "nu"],
@@ -66,7 +70,7 @@ export async function loader(): Promise<Record<string, string>> {
 export function meta(): ReturnType<typeof metadata> {
   return metadata(
     "NuTorch — A shell for GPU computing",
-    "NuTorch is a Nushell-based shell with native GPU tensors, neural networks and optimizers on Apple-silicon Metal. The new shell is unreleased.",
+    "NuTorch is a Nushell-based shell with native GPU tensors, neural networks and optimizers on Apple-silicon Metal. Install with Homebrew on macOS Tahoe.",
     "/",
   );
 }
@@ -114,19 +118,12 @@ export default function Home({
               <CodeBlock blocks={loaderData} code={heroDemo} />
             </div>
             <p className="mt-3 text-sm text-muted">
-              Unreleased development shell, powered by LibTorch on Metal. Use
-              the{" "}
-              <Link
-                to={`${href("/docs/*", { "*": "nushell/" })}#setup`}
-                className="text-primary underline"
-              >
-                local shell setup
-              </Link>{" "}
-              before trying these examples; they require the new local build.
+              Available through Homebrew for Apple silicon on macOS Tahoe 26.x.
+              The native shell and LibTorch are included.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:justify-start">
               <Button asChild size="lg">
-                <a href="#install">Try the development shell</a>
+                <a href="#install">Install with Homebrew</a>
               </Button>
               <Button asChild size="lg" variant="secondary">
                 <a href="https://github.com/astrohackerlabs/nutorch">GitHub</a>
@@ -141,33 +138,46 @@ export default function Home({
         className="mx-auto max-w-5xl scroll-mt-8 px-6 py-12"
       >
         <h2 className="font-display text-2xl font-bold tracking-tight">
-          Launch NuTorch, then import torch
+          Install NuTorch with Homebrew
         </h2>
         <p className="mt-2 text-muted">
-          The native shell is unreleased. The current Homebrew package is the
-          earlier tensor-tool release. Follow the{" "}
-          <Link
-            to={href("/docs/*", { "*": "install-from-source/" })}
-            className="text-primary underline"
-          >
-            development build instructions
-          </Link>
-          , then launch it from the Astrohacker checkout in your current
-          terminal:
+          On an Apple-silicon Mac running macOS Tahoe 26.x, install{" "}
+          <a href="https://brew.sh" className="text-primary underline">
+            Homebrew
+          </a>{" "}
+          if needed, then run these commands in your terminal. The package
+          includes NuTorch and LibTorch, ready to use.
         </p>
-        <div className="relative mt-6">
+        <div className="mt-6">
+          <div className="mb-2 flex justify-end">
+            <Button
+              id="copy-install"
+              type="button"
+              aria-label="Copy Homebrew installation commands"
+              data-copy={installDemo}
+              size="sm"
+              variant="secondary"
+            >
+              copy
+            </Button>
+          </div>
+          <CodeBlock blocks={loaderData} code={installDemo} />
+        </div>
+        <p className="mt-6 text-muted">Then launch NuTorch:</p>
+        <div className="mt-3">
+          <div className="mb-2 flex justify-end">
+            <Button
+              id="copy-launch"
+              type="button"
+              aria-label="Copy NuTorch launch command"
+              data-copy={launchDemo}
+              size="sm"
+              variant="secondary"
+            >
+              copy
+            </Button>
+          </div>
           <CodeBlock blocks={loaderData} code={launchDemo} />
-          <Button
-            id="copy-install"
-            type="button"
-            aria-label="Copy launch command"
-            data-copy={launchDemo}
-            size="sm"
-            variant="secondary"
-            className="absolute top-3 right-3"
-          >
-            copy
-          </Button>
         </div>
         <p className="mt-4 text-muted">
           At the new NuTorch prompt, type <code>use torch</code> to enable the
@@ -194,7 +204,7 @@ export default function Home({
           >
             NuTorch setup instructions
           </Link>{" "}
-          to launch the local shell, then enter <code>use torch</code>.
+          to launch the installed shell, then enter <code>use torch</code>.
         </p>
         <div className="mt-6">
           <div className="min-w-0">
