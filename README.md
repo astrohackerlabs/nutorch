@@ -20,10 +20,13 @@ $x | torch grad | torch value
 
 ## Installation
 
-Homebrew builds from the published source archive:
+The 2.0.1 binary distribution includes the NuTorch executable and its LibTorch
+runtime for Apple-silicon macOS Tahoe with standard Homebrew (`/opt/homebrew`).
+Normal installation pours the prebuilt bottle; no Rust compiler, Python or
+separate LibTorch installation is required. Other targets are not yet qualified.
 
 ```nu
-brew tap astrohackerlabs/nutorch git@github.com:astrohackerlabs/homebrew-nutorch.git
+brew tap astrohackerlabs/nutorch
 brew trust astrohackerlabs/nutorch
 brew install astrohackerlabs/nutorch/nutorch
 ```
@@ -48,4 +51,5 @@ Bun/React Router source; run `bun install --frozen-lockfile` and `bun run build`
 there. Website deployment is independent of the shell release.
 
 NuTorch is independently versioned. TermSurf dependency/default-shell integration
-is pending. No release script may install or upgrade Homebrew packages.
+is pending. Producer bottle builds run locally; publication and
+consumer installation are separate operations.
