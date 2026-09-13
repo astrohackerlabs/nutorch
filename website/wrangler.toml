@@ -1,2 +1,2 @@
 name = "nutorch"
-pages_build_output_dir = "dist"
+pages_build_output_dir = "build/client"

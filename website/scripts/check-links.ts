@@ -3,8 +3,9 @@
 // target page. External links are listed, never fetched (local-only).
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import assert from "node:assert/strict";
 
-const DIST = new URL("../dist/", import.meta.url).pathname;
+const DIST = new URL("../build/client/", import.meta.url).pathname;
 let failed = false;
 const external = new Set<string>();
 
@@ -32,22 +33,109 @@ function targetFile(route: string): string | undefined {
 }
 
 const files = htmlFiles(DIST);
+// Frozen accepted route/metadata oracle; never compare a build with itself.
+import baseline from "./accepted-site.json";
+function decode(value: string): string {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(?:39|x27);/g, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_: string, n: string) =>
+      String.fromCodePoint(parseInt(n, 16)),
+    );
+}
+function metadata(html: string): Record<string, string> {
+  const result: Record<string, string> = {
+    title: decode(/<title>(.*?)<\/title>/s.exec(html)?.[1] ?? ""),
+  };
+  for (const tag of html.matchAll(/<(?:meta|link)\b[^>]*>/g)) {
+    const attrs = Object.fromEntries(
+      [...tag[0].matchAll(/([\w:-]+)="([^"]*)"/g)].map((m) => {
+        assert(
+          m[1] !== undefined && m[2] !== undefined,
+          "Missing attribute capture",
+        );
+        return [m[1], decode(m[2])] as const;
+      }),
+    );
+    const key =
+      attrs.name ??
+      attrs.property ??
+      (attrs.rel === "canonical" ? "canonical" : undefined);
+    if (
+      key &&
+      (key === "description" ||
+        key === "canonical" ||
+        key.startsWith("og:") ||
+        key.startsWith("twitter:"))
+    ) {
+      const value = attrs.content ?? attrs.href;
+      assert(value !== undefined, `Missing metadata value for ${key}`);
+      result[key] = value;
+    }
+  }
+  return result;
+}
+const expectedRoutes = Object.keys(baseline.routes).sort();
+if (
+  JSON.stringify(files.map((file) => file.slice(DIST.length)).sort()) !==
+  JSON.stringify(expectedRoutes)
+) {
+  console.error("FAIL: accepted HTML route set differs");
+  failed = true;
+}
+for (const [relative, expected] of Object.entries(baseline.routes)) {
+  const candidate = join(DIST, relative);
+  if (!existsSync(candidate)) {
+    console.error(`FAIL: missing baseline route ${relative}`);
+    failed = true;
+    continue;
+  }
+  const a = metadata(expected);
+  const b = metadata(readFileSync(candidate, "utf8"));
+  for (const [key, value] of Object.entries(a))
+    if (b[key] !== value) {
+      console.error(
+        `FAIL: ${relative} ${key}: ${JSON.stringify(b[key])} != ${JSON.stringify(value)}`,
+      );
+      failed = true;
+    }
+}
 for (const file of files) {
   const html = readFileSync(file, "utf8");
+  for (const pre of html.matchAll(/<pre\b[^>]*>/g)) {
+    if (!/class="[^"]*\bastro-code\b/.test(pre[0])) {
+      console.error(`FAIL: unstyled code block in ${file}`);
+      failed = true;
+    }
+  }
+  for (const asset of html.matchAll(
+    /(?:src|href)="(\/(?:assets|images|pagefind)\/[^"#?]+)"/g,
+  )) {
+    assert(asset[1] !== undefined, "Missing asset capture");
+    if (!targetFile(asset[1])) {
+      console.error(`FAIL: missing asset ${asset[1]}`);
+      failed = true;
+    }
+  }
   for (const match of html.matchAll(/href="([^"]+)"/g)) {
     const href = match[1];
+    assert(href !== undefined, "Missing href capture");
     if (/^(https?:|mailto:)/.test(href)) {
       external.add(href);
       continue;
     }
     if (href.startsWith("#")) {
       if (!html.includes(`id="${href.slice(1)}"`)) {
-        console.error(`FAIL: ${file.replace(DIST, "")}: missing anchor ${href}`);
+        console.error(
+          `FAIL: ${file.replace(DIST, "")}: missing anchor ${href}`,
+        );
         failed = true;
       }
       continue;
     }
     const [route, anchor] = href.split("#");
+    assert(route !== undefined, "Missing href path");
     const target = targetFile(route);
     if (!target) {
       console.error(`FAIL: ${file.replace(DIST, "")}: dead link ${href}`);
@@ -63,5 +151,5 @@ for (const file of files) {
 
 if (failed) process.exit(1);
 console.log(
-  `links ok: ${files.length} pages checked, ${external.size} external links (not fetched)`,
+  `links ok: ${String(files.length)} pages checked, ${String(external.size)} external links (not fetched)`,
 );

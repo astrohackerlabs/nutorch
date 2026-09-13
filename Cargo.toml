@@ -4,8 +4,9 @@
 # Operator setup and publishing instructions live in Astrohacker's product docs.
 
 [workspace]
-members = ["nutorchd", "ops", "torch-cli"]
+members = ["shell", "core", "ops"]
+exclude = ["forks/nushell", "forks/reedline"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.4"
+version = "2.0.0"

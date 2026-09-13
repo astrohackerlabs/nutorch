@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "forks": [
+    {
+      "name": "nushell",
+      "checkout": "forks/nushell",
+      "base": "8e03210652f3c48c4521cec982d96e4cb6c67181",
+      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "expected_head": "d58006cb47f3526ff74fd38f27420e36175b1b11",
+      "expected_tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
+      "patch_directories": [
+        "patches/nushell/patches/issue-26081615463315",
+        "patches/nushell/patches/issue-26082214188331",
+        "patches/nushell/patches/issue-26082310413946",
+        "patches/nushell/patches/issue-26083023000538",
+        "patches/nushell/patches/issue-26091215074416"
+      ],
+      "patch_count": 16,
+      "archive_sha256": "a4a1f9c8252884705e93bc4c9e638aeb12d85ca6fda1bb741913ca49b134abb0",
+      "allowed_untracked": []
+    },
+    {
+      "name": "reedline",
+      "checkout": "forks/reedline",
+      "base": "9230319ae57f88bac5a2a17dc3f9a313cff3330d",
+      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "expected_head": "a4e8953b8dca874b12fcb323bbd90a6958e5f6b1",
+      "expected_tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
+      "patch_directories": [
+        "patches/reedline/patches/issue-26082214188331",
+        "patches/reedline/patches/issue-26082310413946",
+        "patches/reedline/patches/issue-26083023000538",
+        "patches/reedline/patches/issue-26091215074416"
+      ],
+      "patch_count": 4,
+      "archive_sha256": "d31226d0c371c0ba09d6f3b82e19aa64cd7146f944d35b804896afd082c63b1b",
+      "allowed_untracked": []
+    }
+  ],
+  "verified": [
+    {
+      "name": "nushell",
+      "head": "d4a8ef8be712ab15fe18acdc4eb4e01945bd3ed9",
+      "tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
+      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "ready": true,
+      "canonical_exists": true,
+      "prefix_count": 16,
+      "patch_count": 16,
+      "archive_sha256": "a4a1f9c8252884705e93bc4c9e638aeb12d85ca6fda1bb741913ca49b134abb0",
+      "expected_tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
+      "action": "already-ready"
+    },
+    {
+      "name": "reedline",
+      "head": "fef1d019867b4b1a23b8626349210b2704f22a07",
+      "tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
+      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "ready": true,
+      "canonical_exists": true,
+      "prefix_count": 4,
+      "patch_count": 4,
+      "archive_sha256": "d31226d0c371c0ba09d6f3b82e19aa64cd7146f944d35b804896afd082c63b1b",
+      "expected_tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
+      "action": "already-ready"
+    }
+  ],
+  "transformations": [
+    "Omit agent guidance and Nushell completion-test symlink tests/fixtures/completions/test_a_symlink",
+    "Relocate shell Cargo fork paths and exclude fork workspaces from the root workspace",
+    "Use exported UI package for website; prune its development scripts and exports to the selected runtime files",
+    "Export and relocate website base TypeScript configuration",
+    "Relocate image source paths",
+    "Remove website deployment command",
+    "Append website build-output ignore rules; publisher preserves previous public ignore rules",
+    "Publisher resolves and includes the standalone website lockfile"
+  ]
+}

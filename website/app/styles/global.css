@@ -1,0 +1,217 @@
+@import "tailwindcss";
+@source "../../../../../astrohacker/ts/ui/src";
+@import "@astrohacker/ui/styles.css";
+
+/* App aliases reference the kit; Austin Night has one token authority. */
+:root {
+  --bg: var(--background);
+  --surface: color-mix(in srgb, var(--background) 85%, transparent);
+  --surface-edge: var(--ah-background-highlight);
+  --fg: var(--foreground);
+  --fg-muted: var(--muted-foreground);
+  --primary-strong: var(--accent);
+  --code-edge: var(--border);
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-edge: var(--surface-edge);
+  --color-primary-strong: var(--primary-strong);
+  --color-code-edge: var(--code-edge);
+  --font-display: var(--font-heading);
+}
+
+html {
+  background-color: var(--bg);
+  color: var(--fg);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* Shiki emits inline colors and theme variables. Always use the dark
+ * syntax palette, even before hydration or with stale theme preferences. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Tokyo Night's dim comments need the shared, readable muted foreground. */
+.astro-code span[style*="--shiki-dark:#51597d" i] {
+  color: var(--muted-foreground) !important;
+}
+
+.astro-code {
+  border: 1px solid var(--code-edge);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.astro-code code {
+  font-family: var(--font-mono);
+}
+
+/* Documentation prose. Markdown output from the docs collection. */
+.prose-nutorch {
+  line-height: 1.75;
+}
+
+.prose-nutorch h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-nutorch h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-nutorch p {
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  text-underline-offset: 3px;
+}
+
+.prose-nutorch a:hover {
+  color: var(--primary-strong);
+  text-decoration-color: currentColor;
+}
+
+.prose-nutorch code:not(.astro-code code) {
+  background-color: var(--surface-edge);
+  border-radius: 0.3rem;
+  padding: 0.125rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.prose-nutorch ul,
+.prose-nutorch ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose-nutorch ul {
+  list-style: disc;
+}
+
+.prose-nutorch ol {
+  list-style: decimal;
+}
+
+.prose-nutorch li {
+  margin-bottom: 0.375rem;
+}
+
+.prose-nutorch .astro-code {
+  margin-bottom: 1.25rem;
+}
+
+.prose-nutorch blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--fg-muted);
+  margin-bottom: 1rem;
+}
+
+.prose-nutorch table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.prose-nutorch th,
+.prose-nutorch td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose-nutorch th {
+  font-family: var(--font-display);
+  font-weight: 500;
+  background-color: var(--surface-edge);
+}
+
+.prose-nutorch strong {
+  font-weight: 600;
+}
+
+.prose-nutorch hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* The hero retains its colorful artwork, within the shared brand lighting. */
+.hero-glow {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--accent) 18%, transparent),
+    color-mix(in srgb, var(--secondary) 8%, transparent) 60%,
+    transparent
+  );
+}
+
+/* Pagefind owns its DOM; shared tokens style that integration boundary. */
+#docs-search .pagefind-ui {
+  --pagefind-ui-primary: var(--primary);
+  --pagefind-ui-text: var(--fg);
+  --pagefind-ui-background: var(--surface);
+  --pagefind-ui-border: var(--border);
+  --pagefind-ui-tag: var(--surface-edge);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 0.75rem;
+  --pagefind-ui-font: inherit;
+}
+
+#docs-search .pagefind-ui__search-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

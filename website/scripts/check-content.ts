@@ -1,48 +1,55 @@
 // Content honesty checks (issue 0012 exp 2):
-// 1. The getting-started install block byte-matches src/lib/install.ts.
+// 1. Development docs distinguish the unreleased shell from the older package.
 // 2. Every `torch <op>` used in docs fences is a real table op or a known
-//    client/registry verb, per `torch ops --json` from the real binary.
-import { execSync } from "node:child_process";
+//    native command, per metadata from the local release shell.
+import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { INSTALL } from "../src/lib/install";
+import assert from "node:assert/strict";
 
-const DOCS = new URL("../src/content/docs/", import.meta.url).pathname;
+const DOCS = new URL("../content/docs/", import.meta.url).pathname;
 let failed = false;
 
-// 1. Install block.
+// 1. The local shell is explicitly unreleased; no installed-upgrade claim.
 const gettingStarted = readFileSync(`${DOCS}/getting-started.md`, "utf8");
-const fence = gettingStarted.match(/```bash\n([\s\S]*?)\n```/);
-if (!fence || fence[1] !== INSTALL) {
-  console.error("FAIL: getting-started install block drifted from install.ts");
+if (
+  !gettingStarted.includes("**unreleased native shell**") ||
+  !gettingStarted.includes("earlier tensor-tool release")
+) {
+  console.error(
+    "FAIL: getting-started must distinguish the unreleased shell from the installed product",
+  );
   failed = true;
 }
 
-// 2. Op-name membership. Non-op verbs are the client/registry surface,
+// 2. Op-name membership. Non-op verbs are the native command surface,
 // verified live in the experiment's verification.
 const NON_OP_VERBS = new Set([
   "tensor",
   "value",
   "shape",
-  "free",
-  "tensors",
+  "tolist",
   "forward",
   "step",
-  "daemon",
   "nn",
   "ops",
-  "nu-module",
   "--version",
 ]);
 const ops = new Set(
   (
     JSON.parse(
-      execSync("torch ops --json", {
-        env: { ...process.env, TMPDIR: execSync("mktemp -d").toString().trim() },
-      }).toString(),
+      execFileSync(
+        new URL("../../../rs/target/release/nutorch", import.meta.url).pathname,
+        [
+          "--no-config-file",
+          "--no-history",
+          "-c",
+          "use torch; torch ops | to json --raw",
+        ],
+      ).toString(),
     ) as { name: string }[]
   ).map((o) => o.name),
 );
-execSync("torch daemon stop || true", { stdio: "ignore", shell: "/bin/zsh" });
+// Metadata inspection does not create tensors or start an external process.
 
 // Recursive walk (issue 0017 exp 3 — the reference subdir joins the scan),
 // keyed by docs-root-relative path (autograd.md exists at two levels).
@@ -59,11 +66,21 @@ function docsMdFiles(dir: string, prefix = ""): string[] {
 
 for (const file of docsMdFiles(DOCS)) {
   const text = readFileSync(`${DOCS}/${file}`, "utf8");
-  for (const block of text.matchAll(/```(?:bash|nu)\n([\s\S]*?)\n```/g)) {
-    for (
-      const use of block[1].matchAll(/(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g)
-    ) {
+  if (/```(?:bash|sh|zsh|posix)\b/.test(text)) {
+    console.error(`FAIL: ${file}: obsolete shell example fence`);
+    failed = true;
+  }
+  for (const block of text.matchAll(/```nu\n([\s\S]*?)\n```/g)) {
+    assert(block[1] !== undefined, "Missing fenced code capture");
+    if (/\btorch [a-z]/.test(block[1]) && !block[1].includes("use torch")) {
+      console.error(`FAIL: ${file}: native example is missing use torch`);
+      failed = true;
+    }
+    for (const use of block[1].matchAll(
+      /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
+    )) {
       const verb = use[1];
+      assert(verb !== undefined, "Missing command verb capture");
       if (!ops.has(verb) && !NON_OP_VERBS.has(verb)) {
         console.error(`FAIL: ${file}: unknown verb 'torch ${verb}'`);
         failed = true;
@@ -72,18 +89,83 @@ for (const file of docsMdFiles(DOCS)) {
   }
 }
 
-// The landing page's demo code lives in Astro template LITERALS, not
+// The landing page's demo code lives in TSX template literals, not
 // markdown fences — scan only the backtick strings (prose like the logo
 // alt text would otherwise false-positive).
-const INDEX = new URL("../src/pages/index.astro", import.meta.url).pathname;
+const INDEX = new URL("../app/routes/home.tsx", import.meta.url).pathname;
 const indexSource = readFileSync(INDEX, "utf8");
+const nushellSource = readFileSync(`${DOCS}/nushell.md`, "utf8");
+const requiredSetup = [
+  "## Setup",
+  "./code/nutorch/rs/target/release/nutorch",
+  "Run `use torch` inside NuTorch",
+  "It is not imported by default.",
+  "Do not import `nutorch.nu`",
+  "[[7.0 10.0] [15.0 22.0]]",
+  "Plain Nushell does not gain tensor commands",
+];
+for (const snippet of requiredSetup) {
+  if (!nushellSource.includes(snippet)) {
+    console.error(`FAIL: Nushell setup missing ${snippet}`);
+    failed = true;
+  }
+}
+for (const [name, source] of [
+  [
+    "landing",
+    readFileSync(
+      new URL("../build/client/index.html", import.meta.url),
+      "utf8",
+    ),
+  ],
+  ["getting-started", gettingStarted],
+] as const) {
+  if (!source.includes("/docs/nushell/#setup")) {
+    console.error(`FAIL: ${name} lacks Nushell setup link`);
+    failed = true;
+  }
+}
+const activeSources = [
+  indexSource,
+  ...docsMdFiles(DOCS).map((file) => readFileSync(`${DOCS}/${file}`, "utf8")),
+  ...["Header", "Footer"].map((name) =>
+    readFileSync(
+      new URL(`../app/components/${name}.tsx`, import.meta.url),
+      "utf8",
+    ),
+  ),
+];
+for (const source of activeSources) {
+  if (
+    /nutorch -c|No tensor client import is needed|lang="(?:bash|sh|zsh)"|\[\w+, "bash"\]/.test(
+      source,
+    )
+  ) {
+    console.error("FAIL: obsolete example presentation");
+    failed = true;
+  }
+  if (
+    /github\.com\/nutorch\/(?:nutorch|homebrew-nutorch)|brew (?:tap|trust) nutorch\/nutorch|prebuilt\s+bottle|nothing to set up/.test(
+      source,
+    )
+  ) {
+    console.error("FAIL: obsolete installation claim or repository link");
+    failed = true;
+  }
+}
 for (const literal of indexSource.matchAll(/`([\s\S]*?)`/g)) {
+  assert(literal[1] !== undefined, "Missing template literal capture");
+  if (/\btorch [a-z]/.test(literal[1]) && !literal[1].includes("use torch")) {
+    console.error("FAIL: homepage example missing use torch");
+    failed = true;
+  }
   for (const use of literal[1].matchAll(
-    /(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
+    /(?<![\w/.-])(?:torch|nutorch) ([a-z][a-z0-9_-]*|--version)/g,
   )) {
     const verb = use[1];
+    assert(verb !== undefined, "Missing command verb capture");
     if (!ops.has(verb) && !NON_OP_VERBS.has(verb)) {
-      console.error(`FAIL: index.astro: unknown verb 'torch ${verb}'`);
+      console.error(`FAIL: home.tsx: unknown verb 'torch ${verb}'`);
       failed = true;
     }
   }
@@ -93,7 +175,7 @@ for (const literal of indexSource.matchAll(/`([\s\S]*?)`/g)) {
 // NuTorch. Lowercase `nutorch` is code — it may appear only inside
 // code/pre/script elements, attribute values, or URLs, all of which the
 // strip below removes. Runs only when a build exists.
-const DIST = new URL("../dist/", import.meta.url).pathname;
+const DIST = new URL("../build/client/", import.meta.url).pathname;
 function distHtmlFiles(dir: string): string[] {
   const out: string[] = [];
   let entries: string[] = [];

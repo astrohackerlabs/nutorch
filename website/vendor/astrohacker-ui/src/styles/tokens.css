@@ -1,0 +1,91 @@
+/*
+ * Shared Austin Night tokens + Tailwind v4 @theme for Astrohacker RR8 apps.
+ * (Tokyo Night family ancestry; product name is Austin Night.)
+ * Import via @astrohacker/ui/styles.css after @import "tailwindcss".
+ */
+:root {
+  color-scheme: dark;
+
+  /* Product page ground (Austin Night plate) */
+  --ah-background: #111219;
+  /* Keep darker than main so inputs/panels still step down */
+  --ah-background-dark: #060608;
+  /* Raised panel plate — cool gray-blue (Tokyo Night editor lean) */
+  --ah-background-highlight: #292e42;
+  --ah-foreground: #c0caf5;
+  --ah-foreground-dark: #a9b1d6;
+  --ah-primary: #7aa2f7;
+  --ah-primary-foreground: #111219;
+  --ah-secondary: #bb9af7;
+  --ah-secondary-text: #bb9af7;
+  --ah-accent: #7dcfff;
+  --ah-accent-text: #7dcfff;
+  --ah-success: #9ece6a;
+  --ah-success-text: #9ece6a;
+  /* Exp 6 micro-nudge: sodium streetlight lean */
+  --ah-warning: #e8a84a;
+  --ah-danger: #f7768e;
+  /* Secondary UI/prose text — brighter than Tokyo Night comment gray (#565f89)
+   * so body copy stays readable; still under main fg (#c0caf5). */
+  --ah-muted: #9aa5ce;
+  --ah-border: #3b4261;
+  --ah-ring: #7aa2f7;
+  --radius: 0.5rem;
+
+  --background: var(--ah-background);
+  --foreground: var(--ah-foreground);
+  --card: var(--ah-background-highlight);
+  --card-foreground: var(--ah-foreground);
+  --popover: var(--ah-background);
+  --popover-foreground: var(--ah-foreground);
+  --primary: var(--ah-primary);
+  --primary-foreground: var(--ah-primary-foreground);
+  --secondary: var(--ah-secondary);
+  --secondary-foreground: var(--ah-primary-foreground);
+  --muted: var(--ah-background-highlight);
+  --muted-foreground: var(--ah-muted);
+  --accent: var(--ah-accent);
+  --accent-foreground: var(--ah-primary-foreground);
+  --destructive: var(--ah-danger);
+  --border: var(--ah-border);
+  --input: var(--ah-border);
+  --ring: var(--ah-ring);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-dark: var(--ah-background-dark);
+  --color-background-highlight: var(--ah-background-highlight);
+  --color-foreground: var(--foreground);
+  --color-foreground-dark: var(--ah-foreground-dark);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-text: var(--ah-secondary-text);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--ah-accent-text);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--ah-success);
+  --color-success-text: var(--ah-success-text);
+  --color-warning: var(--ah-warning);
+  --color-danger: var(--ah-danger);
+  --color-destructive: var(--destructive);
+  --color-muted: var(--muted-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}

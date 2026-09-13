@@ -1,0 +1,14 @@
+[package]
+name = "nutorch-core"
+version.workspace = true
+edition = "2024"
+license = "MIT"
+description = "Typed in-process tensor operations and shared ownership for NuTorch"
+
+[dependencies]
+tch = "0.24.0"
+nutorch-ops = { path = "../ops" }
+
+[dev-dependencies]
+serde_json = { version = "1", features = ["float_roundtrip"] }
+tempfile = "3"

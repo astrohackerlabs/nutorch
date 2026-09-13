@@ -1,47 +1,51 @@
 # NuTorch
 
-PyTorch-style GPU tensor operations from any shell, maintained by Astrohacker.
-The `nutorchd` daemon owns tensors and autograd state on Apple-silicon MPS;
-`torch` is its thin CLI, also installed as `nutorch`. The Nushell module adds
-native lists, records and pipeline/argument parity.
+NuTorch is a Nushell-based shell with built-in GPU tensors, autograd, neural
+networks and optimizers. Native values share ownership in the main process;
+LibTorch manages Apple-silicon MPS storage.
 
-## Install
+The 2.0 source tree replaces the earlier tensor tools with a native shell.
+It requires Apple-silicon macOS. Shift+Tab opens an unfinished AI input mode;
+it does not translate or execute an AI request.
+
+The only runtime executable is `nutorch`. Import its native commands with `use torch`.
+The daemon, external tensor CLI and imported Nushell client are removed.
 
 ```nu
-brew tap astrohackerlabs/nutorch
+use torch
+let x = torch tensor [1 2 3] --requires-grad
+$x | torch mul $x | torch sum | torch backward
+$x | torch grad | torch value
+```
+
+## Installation
+
+Homebrew builds from the published source archive:
+
+```nu
+brew tap astrohackerlabs/nutorch git@github.com:astrohackerlabs/homebrew-nutorch.git
 brew trust astrohackerlabs/nutorch
 brew install astrohackerlabs/nutorch/nutorch
 ```
 
-Upgrade with `brew update` then
-`brew upgrade astrohackerlabs/nutorch/nutorch`. Uninstall with
-`brew uninstall astrohackerlabs/nutorch/nutorch`. NuTorch is independent of
-Astrohacker TermSurf. The tap is
-[astrohackerlabs/homebrew-nutorch](https://github.com/astrohackerlabs/homebrew-nutorch).
+For an existing installation, run `brew update` and
+`brew upgrade astrohackerlabs/nutorch/nutorch`. Check `nutorch --version`;
+1.x is the earlier tensor-tool product. Start `nutorch` interactively or run
+ordinary Nushell scripts with `nutorch script.nu`.
 
-Read the [NuTorch documentation](https://nutorch.com/docs/) for operation
-reference, tensor lifecycle, neural networks and shell examples. Tensors live
-in the daemon; stopping it discards its tensor registry. Do not stop a daemon
-that owns work you need to retain.
+## Source layout
 
-## Source
+The Rust workspace contains `shell`, `core` and `ops`. `forks/` contains verified
+Nushell/Reedline sources and licenses; `source-provenance.json` records pins and
+export transformations. LibTorch notices live in `legal/libtorch/`.
 
-This standalone source is exported from the Astrohacker development repository.
-Rust workspace members are `nutorchd`, `torch-cli`, and `ops`; the generated
-Nushell client is `nutorch.nu`. Website source is in `website/` and builds with
-`bun install --frozen-lockfile` followed by `bun run build` there.
+To build, place the `torch` directory from the formula's exact SHA-pinned
+LibTorch wheel at `.libtorch` (or symlink it there), then run
+`cargo build --locked --release --bin nutorch` from this directory.
+The formula records the resource URL, checksum, runtime dylibs and installation
+layout. A build alone does not install the shell. `website/` contains standalone
+Bun/React Router source; run `bun install --frozen-lockfile` and `bun run build`
+there. Website deployment is independent of the shell release.
 
-For a Homebrew-managed source build, use:
-
-```nu
-brew install --build-from-source astrohackerlabs/nutorch/nutorch
-```
-
-Direct Cargo development needs the pinned LibTorch 2.11.0 headers and libraries
-at `.libtorch/` in this workspace. Run Cargo from this directory so its local
-configuration is loaded. `cargo test --locked --workspace` includes real MPS
-tests and requires Apple silicon. Do not substitute a CPU-only test result.
-
-Release and deployment operator scripts are maintained in the Astrohacker
-repository, not this source mirror. The MIT license is in `LICENSE`; bundled
-LibTorch license and notices are in `legal/libtorch/`.
+NuTorch is independently versioned. TermSurf dependency/default-shell integration
+is pending. No release script may install or upgrade Homebrew packages.

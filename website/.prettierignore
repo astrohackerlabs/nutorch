@@ -1,0 +1,7 @@
+content/
+public/
+build/
+.react-router/
+.wrangler/
+node_modules/
+app/styles/global.css
