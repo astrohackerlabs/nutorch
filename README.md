@@ -22,17 +22,17 @@ $x | torch grad | torch value
 
 The 2.0.1 binary distribution includes the NuTorch executable and its LibTorch
 runtime for Apple-silicon macOS Tahoe with standard Homebrew (`/opt/homebrew`).
-Normal installation pours the prebuilt bottle; no Rust compiler, Python or
+Normal installation downloads the prebuilt archive; no Rust compiler, Python or
 separate LibTorch installation is required. Other targets are not yet qualified.
 
 ```nu
 brew tap astrohackerlabs/nutorch
 brew trust astrohackerlabs/nutorch
-brew install astrohackerlabs/nutorch/nutorch
+brew install nutorch
 ```
 
 For an existing installation, run `brew update` and
-`brew upgrade astrohackerlabs/nutorch/nutorch`. Check `nutorch --version`;
+`brew upgrade nutorch`. Check `nutorch --version`;
 1.x is the earlier tensor-tool product. Start `nutorch` interactively or run
 ordinary Nushell scripts with `nutorch script.nu`.
 
@@ -42,14 +42,14 @@ The Rust workspace contains `shell`, `core` and `ops`. `forks/` contains verifie
 Nushell/Reedline sources and licenses; `source-provenance.json` records pins and
 export transformations. LibTorch notices live in `legal/libtorch/`.
 
-To build, place the `torch` directory from the formula's exact SHA-pinned
-LibTorch wheel at `.libtorch` (or symlink it there), then run
+To build from source, place the `torch` directory from PyTorch 2.11.0's
+Apple-silicon wheel at `.libtorch` (or symlink it there), then run
 `cargo build --locked --release --bin nutorch` from this directory.
-The formula records the resource URL, checksum, runtime dylibs and installation
-layout. A build alone does not install the shell. `website/` contains standalone
-Bun/React Router source; run `bun install --frozen-lockfile` and `bun run build`
+The binary distribution bundles libtorch, libtorch_cpu, libc10 and libomp.
+A source build alone does not install the shell. `website/` contains standalone
+Bun/React Router source; run `bun install` and `bun run build`
 there. Website deployment is independent of the shell release.
 
 NuTorch is independently versioned. TermSurf dependency/default-shell integration
-is pending. Producer bottle builds run locally; publication and
+is pending. Producer builds use the normal workspace cache; publication and
 consumer installation are separate operations.

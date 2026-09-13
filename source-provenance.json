@@ -73,6 +73,6 @@
     "Relocate image source paths",
     "Remove website deployment command",
     "Append website build-output ignore rules; publisher preserves previous public ignore rules",
-    "Publisher resolves and includes the standalone website lockfile"
+    "Publisher preserves the existing website lockfile; website dependency resolution is separate"
   ]
 }
