@@ -4,64 +4,57 @@
     {
       "name": "nushell",
       "checkout": "forks/nushell",
-      "base": "8e03210652f3c48c4521cec982d96e4cb6c67181",
-      "branch": "issue-26091215074416-exp1-transplant-shell",
-      "expected_head": "d58006cb47f3526ff74fd38f27420e36175b1b11",
-      "expected_tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
+      "base": "b6e6562a9a385df439ae864714c609c60314fde9",
+      "branch": "issue-26091316465368-exp1-upstream-update",
+      "expected_head": "284809ad08c3babc41a5e5ef68c49656e73613ae",
+      "expected_tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
       "patch_directories": [
-        "patches/nushell/patches/issue-26081615463315",
-        "patches/nushell/patches/issue-26082214188331",
-        "patches/nushell/patches/issue-26082310413946",
-        "patches/nushell/patches/issue-26083023000538",
-        "patches/nushell/patches/issue-26091215074416"
+        "patches/nushell/patches/issue-26091316465368"
       ],
-      "patch_count": 16,
-      "archive_sha256": "a4a1f9c8252884705e93bc4c9e638aeb12d85ca6fda1bb741913ca49b134abb0",
+      "patch_count": 19,
+      "archive_sha256": "a05e4bcc99a75eae8ffa90183b07a6165b84f02426f8edffd5e77b0786f909b0",
       "allowed_untracked": []
     },
     {
       "name": "reedline",
       "checkout": "forks/reedline",
-      "base": "9230319ae57f88bac5a2a17dc3f9a313cff3330d",
-      "branch": "issue-26091215074416-exp1-transplant-shell",
-      "expected_head": "a4e8953b8dca874b12fcb323bbd90a6958e5f6b1",
-      "expected_tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
+      "base": "d9db2f7979471b70eb3c3901a2eba3ef5197b656",
+      "branch": "issue-26091316465368-exp1-upstream-update",
+      "expected_head": "4acac3aeba448c0ce5274d048335846fad36d627",
+      "expected_tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
       "patch_directories": [
-        "patches/reedline/patches/issue-26082214188331",
-        "patches/reedline/patches/issue-26082310413946",
-        "patches/reedline/patches/issue-26083023000538",
-        "patches/reedline/patches/issue-26091215074416"
+        "patches/reedline/patches/issue-26091316465368"
       ],
       "patch_count": 4,
-      "archive_sha256": "d31226d0c371c0ba09d6f3b82e19aa64cd7146f944d35b804896afd082c63b1b",
+      "archive_sha256": "1d40621bf620a04f1fd1fddc99c3955e891fedae8e5f48bb5b4d55234623a13f",
       "allowed_untracked": []
     }
   ],
   "verified": [
     {
       "name": "nushell",
-      "head": "d4a8ef8be712ab15fe18acdc4eb4e01945bd3ed9",
-      "tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
-      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "head": "284809ad08c3babc41a5e5ef68c49656e73613ae",
+      "tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
+      "branch": "issue-26091316465368-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
-      "prefix_count": 16,
-      "patch_count": 16,
-      "archive_sha256": "a4a1f9c8252884705e93bc4c9e638aeb12d85ca6fda1bb741913ca49b134abb0",
-      "expected_tree": "83a2decde78dd04aabc3bfbbfb9d6a4b8c9033da",
+      "prefix_count": 19,
+      "patch_count": 19,
+      "archive_sha256": "a05e4bcc99a75eae8ffa90183b07a6165b84f02426f8edffd5e77b0786f909b0",
+      "expected_tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
       "action": "already-ready"
     },
     {
       "name": "reedline",
-      "head": "fef1d019867b4b1a23b8626349210b2704f22a07",
-      "tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
-      "branch": "issue-26091215074416-exp1-transplant-shell",
+      "head": "4acac3aeba448c0ce5274d048335846fad36d627",
+      "tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
+      "branch": "issue-26091316465368-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
       "prefix_count": 4,
       "patch_count": 4,
-      "archive_sha256": "d31226d0c371c0ba09d6f3b82e19aa64cd7146f944d35b804896afd082c63b1b",
-      "expected_tree": "5a8db2ccdb3c12a92b0ffab8944210e5490e4284",
+      "archive_sha256": "1d40621bf620a04f1fd1fddc99c3955e891fedae8e5f48bb5b4d55234623a13f",
+      "expected_tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
       "action": "already-ready"
     }
   ],

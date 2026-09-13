@@ -16,28 +16,28 @@ path = "src/main.rs"
 nutorch-core = { path = "../core" }
 nutorch-ops = { path = "../ops" }
 typetag = "0.2"
-reedline = { version = "0.50.0", path = "../forks/reedline", default-features = false, features = ["sqlite", "bashisms"] }
+reedline = { version = "0.51.0", path = "../forks/reedline", default-features = false, features = ["sqlite", "bashisms"] }
 
-nu-cli = { version = "0.115.1", path = "../forks/nushell/crates/nu-cli", package = "shannon-nu-cli", default-features = false, features = ["plugin"] }
-nu-cmd-base = { version = "0.115.1", path = "../forks/nushell/crates/nu-cmd-base" }
-nu-cmd-extra = { version = "0.115.1", path = "../forks/nushell/crates/nu-cmd-extra" }
-nu-cmd-lang = { version = "0.115.1", path = "../forks/nushell/crates/nu-cmd-lang" }
-nu-config = { version = "0.115.1", path = "../forks/nushell/crates/nu-config" }
-nu-command = { version = "0.115.1", path = "../forks/nushell/crates/nu-command", default-features = false, features = ["os"] }
-nu-engine = { version = "0.115.1", path = "../forks/nushell/crates/nu-engine", features = ["os"] }
-nu-explore = { version = "0.115.1", path = "../forks/nushell/crates/nu-explore" }
-nu-experimental = { version = "0.115.1", path = "../forks/nushell/crates/nu-experimental" }
-nu-lsp = { version = "0.115.1", path = "../forks/nushell/crates/nu-lsp", package = "shannon-nu-lsp" }
-nu-parser = { version = "0.115.1", path = "../forks/nushell/crates/nu-parser" }
-nu-path = { version = "0.115.1", path = "../forks/nushell/crates/nu-path" }
-nu-protocol = { version = "0.115.1", path = "../forks/nushell/crates/nu-protocol", features = ["os"] }
-nu-std = { version = "0.115.1", path = "../forks/nushell/crates/nu-std" }
-nu-system = { version = "0.115.1", path = "../forks/nushell/crates/nu-system" }
-nu-utils = { version = "0.115.1", path = "../forks/nushell/crates/nu-utils" }
+nu-cli = { version = "0.115.2", path = "../forks/nushell/crates/nu-cli", package = "shannon-nu-cli", default-features = false, features = ["plugin"] }
+nu-cmd-base = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-base" }
+nu-cmd-extra = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-extra" }
+nu-cmd-lang = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-lang" }
+nu-config = { version = "0.115.2", path = "../forks/nushell/crates/nu-config" }
+nu-command = { version = "0.115.2", path = "../forks/nushell/crates/nu-command", default-features = false, features = ["os"] }
+nu-engine = { version = "0.115.2", path = "../forks/nushell/crates/nu-engine", features = ["os"] }
+nu-explore = { version = "0.115.2", path = "../forks/nushell/crates/nu-explore" }
+nu-experimental = { version = "0.115.2", path = "../forks/nushell/crates/nu-experimental" }
+nu-lsp = { version = "0.115.2", path = "../forks/nushell/crates/nu-lsp", package = "shannon-nu-lsp" }
+nu-parser = { version = "0.115.2", path = "../forks/nushell/crates/nu-parser" }
+nu-path = { version = "0.115.2", path = "../forks/nushell/crates/nu-path" }
+nu-protocol = { version = "0.115.2", path = "../forks/nushell/crates/nu-protocol", features = ["os"] }
+nu-std = { version = "0.115.2", path = "../forks/nushell/crates/nu-std" }
+nu-system = { version = "0.115.2", path = "../forks/nushell/crates/nu-system" }
+nu-utils = { version = "0.115.2", path = "../forks/nushell/crates/nu-utils" }
 
-nu-cmd-plugin = { version = "0.115.1", path = "../forks/nushell/crates/nu-cmd-plugin", optional = true }
-nu-plugin-engine = { version = "0.115.1", path = "../forks/nushell/crates/nu-plugin-engine", optional = true }
-nu-mcp = { version = "0.115.1", path = "../forks/nushell/crates/nu-mcp", optional = true }
+nu-cmd-plugin = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-plugin", optional = true }
+nu-plugin-engine = { version = "0.115.2", path = "../forks/nushell/crates/nu-plugin-engine", optional = true }
+nu-mcp = { version = "0.115.2", path = "../forks/nushell/crates/nu-mcp", optional = true }
 
 crossterm = "0.29.0"
 ctrlc = "3.5"

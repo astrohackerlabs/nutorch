@@ -119,7 +119,9 @@ pub enum WordKind {
     LongWord,
     /// Emacs `M-f`/`M-b` — Unicode (UAX-29) word segmentation, so e.g. `can't`
     /// and `3.14` stay single words. The one flavor that isn't a thin char-class
-    /// predicate; see `locate_word`. (Follow-up: collapse onto a class predicate.)
+    /// predicate; see `locate_word`. Holding those together turns on the
+    /// characters flanking a `'` or a `.` rather than on their class, thus it
+    /// stays a separate scan instead of collapsing onto a boundary predicate.
     Unicode,
 }
 
@@ -185,7 +187,6 @@ pub enum MotionTarget {
     LineEdge(Direction),
     /// First non-whitespace character on the current line (helix `gs`). A blank
     /// line has none, so the motion stays put.
-    #[cfg(feature = "helix")]
     LineStartNonBlank,
     /// Whole-buffer edge: `Backward` = start (`gg`), `Forward` = end (`G`).
     BufferEdge(Direction),
@@ -241,7 +242,6 @@ impl MotionTarget {
             // Destination-shaped targets go here. Where they lie depends on the
             // cursor, so callers resolve first and compare after.
             MotionTarget::Position(_) => None,
-            #[cfg(feature = "helix")]
             MotionTarget::LineStartNonBlank => None,
         }
     }
@@ -417,6 +417,14 @@ pub enum EditCommand {
     /// Insert a string at the current insertion point
     InsertString(String),
 
+    /// Insert a character pair around the selection or insertion point
+    InsertPair {
+        /// Opening character of the pair
+        open: char,
+        /// Closing character of the pair
+        close: char,
+    },
+
     /// Inserts the system specific new line character
     ///
     /// - On Unix systems LF (`"\n"`)
@@ -443,6 +451,14 @@ pub enum EditCommand {
 
     /// Backspace delete from the current insertion point
     Backspace,
+
+    /// Backspace delete an empty character pair
+    BackspacePair {
+        /// Opening character of the pair
+        open: char,
+        /// Closing character of the pair
+        close: char,
+    },
 
     /// Delete in-place from the current insertion point
     Delete,
@@ -625,14 +641,12 @@ pub enum EditCommand {
     ///
     /// Repeating therefore grows it a line at a time, so a count is the command
     /// applied that many times.
-    #[cfg(feature = "helix")]
     SelectLine,
 
     /// Delete the selection without filling the cut buffer (helix `Alt-d`).
     ///
     /// [`CutSelection`](EditCommand::CutSelection) clobbers the register, which
     /// is exactly what this avoids when the text is not wanted back.
-    #[cfg(feature = "helix")]
     EraseSelection,
 
     /// Cut selection to local buffer
@@ -811,17 +825,17 @@ impl EditCommand {
             EditCommand::SwapCursorAndAnchor => EditType::MoveCursor { select: true },
 
             EditCommand::SelectAll => EditType::MoveCursor { select: true },
-            #[cfg(feature = "helix")]
             EditCommand::EraseSelection => EditType::EditText,
-            #[cfg(feature = "helix")]
             EditCommand::SelectLine => EditType::MoveCursor { select: true },
             // Text edits
             EditCommand::InsertChar(_)
             | EditCommand::Backspace
+            | EditCommand::BackspacePair { .. }
             | EditCommand::Delete
             | EditCommand::CutChar
             | EditCommand::CutCharLeft
             | EditCommand::InsertString(_)
+            | EditCommand::InsertPair { .. }
             | EditCommand::InsertNewline
             | EditCommand::InsertNewlineAbove
             | EditCommand::InsertNewlineBelow
@@ -1094,6 +1108,15 @@ pub enum ReedlineEvent {
     /// Trigger a menu event. It activates a menu with the event name
     Menu(String),
 
+    /// Accept the highlighted menu item without submitting the line.
+    ///
+    /// Splices the selection into the buffer and closes the menu, as `Enter` does while
+    /// a menu is open, but stops there. Inapplicable when no menu is active or the
+    /// active one has nothing to accept, so it composes: `UntilFound` falls through to
+    /// the next event, and `Multiple` can follow it with an edit, e.g. a space that
+    /// accepts the completion and keeps typing.
+    MenuAccept,
+
     /// Next element in the menu
     MenuNext,
 
@@ -1129,8 +1152,23 @@ pub enum ReedlineEvent {
     /// Open text editor
     OpenEditor,
 
-    /// Change mode (vi mode only)
+    /// Switch the vi state machine to a named mode (vi mode only).
+    ///
+    /// Accepts `normal`, `insert` or `visual`, matched case-insensitively. Any
+    /// other name leaves the mode alone and reports the event inapplicable. On
+    /// its own that is a keybinding that does nothing; inside an
+    /// [`UntilFound`](ReedlineEvent::UntilFound) it hands the key to the next
+    /// event in the list instead.
     ViChangeMode(String),
+
+    /// Switch the helix state machine to a named mode (helix mode only).
+    ///
+    /// Accepts `normal`, `insert` or `select`, matched case-insensitively. Any
+    /// other name leaves the mode alone and reports the event inapplicable. On
+    /// its own that is a keybinding that does nothing; inside an
+    /// [`UntilFound`](ReedlineEvent::UntilFound) it hands the key to the next
+    /// event in the list instead.
+    HelixChangeMode(String),
 }
 
 pub enum EventStatus {
@@ -1174,17 +1212,5 @@ impl TryFrom<Event> for ReedlineRawEvent {
 impl From<ReedlineRawEvent> for Event {
     fn from(event: ReedlineRawEvent) -> Self {
         event.0
-    }
-}
-
-#[cfg(feature = "helix")]
-impl TryFrom<ReedlineRawEvent> for KeyEvent {
-    type Error = ReedlineRawEvent;
-
-    fn try_from(event: ReedlineRawEvent) -> Result<Self, Self::Error> {
-        match event.0 {
-            Event::Key(key_event) => Ok(key_event),
-            other => Err(ReedlineRawEvent(other)),
-        }
     }
 }

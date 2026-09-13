@@ -162,6 +162,11 @@ fn native_optimizer_training_cancels_and_existing_aliases_recover() {
 
 #[test]
 fn torch_import_enables_interactive_completion_and_help() {
+    check_torch_completion(true);
+    check_torch_completion(false);
+}
+
+fn check_torch_completion(quick: bool) {
     let home = tempfile::tempdir().unwrap();
     let mut terminal = Terminal::start(home.path());
     terminal.expect("[nu]");
@@ -169,14 +174,22 @@ fn torch_import_enables_interactive_completion_and_help() {
     terminal.expect("IMPORT_ABSENT");
     terminal.send("use torch; print ('IMPORT_' + 'READY')\r");
     terminal.expect("IMPORT_READY");
+    terminal.send(&format!(
+        "$env.config.completions.quick = {quick}; $env.config.completions.partial = {quick}; print ('COMPLETION_' + 'CONFIGURED')\r"
+    ));
+    terminal.expect("COMPLETION_CONFIGURED");
     terminal.send("help torch tensor\r");
     terminal.expect("Create a native MPS tensor");
     terminal.expect("[nu]");
     terminal.send("torch tenso\t");
     terminal.expect("torch tensor");
-    // Enter accepts the selected completion menu entry; the next Enter runs it.
-    terminal.send("\r");
-    terminal.expect("torch tensor");
+    // Upstream now accepts a lone asynchronous result when quick completion is
+    // enabled. With quick and partial insertion disabled, Enter accepts the
+    // open menu selection rather than submitting an already-completed line.
+    if !quick {
+        terminal.send("\r");
+        terminal.expect("torch tensor");
+    }
     terminal.send(" [2 3] | torch value | to json --raw\r");
     terminal.expect("[2.0,3.0]");
 }

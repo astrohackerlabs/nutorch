@@ -1,5 +1,12 @@
+import type { MotionModeSource } from "../motion-mode/state";
+import type { PageSeed } from "./seed";
+
 interface SpaceRainRuntime {
-  installSpaceRainCanvas(canvas: HTMLCanvasElement): AbortController;
+  installSpaceRainCanvas(
+    canvas: HTMLCanvasElement,
+    explicitPageSeed?: PageSeed,
+    motion?: MotionModeSource,
+  ): AbortController;
 }
 
 type SpaceRainRuntimeLoader = () => Promise<SpaceRainRuntime>;
@@ -14,12 +21,13 @@ export async function mountSpaceRain(
   canvas: HTMLCanvasElement,
   signal: AbortSignal,
   loadRuntime: SpaceRainRuntimeLoader = loadSpaceRainRuntime,
+  motion?: MotionModeSource,
 ): Promise<AbortController | undefined> {
   try {
     const runtime = await loadRuntime();
     if (signal.aborted) return undefined;
 
-    const renderer = runtime.installSpaceRainCanvas(canvas);
+    const renderer = runtime.installSpaceRainCanvas(canvas, undefined, motion);
     if (isAborted(signal)) {
       renderer.abort();
       return undefined;

@@ -59,3 +59,11 @@ target/
 /website/build/
 /website/.react-router/
 /website/.wrangler/
+.venv-torch/
+.libtorch
+target/
+
+/website/node_modules/
+/website/build/
+/website/.react-router/
+/website/.wrangler/

@@ -21,6 +21,18 @@ import {
   type UfoTraversalClass,
 } from "./ufo";
 import { freshPageSeed, pageSeedFromHex, type PageSeed } from "./seed";
+import {
+  resolveReducedMotion,
+  type MotionModeSource,
+} from "../motion-mode/state";
+
+type RainRenderer = Pick<
+  SpaceRainRenderer,
+  "resources" | "shaderStatus" | "render" | "resize" | "dispose"
+>;
+type RendererFactory = (canvas: HTMLCanvasElement) => RainRenderer;
+const createRenderer: RendererFactory = (canvas) =>
+  new SpaceRainRenderer(canvas);
 
 export interface SpaceRainDiagnostics {
   status: "idle" | "running" | "paused" | "fallback" | "disposed";
@@ -101,15 +113,20 @@ function installCanvas(
   pageSeed: PageSeed,
   reviewMode: ReviewMode | null,
   ufoTraversalClass: UfoTraversalClass | null,
+  motion?: MotionModeSource,
+  rendererFactory: RendererFactory = createRenderer,
 ): AbortController {
   const abortController = new AbortController();
   const { signal } = abortController;
   const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let reducedMotion = reducedQuery.matches;
-  let renderer: SpaceRainRenderer | null = null;
+  const resolveMotion = (): boolean =>
+    resolveReducedMotion(motion?.getMode() ?? "system", reducedQuery.matches);
+  let reducedMotion = resolveMotion();
+  let renderer: RainRenderer | null = null;
   let scene: SpaceRainScene | null = null;
   let frameRequest = 0;
   let lastTime = 0;
+  let visualTime = 0;
   let status: SpaceRainDiagnostics["status"] = "idle";
   let drawCalls = 0;
   let instanceCount = 0;
@@ -276,7 +293,16 @@ function installCanvas(
     canvas.dataset.spaceRainStatus = "fallback";
   };
 
-  const resize = (): void => {
+  const draw = (): void => {
+    if (!renderer || !scene) return;
+    const report = renderer.render(scene, visualTime);
+    drawCalls = report.drawCalls;
+    instanceCount = report.instanceCount;
+    offscreenActive = report.offscreenActive;
+    offscreenBytes = report.offscreenBytes;
+  };
+
+  const resize = (redraw = true): void => {
     if (!renderer || !scene) return;
     const bounds = canvas.getBoundingClientRect();
     const width = Math.max(1, bounds.width);
@@ -287,10 +313,19 @@ function installCanvas(
     );
     renderer.resize(width, height, dpr);
     resizeScene(scene, width, height);
+    if (redraw && (reducedMotion || document.hidden)) draw();
   };
 
   const frame = (time: number): void => {
-    if (!renderer || !scene || signal.aborted || document.hidden) return;
+    frameRequest = 0;
+    if (
+      !renderer ||
+      !scene ||
+      signal.aborted ||
+      document.hidden ||
+      reducedMotion
+    )
+      return;
     const elapsed =
       lastTime === 0 ? 0 : Math.min(0.05, (time - lastTime) / 1_000);
     if (lastTime > 0) {
@@ -298,13 +333,10 @@ function installCanvas(
       if (frameIntervals.length > 3_000) frameIntervals.shift();
     }
     lastTime = time;
+    visualTime += elapsed;
     advanceScene(scene, elapsed);
-    const report = renderer.render(scene, time / 1_000);
+    draw();
     frameCount += 1;
-    drawCalls = report.drawCalls;
-    instanceCount = report.instanceCount;
-    offscreenActive = report.offscreenActive;
-    offscreenBytes = report.offscreenBytes;
     status = "running";
     frameRequest = requestAnimationFrame(frame);
   };
@@ -312,7 +344,7 @@ function installCanvas(
   const start = (): void => {
     if (signal.aborted || renderer) return;
     try {
-      renderer = new SpaceRainRenderer(canvas);
+      renderer = rendererFactory(canvas);
       shaderStatus = renderer.shaderStatus;
       const bounds = canvas.getBoundingClientRect();
       scene ??= createScene({
@@ -323,12 +355,8 @@ function installCanvas(
         reviewMode,
         ufoTraversalClass,
       });
-      resize();
-      const report = renderer.render(scene, performance.now() / 1_000);
-      drawCalls = report.drawCalls;
-      instanceCount = report.instanceCount;
-      offscreenActive = report.offscreenActive;
-      offscreenBytes = report.offscreenBytes;
+      resize(false);
+      draw();
       status = reducedMotion || document.hidden ? "paused" : "running";
       canvas.dataset.spaceRainStatus = status;
       if (!reducedMotion && !document.hidden) {
@@ -363,16 +391,15 @@ function installCanvas(
   };
 
   const onReducedMotion = (): void => {
-    reducedMotion = reducedQuery.matches;
-    if (!scene || !renderer) return;
+    const next = resolveMotion();
+    if (next === reducedMotion) return;
+    reducedMotion = next;
     stopFrame();
+    if (!scene) return;
     setReducedMotion(scene, reducedMotion);
-    resize();
-    const report = renderer.render(scene, performance.now() / 1_000);
-    drawCalls = report.drawCalls;
-    instanceCount = report.instanceCount;
-    offscreenActive = report.offscreenActive;
-    offscreenBytes = report.offscreenBytes;
+    if (!renderer) return;
+    resize(false);
+    draw();
     status = reducedMotion || document.hidden ? "paused" : "running";
     canvas.dataset.spaceRainStatus = status;
     if (!reducedMotion && !document.hidden) {
@@ -393,10 +420,13 @@ function installCanvas(
   const onContextRestored = (): void => {
     start();
   };
-  const resizeObserver = new ResizeObserver(resize);
+  const resizeObserver = new ResizeObserver(() => {
+    resize();
+  });
   resizeObserver.observe(canvas);
   document.addEventListener("visibilitychange", onVisibility, { signal });
   reducedQuery.addEventListener("change", onReducedMotion, { signal });
+  const unsubscribeMotion = motion?.subscribe(onReducedMotion);
   canvas.addEventListener("webglcontextlost", onContextLost, { signal });
   canvas.addEventListener("webglcontextrestored", onContextRestored, {
     signal,
@@ -405,6 +435,7 @@ function installCanvas(
     "abort",
     () => {
       stopFrame();
+      unsubscribeMotion?.();
       resizeObserver.disconnect();
       renderer?.dispose();
       renderer = null;
@@ -423,12 +454,21 @@ function installCanvas(
 export function installSpaceRainCanvas(
   canvas: HTMLCanvasElement,
   explicitPageSeed?: PageSeed,
+  motion?: MotionModeSource,
+  rendererFactory: RendererFactory = createRenderer,
 ): AbortController {
   const search = window.location.search;
   const reviewMode = reviewModeFromSearch(search);
   const ufoTraversalClass = ufoTraversalClassFromSearch(search, reviewMode);
   const pageSeed = resolvePageSeed(search, explicitPageSeed);
-  return installCanvas(canvas, pageSeed, reviewMode, ufoTraversalClass);
+  return installCanvas(
+    canvas,
+    pageSeed,
+    reviewMode,
+    ufoTraversalClass,
+    motion,
+    rendererFactory,
+  );
 }
 
 export function resolvePageSeed(
