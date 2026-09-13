@@ -20,7 +20,7 @@ $x | torch grad | torch value
 
 ## Installation
 
-The 2.0.1 binary distribution includes the NuTorch executable and its LibTorch
+The 2.0.2 binary distribution includes the NuTorch executable and its LibTorch
 runtime for Apple-silicon macOS Tahoe with standard Homebrew (`/opt/homebrew`).
 Normal installation downloads the prebuilt archive; no Rust compiler, Python or
 separate LibTorch installation is required. Other targets are not yet qualified.
