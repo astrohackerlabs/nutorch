@@ -70,6 +70,10 @@ fn current_dir_from_environment() -> PathBuf {
 }
 
 fn main() -> Result<()> {
+    if let Some(code) = nutorch::sync::early_cli() {
+        std::process::exit(code);
+    }
+    let sync_context = nutorch::sync::Context::capture();
     let entire_start_time = nu_utils::time::Instant::now();
     let mut start_time = nu_utils::time::Instant::now();
     miette::set_panic_hook();
@@ -94,6 +98,7 @@ fn main() -> Result<()> {
     experimental_options::load(&engine_state, &parsed_nu_cli_args, !script_name.is_empty());
 
     let mut engine_state = command_context::add_command_context(engine_state);
+    nutorch::sync::add_context(&mut engine_state, sync_context.clone());
 
     // Provide `version` the features of this nu binary
     let cargo_features = env!("NU_FEATURES").split(",").map(Cow::Borrowed).collect();
@@ -620,6 +625,7 @@ fn main() -> Result<()> {
             stack,
             parsed_nu_cli_args,
             entire_start_time,
+            sync_context,
         )?;
 
         cleanup_exit(0, &engine_state, 0);

@@ -16,6 +16,7 @@
     "check:flow": "bun scripts/check-shell-tabs.ts",
     "check:ops-ref": "bun scripts/gen-ops-reference.ts --check",
     "check:parity": "nu scripts/check-parity.nu",
+    "check:analytics": "bun test app/lib/umami.test.ts app/lib/umami.browser.test.ts",
     "lint": "oxlint --config ../../../oxlint.config.ts --deny-warnings .",
     "format": "prettier --ignore-path ../../../.prettierignore --ignore-path .prettierignore --write .",
     "format:check": "prettier --ignore-path ../../../.prettierignore --ignore-path .prettierignore --check .",
@@ -41,24 +42,25 @@
     "isbot": "^5"
   },
   "devDependencies": {
-    "wrangler": "4.100.0",
-    "png-to-ico": "3.0.1",
-    "sharp": "0.34.5",
-    "@types/hast": "^3.0.4",
     "@react-router/dev": "^8",
     "@tailwindcss/vite": "4.3.0",
     "@types/bun": "latest",
+    "@types/hast": "^3.0.4",
     "@types/node": "^26.3.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "oxlint": "1.80.0",
+    "oxlint-tsgolint": "7.0.2001",
     "pagefind": "1.5.2",
+    "playwright": "1.63.0",
+    "png-to-ico": "3.0.1",
     "prettier": "3.9.6",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "sharp": "0.34.5",
     "tailwindcss": "4.3.0",
     "typescript": "7.0.2",
     "vite": "^8.2.2",
     "vite-tsconfig-paths": "^6",
-    "oxlint": "1.80.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "prettier-plugin-tailwindcss": "0.8.1"
+    "wrangler": "4.100.0"
   }
 }

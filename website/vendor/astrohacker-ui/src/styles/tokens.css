@@ -81,6 +81,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
+  --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-heading: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --font-sans: "Space Grotesk", system-ui, sans-serif;

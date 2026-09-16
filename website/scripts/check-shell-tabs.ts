@@ -304,7 +304,7 @@ try {
 
   // Verify both real clipboard handlers at desktop and narrow-screen widths.
   const installCommands =
-    "brew tap astrohackerlabs/astrohacker\nbrew trust astrohackerlabs/astrohacker\nbrew install astrohackerlabs/astrohacker/nutorch";
+    "brew trust astrohackerlabs/astrohacker\nbrew tap astrohackerlabs/astrohacker\nbrew install nutorch";
   for (const width of [1280, 390]) {
     await send("Emulation.setDeviceMetricsOverride", {
       width,

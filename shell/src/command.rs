@@ -12,14 +12,7 @@ use std::{
     path::Path,
 };
 
-const HELP_SECTION_COLOR: &str = "\x1b[32m";
-const HELP_FLAG_COLOR: &str = "\x1b[36m";
-const HELP_TYPE_COLOR: &str = "\x1b[94m";
-const HELP_DESC_COLOR: &str = "\x1b[2;39m";
-#[allow(dead_code)]
-const HELP_SUBCMD_COLOR: &str = "\x1b[96m"; // bright cyan, lighter than flags
-const DEFAULT_COLOR: &str = "\x1b[39m";
-const RESET_COLOR: &str = "\x1b[0m";
+use nutorch::help::{self, HELP_DESC_COLOR, HELP_SUBCMD_COLOR, RESET_COLOR};
 const TABLE_MODE_VALUES: &[&str] = &[
     "basic",
     "thin",
@@ -166,14 +159,14 @@ const CLI_FLAGS: &[CliFlag] = &[
         Some('i'),
         "start as an interactive shell",
         CliCategory::Startup,
-        "nu -i",
+        "nutorch -i",
     ),
     CliFlag::switch(
         "login",
         Some('l'),
         "start as a login shell",
         CliCategory::Startup,
-        "nu -l",
+        "nutorch -l",
     ),
     CliFlag::value(
         "commands",
@@ -181,7 +174,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "run the given commands and then exit",
         CliCategory::Startup,
-        "nu -c \"print 1\"",
+        "nutorch -c \"print 1\"",
     ),
     CliFlag::value(
         "execute",
@@ -189,7 +182,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "run the given commands and then enter an interactive shell",
         CliCategory::Startup,
-        "nu -e \"print 1\"",
+        "nutorch -e \"print 1\"",
     ),
     CliFlag::value(
         "include-path",
@@ -197,7 +190,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "set the NU_LIB_DIRS for the given script (delimited by char record_sep ('\x1e'))",
         CliCategory::Config,
-        "nu -I scripts",
+        "nutorch -I scripts",
     ),
     CliFlag::value(
         "table-mode",
@@ -205,7 +198,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "the table mode to use. rounded is default.",
         CliCategory::Startup,
-        "nu -m rounded",
+        "nutorch -m rounded",
     ),
     CliFlag::value(
         "error-style",
@@ -213,35 +206,35 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "the error style to use (fancy or plain). default: fancy",
         CliCategory::Startup,
-        "nu --error-style plain",
+        "nutorch --error-style plain",
     ),
     CliFlag::switch(
         "no-newline",
         None,
         "print the result for --commands(-c) without a newline",
         CliCategory::Startup,
-        "nu --no-newline -c \"print 1\"",
+        "nutorch --no-newline -c \"print 1\"",
     ),
     CliFlag::switch(
         "no-config-file",
         Some('n'),
         "start with no config file and no env file",
         CliCategory::Config,
-        "nu --no-config-file",
+        "nutorch --no-config-file",
     ),
     CliFlag::switch(
         "no-history",
         None,
         "disable reading and writing to command history",
         CliCategory::Config,
-        "nu --no-history",
+        "nutorch --no-history",
     ),
     CliFlag::switch(
         "no-std-lib",
         None,
         "start with no standard library",
         CliCategory::Config,
-        "nu --no-std-lib",
+        "nutorch --no-std-lib",
     ),
     CliFlag::value(
         "config",
@@ -249,7 +242,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Path,
         "start with an alternate config file",
         CliCategory::Config,
-        "nu --config config.nu",
+        "nutorch --config config.nu",
     ),
     CliFlag::value(
         "env-config",
@@ -257,7 +250,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Path,
         "start with an alternate environment config file",
         CliCategory::Config,
-        "nu --env-config env.nu",
+        "nutorch --env-config env.nu",
     ),
     CliFlag::value(
         "log-level",
@@ -265,7 +258,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "log level for diagnostic logs (error, warn, info, debug, trace). Off by default",
         CliCategory::Logging,
-        "nu --log-level info",
+        "nutorch --log-level info",
     ),
     CliFlag::value(
         "log-target",
@@ -273,7 +266,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "set the target for the log to output. stdout, stderr(default), mixed or file (requires --log-file)",
         CliCategory::Logging,
-        "nu --log-target stdout",
+        "nutorch --log-target stdout",
     ),
     CliFlag::value(
         "log-file",
@@ -281,7 +274,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Path,
         "specify a custom log file path (requires --log-target file and --log-level <level>)",
         CliCategory::Logging,
-        "nu --log-target file --log-file ~/.local/share/nushell/nu.log --log-level info",
+        "nutorch --log-target file --log-file nutorch.log --log-level info",
     ),
     CliFlag::value(
         "log-include",
@@ -289,7 +282,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::ListString,
         "set the Rust module prefixes to include from the log output",
         CliCategory::Logging,
-        "nu --log-include info",
+        "nutorch --log-include info",
     ),
     CliFlag::value(
         "log-exclude",
@@ -297,14 +290,14 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::ListString,
         "set the Rust module prefixes to exclude from the log output",
         CliCategory::Logging,
-        "nu --log-exclude info",
+        "nutorch --log-exclude info",
     ),
     CliFlag::switch(
         "stdin",
         None,
         "redirect standard input to a command (with `-c`) or a script file",
         CliCategory::Startup,
-        "nu --stdin -c \"print $in\"",
+        "nutorch --stdin -c \"print $in\"",
     ),
     CliFlag::value(
         "testbin",
@@ -312,7 +305,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "run an internal test binary (see available bins below)",
         CliCategory::Startup,
-        "nu --testbin cococo",
+        "nutorch --testbin cococo",
     ),
     CliFlag::value(
         "experimental-options",
@@ -320,14 +313,14 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::ListString,
         r#"enable or disable experimental options, use "all" to set all active options"#,
         CliCategory::Experimental,
-        "nu --experimental-options [example=false]",
+        "nutorch --experimental-options [example=false]",
     ),
     CliFlag::switch(
         "lsp",
         None,
-        "start nu's language server protocol",
+        "start NuTorch's language server protocol",
         CliCategory::Ide,
-        "nu --lsp",
+        "nutorch --lsp",
     ),
     CliFlag::value(
         "ide-goto-def",
@@ -335,7 +328,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Int,
         "go to the definition of the item at the given position",
         CliCategory::Ide,
-        "nu --ide-goto-def 0",
+        "nutorch --ide-goto-def 0",
     ),
     CliFlag::value(
         "ide-hover",
@@ -343,7 +336,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Int,
         "give information about the item at the given position",
         CliCategory::Ide,
-        "nu --ide-hover 0",
+        "nutorch --ide-hover 0",
     ),
     CliFlag::value(
         "ide-complete",
@@ -351,7 +344,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Int,
         "list completions for the item at the given position",
         CliCategory::Ide,
-        "nu --ide-complete 0",
+        "nutorch --ide-complete 0",
     ),
     CliFlag::value(
         "ide-check",
@@ -359,14 +352,14 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Int,
         "run a diagnostic check on the given source and limit number of errors returned to provided number",
         CliCategory::Ide,
-        "nu --ide-check 0",
+        "nutorch --ide-check 0",
     ),
     CliFlag::switch(
         "ide-ast",
         None,
         "generate the ast on the given source",
         CliCategory::Ide,
-        "nu --ide-ast -c \"print 1\"",
+        "nutorch --ide-ast -c \"print 1\"",
     ),
     #[cfg(feature = "plugin")]
     CliFlag::value(
@@ -375,7 +368,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Path,
         "start with an alternate plugin registry file",
         CliCategory::Plugins,
-        "nu --plugin-config plugins.msgpackz",
+        "nutorch --plugin-config plugins.msgpackz",
     ),
     #[cfg(feature = "plugin")]
     CliFlag::value(
@@ -384,15 +377,15 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::ListPath,
         "list of plugin executable files to load (full paths), separately from the registry file",
         CliCategory::Plugins,
-        "nu --plugins /path/nu_plugin_one /path/nu_plugin_two",
+        "nutorch --plugins /path/nu_plugin_one /path/nu_plugin_two",
     ),
     #[cfg(feature = "mcp")]
     CliFlag::switch(
         "mcp",
         None,
-        "start nu's model context protocol server",
+        "start NuTorch's model context protocol server",
         CliCategory::Startup,
-        "nu --mcp",
+        "nutorch --mcp",
     ),
     #[cfg(feature = "mcp")]
     CliFlag::value(
@@ -401,7 +394,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::String,
         "transport to use for MCP server (stdio or http)",
         CliCategory::Startup,
-        "nu --mcp --mcp-transport http",
+        "nutorch --mcp --mcp-transport http",
     ),
     #[cfg(feature = "mcp")]
     CliFlag::value(
@@ -410,7 +403,7 @@ const CLI_FLAGS: &[CliFlag] = &[
         ValueHint::Int,
         "port for MCP HTTP transport (default 8080)",
         CliCategory::Startup,
-        "nu --mcp --mcp-transport http --mcp-port 3000",
+        "nutorch --mcp --mcp-transport http --mcp-port 3000",
     ),
 ];
 
@@ -697,7 +690,7 @@ pub(crate) fn parse_cli_args(args: Vec<OsString>) -> Result<ParsedCli, CliError>
                             "expected full path",
                         )
                         .with_help(
-                            "Use an absolute path to the plugin executable, e.g. `nu --plugins /path/nu_plugin_one`."
+                            "Use an absolute path to the plugin executable, e.g. `nutorch --plugins /path/nu_plugin_one`."
                         ));
                     }
                 }
@@ -726,7 +719,7 @@ pub(crate) fn parse_cli_args(args: Vec<OsString>) -> Result<ParsedCli, CliError>
             Value(value) => {
                 let value = value.string().map_err(|_| {
                     CliError::new("Invalid argument", "argument is not valid unicode")
-                        .with_help("Use UTF-8 arguments when calling nushell.")
+                        .with_help("Use UTF-8 arguments when calling NuTorch.")
                 })?;
                 if script_name.is_empty() {
                     script_name = value;
@@ -819,7 +812,7 @@ fn parse_string_value(parser: &mut lexopt::Parser, name: &str) -> Result<String,
                 format!("Invalid value for `--{name}`"),
                 "value is not valid unicode",
             )
-            .with_help("Use UTF-8 values when calling nushell.")
+            .with_help("Use UTF-8 values when calling NuTorch.")
         })
 }
 
@@ -893,7 +886,7 @@ fn parse_list_values(parser: &mut lexopt::Parser, name: &str) -> Result<Vec<Stri
                 format!("Invalid value for `--{name}`"),
                 "value is not valid unicode",
             )
-            .with_help("Use UTF-8 values when calling nushell.")
+            .with_help("Use UTF-8 values when calling NuTorch.")
         })?;
         parsed.push(value);
     }
@@ -1052,13 +1045,13 @@ fn map_lexopt_error(error: lexopt::Error) -> CliError {
         .with_help(format!("Remove the value or use `{option}` without it.")),
         lexopt::Error::UnexpectedOption(option) => {
             CliError::new(format!("Unknown option '{option}'"), "unknown option")
-                .with_help("Use `nu --help` to see available flags.")
+                .with_help("Use `nutorch --help` to see available flags.")
         }
         lexopt::Error::UnexpectedArgument(value) => CliError::new(
             format!("Unexpected argument '{:?}'", value),
             "unexpected argument",
         )
-        .with_help("Use `nu --help` to see usage."),
+        .with_help("Use `nutorch --help` to see usage."),
         lexopt::Error::ParsingFailed { value, error } => {
             CliError::new(format!("Invalid value '{value}'"), error.to_string())
                 .with_help("Check the value format and try again.")
@@ -1067,7 +1060,7 @@ fn map_lexopt_error(error: lexopt::Error) -> CliError {
             format!("Invalid argument '{:?}'", value),
             "argument is not valid unicode",
         )
-        .with_help("Use UTF-8 arguments when calling nushell."),
+        .with_help("Use UTF-8 arguments when calling NuTorch."),
         lexopt::Error::Custom(error) => CliError::new(error.to_string(), "invalid argument"),
     }
 }
@@ -1081,7 +1074,7 @@ fn unknown_long_flag(name: &str) -> CliError {
     let suggestion = did_you_mean(&candidates, &format!("--{name}"));
     let help = suggestion
         .map(|s| format!("Did you mean '{s}'?"))
-        .unwrap_or_else(|| "Use `nu --help` to see available flags.".to_string());
+        .unwrap_or_else(|| "Use `nutorch --help` to see available flags.".to_string());
     CliError::new(format!("Unknown flag '--{name}'"), "unknown flag").with_help(help)
 }
 
@@ -1095,7 +1088,7 @@ fn unknown_short_flag(short: char) -> CliError {
     let suggestion = did_you_mean(&candidates, &format!("-{short}"));
     let help = suggestion
         .map(|s| format!("Did you mean '{s}'?"))
-        .unwrap_or_else(|| "Use `nu --help` to see available flags.".to_string());
+        .unwrap_or_else(|| "Use `nutorch --help` to see available flags.".to_string());
     CliError::new(format!("Unknown flag '-{short}'"), "unknown flag").with_help(help)
 }
 
@@ -1247,9 +1240,21 @@ fn prevalidate_short_groups_before_lexopt(args: &[OsString]) -> Result<(), CliEr
 
 // Generate help text with the legacy layout and default help colors.
 fn cli_help_text() -> String {
-    let mut output = String::new();
-    output.push_str("NuTorch — the Astrohacker command shell, powered by Nushell.\n\n");
-    output.push_str("Usage:\n  nutorch [options] [script file] [script args]\n\n");
+    let mut output = help::start(&[
+        "nutorch [options] [script file] [script args]",
+        "nutorch sync",
+    ]);
+    help::section(&mut output, "Commands");
+    writeln!(output, "  {HELP_SUBCMD_COLOR}sync{RESET_COLOR}")
+        .expect("writing to a String is infallible");
+    for description in [
+        "Queue exported environment variables in the enclosing NuTorch.",
+        "Updates apply at its next prompt. Missing keys are not deleted.",
+        "Run nutorch sync --help for details.",
+    ] {
+        help::description(&mut output, description, 6);
+    }
+    output.push('\n');
     output.push_str("Options:\n");
 
     for category in [
@@ -1265,46 +1270,17 @@ fn cli_help_text() -> String {
         if flags.clone().next().is_none() {
             continue;
         }
-        write!(
-            output,
-            "\n{HELP_SECTION_COLOR}{}:{RESET_COLOR}\n",
-            category_name(category)
-        )
-        .expect("writing to a String is infallible");
+        output.push('\n');
+        help::section(&mut output, category_name(category));
         for flag in flags {
-            output.push_str("  ");
-            if let Some(short) = flag.short {
-                write!(output, "{HELP_FLAG_COLOR}-{short}{RESET_COLOR}")
-                    .expect("writing to a String is infallible");
-                if !flag.long.is_empty() {
-                    write!(output, "{DEFAULT_COLOR},{RESET_COLOR} ")
-                        .expect("writing to a String is infallible");
-                }
-            }
-            if !flag.long.is_empty() {
-                write!(output, "{HELP_FLAG_COLOR}--{}{RESET_COLOR}", flag.long)
-                    .expect("writing to a String is infallible");
-            }
-            if flag.value != ValueHint::None {
-                write!(
-                    output,
-                    " <{HELP_TYPE_COLOR}{}{RESET_COLOR}>",
-                    value_hint(flag.value)
-                )
-                .expect("writing to a String is infallible");
-            }
-            write!(
-                output,
-                "\n      {HELP_DESC_COLOR}{}{RESET_COLOR}\n",
-                flag.description
-            )
-            .expect("writing to a String is infallible");
-            writeln!(
-                output,
-                "      {HELP_DESC_COLOR}Example: {RESET_COLOR}{}",
-                flag.example
-            )
-            .expect("writing to a String is infallible");
+            help::flag(
+                &mut output,
+                flag.short,
+                flag.long,
+                (flag.value != ValueHint::None).then(|| value_hint(flag.value)),
+            );
+            help::description(&mut output, flag.description, 6);
+            help::example(&mut output, flag.example);
 
             // For the --testbin option we augment the static description with a dynamically generated list of the available binaries
             // and their individual help strings
@@ -1401,6 +1377,12 @@ mod tests {
 
     #[test]
     fn cli_help_includes_testbin_list() {
+        let bins = test_bins::help_text(&test_bins::new_testbin_dispatcher());
+        assert!(bins.starts_with("Usage: nutorch --testbin <bin>\n"));
+        assert!(!bins.split_whitespace().any(|word| word == "nu"));
+        for flag in CLI_FLAGS {
+            assert!(flag.example.starts_with("nutorch "));
+        }
         let help = cli_help_text();
         assert!(help.starts_with("NuTorch — the Astrohacker command shell, powered by Nushell.\n"));
         assert!(help.contains("Usage:\n  nutorch [options] [script file] [script args]"));

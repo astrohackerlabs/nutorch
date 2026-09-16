@@ -4024,12 +4024,13 @@ dependencies = [
 
 [[package]]
 name = "nutorch"
-version = "2.0.4"
+version = "2.0.5"
 dependencies = [
  "chrono",
  "crossterm",
  "ctrlc",
  "dirs 6.0.0",
+ "getrandom 0.3.4",
  "lexopt",
  "libc",
  "log",
@@ -4061,6 +4062,7 @@ dependencies = [
  "shannon-nu-cli",
  "shannon-nu-lsp",
  "simplelog",
+ "socket2",
  "tempfile",
  "time",
  "tokio",
@@ -4069,7 +4071,7 @@ dependencies = [
 
 [[package]]
 name = "nutorch-core"
-version = "2.0.4"
+version = "2.0.5"
 dependencies = [
  "nutorch-ops",
  "serde_json",
@@ -4079,7 +4081,7 @@ dependencies = [
 
 [[package]]
 name = "nutorch-ops"
-version = "2.0.4"
+version = "2.0.5"
 
 [[package]]
 name = "objc2"

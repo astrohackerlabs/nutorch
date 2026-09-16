@@ -5,7 +5,7 @@
     "app/styles/global.css": "4885bf427ba932a1f607a8bc7527e2b15ab30aa5acc301802ee64ceecac75704",
     "content/docs/autograd.md": "650e754191053fc537478b001a43af99af0acfc738162fb7d64b929a67975b7e",
     "content/docs/daemon.md": "cdfadeb53c9bfcf217a560a5bd0b86658d98e67502ef4255354769cc64720381",
-    "content/docs/getting-started.md": "cb44e460b3e613e314409fa8a39b8ac1ca85253d64d1960b6aa838618c819a4b",
+    "content/docs/getting-started.md": "0585a03a0c9dd4a7aa31d802fb14d6a876fcdc55057e5cda870a3f2636b5d610",
     "content/docs/install-from-source.md": "7b4d80da023f1e94a0d067b837cd5d26e22eea7808262af56d95190195f734ac",
     "content/docs/neural-networks.md": "fded4247cb9d82cbbec870d42f697d4e0e1723308a99282e27f5e547bb4a5076",
     "content/docs/nushell.md": "0c4f3065a2eb7ac4e751844153bbba9b3e33f6e938bf49f7686024ac4fd7298c",
@@ -152,5 +152,12 @@
     "design_commit": "f5c743fa2",
     "scope": "Shared Homebrew tap in getting-started installation commands; no metadata, routes or assets changed.",
     "completion_review": "pending"
+  },
+  "installationOrderAmendment": {
+    "issue": "26091322413429",
+    "experiment": 2,
+    "design_commit": "c6c1854d3",
+    "scope": "Trust before tap and use brew install nutorch in getting-started; metadata, routes and assets unchanged.",
+    "completion_review": "Approved by Ryan with $commit after live website verification was presented."
   }
 }

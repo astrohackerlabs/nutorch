@@ -13,6 +13,15 @@ use std::path::PathBuf;
 /// typed Values) and returns strings. The REPL handles conversion back to
 /// nushell Values.
 pub trait ModeDispatcher: Send {
+    /// Apply host-owned updates between evaluations, before user prompt hooks.
+    /// Called only on the REPL thread; default hosts have no pending updates.
+    fn before_prompt(
+        &mut self,
+        _engine: &mut nu_protocol::engine::EngineState,
+        _stack: &mut nu_protocol::engine::Stack,
+    ) {
+    }
+
     /// Execute a command in the given mode.
     ///
     /// - `mode`: the active mode name (e.g., "brush", "ai")

@@ -14,8 +14,8 @@ fn explicit_imports_control_scope_and_preserve_native_values() {
     // `use`/`hide` are parse-time operations. Inspect distinct source units so
     // a later hide cannot make a pre-import visibility assertion pass by accident.
     for script in [
-        "scope commands | where name =~ '^(torch|nutorch)( |$)' | length",
-        "let escaped = (do { use torch; torch tensor [2 3] }); scope commands | where name =~ '^(torch|nutorch)( |$)' | length",
+        "scope commands | where name =~ '^(torch|nutorch)( |$)' | where name != 'nutorch sync' | length",
+        "let escaped = (do { use torch; torch tensor [2 3] }); scope commands | where name =~ '^(torch|nutorch)( |$)' | where name != 'nutorch sync' | length",
         "use torch; hide torch; scope commands | where name == 'torch tensor' | length",
     ] {
         assert_eq!(shell.run_raw(script, true).trim(), "0");

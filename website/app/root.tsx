@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { UmamiPageviews } from "./components/umami-pageviews";
+import { UMAMI_SCRIPT_URL, UMAMI_WEBSITE_ID } from "./lib/umami";
 import { SpaceRain } from "@astrohacker/ui/space-rain";
 import { MotionModeProvider, useMotionMode } from "@astrohacker/ui/motion-mode";
 import "@fontsource/space-grotesk/400.css";
@@ -50,6 +52,15 @@ export function Layout({
           media="(prefers-color-scheme: light)"
         />
         <Links />
+        {import.meta.env.PROD ? (
+          <script
+            defer
+            src={UMAMI_SCRIPT_URL}
+            data-website-id={UMAMI_WEBSITE_ID}
+            data-umami-tracker
+            data-auto-pageview="false"
+          />
+        ) : null}
       </head>
       <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <MotionModeProvider storageKey="ntcom.motion-mode.v1">
@@ -104,5 +115,10 @@ export default function App(): React.JSX.Element {
       document.removeEventListener("click", onClick);
     };
   }, []);
-  return <Outlet />;
+  return (
+    <>
+      {import.meta.env.PROD ? <UmamiPageviews /> : null}
+      <Outlet />
+    </>
+  );
 }

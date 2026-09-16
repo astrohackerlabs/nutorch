@@ -187,11 +187,10 @@ pub(crate) fn run_repl(
     mut stack: Stack,
     parsed_nu_cli_args: command::NushellCliArgs,
     entire_start_time: nu_utils::time::Instant,
+    sync_context: std::sync::Arc<nutorch::sync::Context>,
 ) -> Result<(), miette::ErrReport> {
     trace!("run_repl");
     let start_time = nu_utils::time::Instant::now();
-
-    let dispatcher = nutorch::dispatcher::NuTorchDispatcher;
 
     if parsed_nu_cli_args.no_config_file.is_none() {
         setup_config(
@@ -306,6 +305,10 @@ pub(crate) fn run_repl(
         }
     }
 
+    let server = sync_context.start(engine_state, &mut stack);
+    let dispatcher = nutorch::sync::Dispatcher {
+        server: server.clone(),
+    };
     let dispatcher: std::sync::Arc<std::sync::Mutex<Box<dyn nu_cli::ModeDispatcher>>> =
         std::sync::Arc::new(std::sync::Mutex::new(Box::new(dispatcher)));
 
@@ -319,6 +322,9 @@ pub(crate) fn run_repl(
         Some(dispatcher),
     );
     perf!("evaluate_repl", start_time, use_color);
+    if let Some(server) = server {
+        server.shutdown();
+    }
 
     ret_val
 }

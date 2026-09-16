@@ -4,9 +4,9 @@ import { metadata } from "../lib/metadata";
 import { highlight } from "../lib/markdown.server";
 import { Button } from "@astrohacker/ui/button";
 import { Card } from "@astrohacker/ui/card";
-const installDemo = `brew tap astrohackerlabs/astrohacker
-brew trust astrohackerlabs/astrohacker
-brew install astrohackerlabs/astrohacker/nutorch`;
+const installDemo = `brew trust astrohackerlabs/astrohacker
+brew tap astrohackerlabs/astrohacker
+brew install nutorch`;
 const launchDemo = `nutorch`;
 
 const heroDemo = `use torch

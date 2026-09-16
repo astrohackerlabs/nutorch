@@ -12,9 +12,7 @@ let failed = false;
 // 1. The public onboarding uses the released installation path.
 const gettingStarted = readFileSync(`${DOCS}/getting-started.md`, "utf8");
 if (
-  !gettingStarted.includes(
-    "brew install astrohackerlabs/astrohacker/nutorch",
-  ) ||
+  !gettingStarted.includes("brew install nutorch") ||
   !gettingStarted.includes("```nu\nnutorch\n```") ||
   /unreleased|earlier tensor-tool release/.test(gettingStarted)
 ) {
@@ -95,9 +93,9 @@ for (const file of docsMdFiles(DOCS)) {
 const INDEX = new URL("../app/routes/home.tsx", import.meta.url).pathname;
 const indexSource = readFileSync(INDEX, "utf8");
 for (const command of [
-  "brew tap astrohackerlabs/astrohacker",
   "brew trust astrohackerlabs/astrohacker",
-  "brew install astrohackerlabs/astrohacker/nutorch",
+  "brew tap astrohackerlabs/astrohacker",
+  "brew install nutorch",
 ]) {
   if (!indexSource.includes(command) || !gettingStarted.includes(command)) {
     console.error(`FAIL: homepage/onboarding missing ${command}`);

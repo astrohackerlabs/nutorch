@@ -5,14 +5,15 @@
       "name": "nushell",
       "checkout": "forks/nushell",
       "base": "b6e6562a9a385df439ae864714c609c60314fde9",
-      "branch": "issue-26091316465368-exp1-upstream-update",
-      "expected_head": "284809ad08c3babc41a5e5ef68c49656e73613ae",
-      "expected_tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
+      "branch": "issue-26091523132966-exp1-environment-sync",
+      "expected_head": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+      "expected_tree": "0551fcb838a83036853148db4df5a4e19aa78452",
       "patch_directories": [
-        "patches/nushell/patches/issue-26091316465368"
+        "patches/nushell/patches/issue-26091316465368",
+        "patches/nushell/patches/issue-26091523132966"
       ],
-      "patch_count": 19,
-      "archive_sha256": "a05e4bcc99a75eae8ffa90183b07a6165b84f02426f8edffd5e77b0786f909b0",
+      "patch_count": 20,
+      "archive_sha256": "8d98f785481956e2461f330ee0df922fc16daa4bb08e2f6ac7aea841e67e69f4",
       "allowed_untracked": []
     },
     {
@@ -33,20 +34,20 @@
   "verified": [
     {
       "name": "nushell",
-      "head": "830a1103560f28e10e88b6b32414ac3416bb7d84",
-      "tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
-      "branch": "issue-26091316465368-exp1-upstream-update",
+      "head": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+      "tree": "0551fcb838a83036853148db4df5a4e19aa78452",
+      "branch": "issue-26091523132966-exp1-environment-sync",
       "ready": true,
       "canonical_exists": true,
-      "prefix_count": 19,
-      "patch_count": 19,
-      "archive_sha256": "a05e4bcc99a75eae8ffa90183b07a6165b84f02426f8edffd5e77b0786f909b0",
-      "expected_tree": "c7ae198010c51b563b51162908e69aa5062c6fbb",
+      "prefix_count": 20,
+      "patch_count": 20,
+      "archive_sha256": "8d98f785481956e2461f330ee0df922fc16daa4bb08e2f6ac7aea841e67e69f4",
+      "expected_tree": "0551fcb838a83036853148db4df5a4e19aa78452",
       "action": "already-ready"
     },
     {
       "name": "reedline",
-      "head": "f352d8ffce120cb5440ae97fe40e811a471c562a",
+      "head": "4acac3aeba448c0ce5274d048335846fad36d627",
       "tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
       "branch": "issue-26091316465368-exp1-upstream-update",
       "ready": true,

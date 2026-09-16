@@ -621,6 +621,13 @@ fn loop_iteration(ctx: LoopContext) -> (bool, Stack, Reedline) {
     engine_state.reset_signals();
     perf!("reset signals", start_time, use_color);
 
+    if let Some(ref dispatcher) = mode_dispatcher {
+        dispatcher
+            .lock()
+            .expect("mode dispatcher mutex")
+            .before_prompt(engine_state, &mut stack);
+    }
+
     start_time = Instant::now();
 
     // Juhan said to do this :)

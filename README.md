@@ -26,8 +26,8 @@ Normal installation downloads the prebuilt archive; no Rust compiler, Python or
 separate LibTorch installation is required. Other targets are not yet qualified.
 
 ```nu
-brew tap astrohackerlabs/astrohacker
 brew trust astrohackerlabs/astrohacker
+brew tap astrohackerlabs/astrohacker
 brew install nutorch
 ```
 

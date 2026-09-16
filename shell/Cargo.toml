@@ -49,6 +49,8 @@ log = "0.4"
 miette = { version = "7.6", features = ["fancy-no-backtrace", "fancy"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1.0", features = ["float_roundtrip"] }
+getrandom = "=0.3.4"
+socket2 = "=0.6.4"
 simplelog = "0.12"
 tempfile = "3"
 time = "0.3"

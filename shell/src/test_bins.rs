@@ -15,10 +15,7 @@ use std::{
     sync::Arc,
 };
 
-// color constants should match those used in `command.rs` so the help output appears consistent when embedded.
-const HELP_SUBCMD_COLOR: &str = "\x1b[96m"; // bright cyan
-const HELP_DESC_COLOR: &str = "\x1b[2;39m"; // dark gray
-const RESET_COLOR: &str = "\x1b[0m";
+use nutorch::help::{HELP_DESC_COLOR, HELP_SUBCMD_COLOR, RESET_COLOR};
 
 pub trait TestBin {
     fn help(&self) -> &'static str;
@@ -44,7 +41,7 @@ pub struct InputBytesLength;
 
 impl TestBin for EchoEnv {
     fn help(&self) -> &'static str {
-        "Echo's value of env keys from args(e.g: nu --testbin echo_env FOO BAR)"
+        "Echo's value of env keys from args(e.g: nutorch --testbin echo_env FOO BAR)"
     }
 
     fn run(&self) {
@@ -54,7 +51,7 @@ impl TestBin for EchoEnv {
 
 impl TestBin for EchoEnvStderr {
     fn help(&self) -> &'static str {
-        "Echo's value of env keys from args to stderr(e.g: nu --testbin echo_env_stderr FOO BAR)"
+        "Echo's value of env keys from args to stderr(e.g: nutorch --testbin echo_env_stderr FOO BAR)"
     }
 
     fn run(&self) {
@@ -64,7 +61,7 @@ impl TestBin for EchoEnvStderr {
 
 impl TestBin for EchoEnvStderrFail {
     fn help(&self) -> &'static str {
-        "Echo's value of env keys from args to stderr, and exit with failure(e.g: nu --testbin echo_env_stderr_fail FOO BAR)"
+        "Echo's value of env keys from args to stderr, and exit with failure(e.g: nutorch --testbin echo_env_stderr_fail FOO BAR)"
     }
 
     fn run(&self) {
@@ -75,7 +72,7 @@ impl TestBin for EchoEnvStderrFail {
 
 impl TestBin for EchoEnvMixed {
     fn help(&self) -> &'static str {
-        "Mix echo of env keys from input(e.g: nu --testbin echo_env_mixed out-err FOO BAR; nu --testbin echo_env_mixed err-out FOO BAR)"
+        "Mix echo of env keys from input(e.g: nutorch --testbin echo_env_mixed out-err FOO BAR; nutorch --testbin echo_env_mixed err-out FOO BAR)"
     }
 
     fn run(&self) {
@@ -85,8 +82,8 @@ impl TestBin for EchoEnvMixed {
         if args.len() != 3 {
             panic!(
                 "Usage examples:
-* nu --testbin echo_env_mixed out-err FOO BAR
-* nu --testbin echo_env_mixed err-out FOO BAR"
+* nutorch --testbin echo_env_mixed out-err FOO BAR
+* nutorch --testbin echo_env_mixed err-out FOO BAR"
             )
         }
         match args[0].as_str() {
@@ -107,7 +104,7 @@ impl TestBin for EchoEnvMixed {
 
 impl TestBin for Cococo {
     fn help(&self) -> &'static str {
-        "Cross platform echo using println!()(e.g: nu --testbin cococo a b c)"
+        "Cross platform echo using println!()(e.g: nutorch --testbin cococo a b c)"
     }
 
     fn run(&self) {
@@ -126,7 +123,7 @@ impl TestBin for Cococo {
 
 impl TestBin for Meow {
     fn help(&self) -> &'static str {
-        "Cross platform cat (open a file, print the contents) using read_to_string and println!()(e.g: nu --testbin meow file.txt)"
+        "Cross platform cat (open a file, print the contents) using read_to_string and println!()(e.g: nutorch --testbin meow file.txt)"
     }
 
     fn run(&self) {
@@ -141,7 +138,7 @@ impl TestBin for Meow {
 
 impl TestBin for Meowb {
     fn help(&self) -> &'static str {
-        "Cross platform cat (open a file, print the contents) using read() and write_all() / binary(e.g: nu --testbin meowb sample.db)"
+        "Cross platform cat (open a file, print the contents) using read() and write_all() / binary(e.g: nutorch --testbin meowb sample.db)"
     }
 
     fn run(&self) {
@@ -159,7 +156,7 @@ impl TestBin for Meowb {
 
 impl TestBin for Relay {
     fn help(&self) -> &'static str {
-        "Relays anything received on stdin to stdout(e.g: 0x[beef] | nu --testbin relay)"
+        "Relays anything received on stdin to stdout(e.g: 0x[beef] | nutorch --testbin relay)"
     }
 
     fn run(&self) {
@@ -170,7 +167,7 @@ impl TestBin for Relay {
 
 impl TestBin for Iecho {
     fn help(&self) -> &'static str {
-        "Another type of echo that outputs a parameter per line, looping infinitely(e.g: nu --testbin iecho 3)"
+        "Another type of echo that outputs a parameter per line, looping infinitely(e.g: nutorch --testbin iecho 3)"
     }
 
     fn run(&self) {
@@ -186,7 +183,7 @@ impl TestBin for Iecho {
 
 impl TestBin for Fail {
     fn help(&self) -> &'static str {
-        "Exits with failure code <c>, if not given, fail with code 1(e.g: nu --testbin fail 10)"
+        "Exits with failure code <c>, if not given, fail with code 1(e.g: nutorch --testbin fail 10)"
     }
 
     fn run(&self) {
@@ -203,7 +200,7 @@ impl TestBin for Fail {
 
 impl TestBin for Nonu {
     fn help(&self) -> &'static str {
-        "Cross platform echo but concats arguments without space and NO newline(e.g: nu --testbin nonu a b c)"
+        "Cross platform echo but concats arguments without space and NO newline(e.g: nutorch --testbin nonu a b c)"
     }
 
     fn run(&self) {
@@ -244,7 +241,7 @@ impl TestBin for Chop {
 }
 impl TestBin for Repeater {
     fn help(&self) -> &'static str {
-        "Repeat a string or char N times(e.g: nu --testbin repeater a 5)"
+        "Repeat a string or char N times(e.g: nutorch --testbin repeater a 5)"
     }
 
     fn run(&self) {
@@ -265,7 +262,7 @@ impl TestBin for Repeater {
 
 impl TestBin for RepeatBytes {
     fn help(&self) -> &'static str {
-        "A version of repeater that can output binary data, even null bytes(e.g: nu --testbin repeat_bytes 003d9fbf 10)"
+        "A version of repeater that can output binary data, even null bytes(e.g: nutorch --testbin repeat_bytes 003d9fbf 10)"
     }
 
     fn run(&self) {
@@ -306,7 +303,7 @@ impl TestBin for NuRepl {
 
 impl TestBin for InputBytesLength {
     fn help(&self) -> &'static str {
-        "Prints the number of bytes received on stdin(e.g: 0x[deadbeef] | nu --testbin input_bytes_length)"
+        "Prints the number of bytes received on stdin(e.g: 0x[deadbeef] | nutorch --testbin input_bytes_length)"
     }
 
     fn run(&self) {
@@ -318,7 +315,7 @@ impl TestBin for InputBytesLength {
 }
 
 /// Echo's value of env keys from args
-/// Example: nu --testbin env_echo FOO BAR
+/// Example: nutorch --testbin env_echo FOO BAR
 /// If it it's not present echo's nothing
 pub fn echo_env(to_stdout: bool) {
     let args = args();
@@ -494,13 +491,18 @@ fn args() -> Vec<String> {
 }
 
 pub fn show_help(dispatcher: &std::collections::HashMap<String, Box<dyn TestBin>>) {
-    println!("Usage: nu --testbin <bin>\n<bin>:");
+    print!("{}", help_text(dispatcher));
+}
+
+pub fn help_text(dispatcher: &std::collections::HashMap<String, Box<dyn TestBin>>) -> String {
+    let mut output = String::from("Usage: nutorch --testbin <bin>\n<bin>:\n");
     let mut names = dispatcher.keys().collect::<Vec<_>>();
     names.sort();
     for n in names {
         let test_bin = dispatcher.get(n).expect("Test bin should exist");
-        println!("{n} -> {}", test_bin.help())
+        writeln!(output, "{n} -> {}", test_bin.help()).unwrap();
     }
+    output
 }
 
 /// Return a formatted help listing suitable for inclusion in usage output.

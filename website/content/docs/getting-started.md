@@ -14,9 +14,9 @@ on macOS Tahoe 26.x.
 With [Homebrew](https://brew.sh) installed, run:
 
 ```nu
-brew tap astrohackerlabs/astrohacker
 brew trust astrohackerlabs/astrohacker
-brew install astrohackerlabs/astrohacker/nutorch
+brew tap astrohackerlabs/astrohacker
+brew install nutorch
 ```
 
 Then launch the installed shell:
