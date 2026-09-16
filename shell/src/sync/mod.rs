@@ -24,14 +24,19 @@ impl Context {
     }
 
     pub fn start(&self, engine: &EngineState, stack: &mut Stack) -> Option<Arc<Server>> {
-        let runtime = stack
-            .get_env_var(engine, "XDG_RUNTIME_DIR")
+        let data = stack
+            .get_env_var(engine, "XDG_DATA_HOME")
             .and_then(|v| v.as_str().ok().map(std::path::PathBuf::from));
-        let result = Server::start(runtime.as_deref()).and_then(|server| {
-            let server = Arc::new(server);
-            transport::register_exit(server.clone())?;
-            Ok(server)
-        });
+        let home = stack
+            .get_env_var(engine, "HOME")
+            .and_then(|v| v.as_str().ok().map(std::path::PathBuf::from));
+        let result = transport::data_home(data.as_deref(), home.as_deref())
+            .and_then(|base| Server::start(&base))
+            .and_then(|server| {
+                let server = Arc::new(server);
+                transport::register_exit(server.clone())?;
+                Ok(server)
+            });
         match result {
             Ok(server) => {
                 stack.add_env_var(

@@ -174,21 +174,39 @@ fn private_dir(path: &Path, create: bool) -> Result<()> {
     Ok(())
 }
 
-fn runtime_dir(runtime: Option<&Path>, id: &str) -> Result<PathBuf> {
-    if let Some(base) = runtime.filter(|p| p.is_absolute()) {
-        private_dir(base, false)?;
-        let dir = base.join("astrohacker").join("nutorch");
-        if socket2::SockAddr::unix(dir.join(format!("{id}.sock"))).is_ok() {
-            private_dir(&base.join("astrohacker"), true)?;
-            private_dir(&dir, true)?;
-            return Ok(dir);
-        }
+pub fn data_home(data: Option<&Path>, home: Option<&Path>) -> Result<PathBuf> {
+    if let Some(base) = data.filter(|p| p.is_absolute()) {
+        return Ok(base.to_path_buf());
     }
-    eprintln!(
-        "nutorch sync: using private /tmp runtime storage (XDG runtime absent or unsuitable)"
-    );
-    // SAFETY: getuid has no preconditions.
-    let dir = PathBuf::from(format!("/tmp/nutorch-{}", unsafe { libc::getuid() }));
+    let home = home
+        .filter(|p| p.is_absolute())
+        .ok_or("set an absolute HOME or XDG_DATA_HOME for sync socket storage")?;
+    Ok(home.join(".local/share"))
+}
+
+fn socket_dir(base: &Path, id: &str) -> Result<PathBuf> {
+    if !base.is_absolute() {
+        return Err("XDG data directory must be absolute");
+    }
+    let parent = base.join("astrohacker");
+    let dir = parent.join("nutorch");
+    socket2::SockAddr::unix(dir.join(format!("{id}.sock")))
+        .map_err(|_| "XDG data socket path is too long; set a shorter absolute XDG_DATA_HOME")?;
+    fs::create_dir_all(base)
+        .map_err(|_| "cannot create XDG data directory; check HOME or XDG_DATA_HOME")?;
+    match DirBuilder::new().mode(0o700).create(&parent) {
+        Ok(()) => (),
+        Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => (),
+        Err(_) => return Err("cannot create Astrohacker data directory"),
+    }
+    let meta =
+        fs::symlink_metadata(&parent).map_err(|_| "Astrohacker data directory is unavailable")?;
+    // Shared Astrohacker data may be readable; it must not be writable by others.
+    if !meta.is_dir() || meta.uid() != unsafe { libc::getuid() } || meta.mode() & 0o022 != 0 {
+        return Err(
+            "Astrohacker data directory must be user-owned, not a symlink, and not writable by others",
+        );
+    }
     private_dir(&dir, true)?;
     Ok(dir)
 }
@@ -385,9 +403,9 @@ fn handle(mut stream: UnixStream, token: &str, queue: &Mutex<Queue>) {
 }
 
 impl Server {
-    pub fn start(runtime: Option<&Path>) -> Result<Self> {
+    pub fn start(data: &Path) -> Result<Self> {
         let id = random_hex(12)?;
-        let dir = runtime_dir(runtime, &id)?;
+        let dir = socket_dir(data, &id)?;
         Self::bind(dir.join(format!("{id}.sock")))
     }
 
@@ -564,7 +582,7 @@ mod tests {
             .tempdir_in("/tmp")
             .unwrap();
         fs::set_permissions(dir.path(), fs::Permissions::from_mode(0o700)).unwrap();
-        let server = Server::start(Some(dir.path())).unwrap();
+        let server = Server::start(dir.path()).unwrap();
         (dir, server)
     }
     fn request(server: &Server, env: Vec<(String, String)>) -> Request {
@@ -693,9 +711,9 @@ mod tests {
         send(&server.endpoint, vec![]).unwrap();
     }
     #[test]
-    fn runtime_security_and_independent_sessions() {
+    fn data_security_and_independent_sessions() {
         let (dir, one) = fixture();
-        let two = Server::start(Some(dir.path())).unwrap();
+        let two = Server::start(dir.path()).unwrap();
         assert_ne!(one.endpoint.path, two.endpoint.path);
         send(&one.endpoint, vec![("A".into(), "one".into())]).unwrap();
         assert!(two.drain().is_empty());
@@ -703,27 +721,55 @@ mod tests {
         assert!(Server::bind(one.endpoint.path.clone()).is_err());
         one.shutdown();
         assert!(two.endpoint.path.exists());
-        let insecure = dir.path().join("insecure");
-        fs::create_dir(&insecure).unwrap();
-        fs::set_permissions(&insecure, fs::Permissions::from_mode(0o755)).unwrap();
-        assert!(Server::start(Some(&insecure)).is_err());
+        send(&two.endpoint, vec![("B".into(), "still alive".into())]).unwrap();
+        let private = dir.path().join("astrohacker/nutorch");
+        fs::set_permissions(&private, fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(Server::start(dir.path()).is_err());
+        fs::set_permissions(&private, fs::Permissions::from_mode(0o700)).unwrap();
         let link = dir.path().join("link");
-        std::os::unix::fs::symlink(dir.path(), &link).unwrap();
-        assert!(Server::start(Some(&link)).is_err());
-        for runtime in [None, Some(Path::new("relative")), Some(Path::new(""))] {
-            let fallback = Server::start(runtime).unwrap();
-            assert!(
-                fallback
-                    .endpoint
-                    .path
-                    .starts_with(format!("/tmp/nutorch-{}", unsafe { libc::getuid() }))
-            );
-        }
+        fs::create_dir(&link).unwrap();
+        std::os::unix::fs::symlink(dir.path().join("astrohacker"), link.join("astrohacker"))
+            .unwrap();
+        assert!(Server::start(&link).is_err());
         let long = dir.path().join("x".repeat(100));
-        fs::create_dir(&long).unwrap();
-        fs::set_permissions(&long, fs::Permissions::from_mode(0o700)).unwrap();
-        let fallback = Server::start(Some(&long)).unwrap();
-        assert!(!fallback.endpoint.path.starts_with(&long));
+        assert!(Server::start(&long).is_err());
+        assert!(!long.exists());
+        assert!(Server::start(Path::new("relative")).is_err());
+    }
+
+    #[test]
+    fn xdg_defaults_and_ordinary_shared_root() {
+        let home = Path::new("/Users/example");
+        for data in [None, Some(Path::new("")), Some(Path::new("relative"))] {
+            assert_eq!(
+                data_home(data, Some(home)).unwrap(),
+                home.join(".local/share")
+            );
+            assert!(data_home(data, None).is_err());
+            assert!(data_home(data, Some(Path::new("relative"))).is_err());
+        }
+        assert_eq!(
+            data_home(Some(Path::new("/custom data")), None).unwrap(),
+            Path::new("/custom data")
+        );
+        let (dir, server) = fixture();
+        fs::set_permissions(dir.path(), fs::Permissions::from_mode(0o755)).unwrap();
+        fs::set_permissions(
+            dir.path().join("astrohacker"),
+            fs::Permissions::from_mode(0o755),
+        )
+        .unwrap();
+        let two = Server::start(dir.path()).unwrap();
+        assert!(
+            two.endpoint
+                .path
+                .starts_with(dir.path().join("astrohacker/nutorch"))
+        );
+        server.shutdown();
+        assert!(two.endpoint.path.exists());
+        let unicode = dir.path().join("é space");
+        let three = Server::start(&unicode).unwrap();
+        assert!(three.endpoint.path.starts_with(&unicode));
     }
 
     #[test]

@@ -14,6 +14,56 @@ struct Terminal {
     output: String,
 }
 
+#[test]
+fn xdg_socket_startup_is_quiet_and_exit_preserves_siblings() {
+    for default in [false, true] {
+        let home = tempfile::Builder::new()
+            .prefix("ntxdg-")
+            .tempdir_in("/tmp")
+            .unwrap();
+        let config = home.path().join("env.nu");
+        std::fs::write(&config, "hide-env XDG_DATA_HOME\n").unwrap();
+        let mut one = Terminal::start_with_env(home.path(), default.then_some(config.as_path()));
+        one.expect("[nu]");
+        assert!(!one.output.contains("runtime storage"), "{}", one.output);
+        assert!(!one.output.contains("receiver disabled"), "{}", one.output);
+        let base = if default {
+            home.path().join(".local/share")
+        } else {
+            home.path().to_path_buf()
+        };
+        let directory = base.join("astrohacker/nutorch");
+        let first = std::fs::read_dir(&directory)
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap()
+            .path();
+        let mut two = Terminal::start_with_env(home.path(), default.then_some(config.as_path()));
+        two.expect("[nu]");
+        assert!(!two.output.contains("runtime storage"));
+        assert!(!two.output.contains("receiver disabled"));
+        assert_eq!(std::fs::read_dir(&directory).unwrap().count(), 2);
+        one.send("exit\r");
+        let until = Instant::now() + Duration::from_secs(5);
+        while one.child.try_wait().unwrap().is_none() {
+            assert!(Instant::now() < until);
+            one.read_output();
+        }
+        assert!(!first.exists());
+        assert_eq!(std::fs::read_dir(&directory).unwrap().count(), 1);
+        two.send("print ('SECOND_' + 'ALIVE')\r");
+        two.expect("SECOND_ALIVE");
+        two.send("exit\r");
+        let until = Instant::now() + Duration::from_secs(5);
+        while two.child.try_wait().unwrap().is_none() {
+            assert!(Instant::now() < until);
+            two.read_output();
+        }
+        assert_eq!(std::fs::read_dir(&directory).unwrap().count(), 0);
+    }
+}
+
 impl Terminal {
     fn start(home: &std::path::Path) -> Self {
         Self::start_with_env(home, None)
@@ -39,7 +89,7 @@ impl Terminal {
             .env("HOME", home)
             .env("XDG_CONFIG_HOME", home)
             .env("ZDOTDIR", home)
-            .env("XDG_RUNTIME_DIR", home)
+            .env("XDG_DATA_HOME", home)
             .env_remove("NUTORCH_SYNC_SOCKET")
             .env_remove("NUTORCH_SYNC_TOKEN")
             .env(
@@ -361,12 +411,13 @@ fn sync_failed_initialization_does_not_route_to_ancestor() {
     use std::os::unix::fs::PermissionsExt;
     std::fs::set_permissions(home.path(), std::fs::Permissions::from_mode(0o700)).unwrap();
     let bad = home.path().join("unsafe");
-    std::fs::create_dir(&bad).unwrap();
-    std::fs::set_permissions(&bad, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let private = bad.join("astrohacker/nutorch");
+    std::fs::create_dir_all(&private).unwrap();
+    std::fs::set_permissions(&private, std::fs::Permissions::from_mode(0o755)).unwrap();
     let mut terminal = Terminal::start(home.path());
     terminal.expect("[nu]");
     terminal.send(&format!(
-        "with-env {{XDG_RUNTIME_DIR: '{}'}} {{ nutorch --no-config-file --no-history }}\r",
+        "with-env {{XDG_DATA_HOME: '{}'}} {{ nutorch --no-config-file --no-history }}\r",
         bad.display()
     ));
     terminal.expect("receiver disabled");

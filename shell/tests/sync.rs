@@ -17,7 +17,7 @@ fn command(home: &std::path::Path) -> Command {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_nutorch"));
     cmd.env("HOME", home)
         .env("XDG_CONFIG_HOME", home)
-        .env("XDG_RUNTIME_DIR", home)
+        .env("XDG_DATA_HOME", home)
         .env_remove(SOCKET)
         .env_remove(TOKEN);
     cmd
@@ -129,7 +129,7 @@ fn early_dispatch_help_errors_and_no_configuration() {
 #[test]
 fn external_and_noninteractive_native_target_inherited_receiver() {
     let home = home();
-    let server = Server::start(Some(home.path())).unwrap();
+    let server = Server::start(home.path()).unwrap();
     for args in [
         vec!["sync"],
         vec![
