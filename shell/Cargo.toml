@@ -18,7 +18,7 @@ nutorch-ops = { path = "../ops" }
 typetag = "0.2"
 reedline = { version = "0.51.0", path = "../forks/reedline", default-features = false, features = ["sqlite", "bashisms"] }
 
-nu-cli = { version = "0.115.2", path = "../forks/nushell/crates/nu-cli", package = "shannon-nu-cli", default-features = false, features = ["plugin"] }
+nu-cli = { version = "0.115.2", path = "../forks/nushell/crates/nu-cli", package = "shannon-nu-cli", default-features = false }
 nu-cmd-base = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-base" }
 nu-cmd-extra = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-extra" }
 nu-cmd-lang = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-lang" }
@@ -61,10 +61,20 @@ same-file = "1.0"
 nix = { version = "0.30", default-features = false, features = ["signal", "process", "fs", "term"] }
 
 [features]
-default = ["plugin", "sqlite", "trash-support"]
-plugin = ["nu-cmd-plugin", "nu-plugin-engine"]
+default = ["mcp", "network", "plugin", "rustls-tls", "sqlite", "trash-support"]
+plugin = [
+    "dep:nu-cmd-plugin",
+    "dep:nu-plugin-engine",
+    "nu-cli/plugin",
+    "nu-cmd-lang/plugin",
+    "nu-command/plugin",
+    "nu-config/plugin",
+    "nu-engine/plugin",
+    "nu-parser/plugin",
+    "nu-protocol/plugin",
+]
 sqlite = ["nu-cli/sqlite", "nu-command/sqlite", "nu-std/sqlite", "nu-protocol/sqlite", "reedline/sqlite"]
 trash-support = ["nu-command/trash-support"]
-mcp = ["nu-mcp"]
+mcp = ["dep:nu-mcp", "nu-mcp/mcp"]
 network = ["nu-command/network"]
-rustls-tls = []
+rustls-tls = ["nu-command/rustls-tls"]

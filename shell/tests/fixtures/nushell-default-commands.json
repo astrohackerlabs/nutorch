@@ -1,0 +1,4131 @@
+{
+  "fork_commit": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+  "platform": "aarch64-apple-darwin",
+  "version": {
+    "version": "0.115.2",
+    "major": 0,
+    "minor": 115,
+    "patch": 2,
+    "branch": "issue-26091523132966-exp1-environment-sync",
+    "commit_hash": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+    "build_os": "macos-aarch64",
+    "build_target": "aarch64-apple-darwin",
+    "rust_version": "rustc 1.96.1 (31fca3adb 2026-06-26)",
+    "rust_channel": "1.96.1-aarch64-apple-darwin",
+    "cargo_version": "cargo 1.96.1 (356927216 2026-06-26)",
+    "build_time": "2026-09-17 17:54:16 -05:00",
+    "build_rust_channel": "debug",
+    "allocator": "standard",
+    "features": "default, lsp, mcp, network, plugin, rustls-tls, sqlite, trash-support",
+    "installed_plugins": "",
+    "experimental_options": "example=false, dc-glob=false, reorder-cell-paths=true, pipefail=true, enforce-runtime-annotations=true, native-clip=false, cell-path-types=false"
+  },
+  "without_std": [
+    {
+      "name": "abbr",
+      "type": "built-in"
+    },
+    {
+      "name": "abbr list",
+      "type": "built-in"
+    },
+    {
+      "name": "alias",
+      "type": "keyword"
+    },
+    {
+      "name": "all",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi gradient",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi link",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi strip",
+      "type": "built-in"
+    },
+    {
+      "name": "any",
+      "type": "built-in"
+    },
+    {
+      "name": "append",
+      "type": "built-in"
+    },
+    {
+      "name": "ast",
+      "type": "built-in"
+    },
+    {
+      "name": "attr",
+      "type": "built-in"
+    },
+    {
+      "name": "attr category",
+      "type": "built-in"
+    },
+    {
+      "name": "attr complete",
+      "type": "built-in"
+    },
+    {
+      "name": "attr complete external",
+      "type": "built-in"
+    },
+    {
+      "name": "attr deprecated",
+      "type": "built-in"
+    },
+    {
+      "name": "attr example",
+      "type": "built-in"
+    },
+    {
+      "name": "attr interactive",
+      "type": "built-in"
+    },
+    {
+      "name": "attr search-terms",
+      "type": "built-in"
+    },
+    {
+      "name": "bits",
+      "type": "built-in"
+    },
+    {
+      "name": "bits and",
+      "type": "built-in"
+    },
+    {
+      "name": "bits not",
+      "type": "built-in"
+    },
+    {
+      "name": "bits or",
+      "type": "built-in"
+    },
+    {
+      "name": "bits rol",
+      "type": "built-in"
+    },
+    {
+      "name": "bits ror",
+      "type": "built-in"
+    },
+    {
+      "name": "bits shl",
+      "type": "built-in"
+    },
+    {
+      "name": "bits shr",
+      "type": "built-in"
+    },
+    {
+      "name": "bits xor",
+      "type": "built-in"
+    },
+    {
+      "name": "break",
+      "type": "keyword"
+    },
+    {
+      "name": "bytes",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes add",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes at",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes build",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes collect",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes ends-with",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes index-of",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes length",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes remove",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes replace",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes split",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes starts-with",
+      "type": "built-in"
+    },
+    {
+      "name": "cal",
+      "type": "built-in"
+    },
+    {
+      "name": "cd",
+      "type": "built-in"
+    },
+    {
+      "name": "char",
+      "type": "built-in"
+    },
+    {
+      "name": "chunk-by",
+      "type": "built-in"
+    },
+    {
+      "name": "chunks",
+      "type": "built-in"
+    },
+    {
+      "name": "clear",
+      "type": "built-in"
+    },
+    {
+      "name": "collect",
+      "type": "keyword"
+    },
+    {
+      "name": "columns",
+      "type": "built-in"
+    },
+    {
+      "name": "combinations",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline complete",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline edit",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline get-cursor",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline set-cursor",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline set-prompt",
+      "type": "built-in"
+    },
+    {
+      "name": "compact",
+      "type": "built-in"
+    },
+    {
+      "name": "complete",
+      "type": "built-in"
+    },
+    {
+      "name": "config",
+      "type": "built-in"
+    },
+    {
+      "name": "config env",
+      "type": "built-in"
+    },
+    {
+      "name": "config flatten",
+      "type": "built-in"
+    },
+    {
+      "name": "config nu",
+      "type": "built-in"
+    },
+    {
+      "name": "config reset",
+      "type": "built-in"
+    },
+    {
+      "name": "config use-colors",
+      "type": "built-in"
+    },
+    {
+      "name": "const",
+      "type": "keyword"
+    },
+    {
+      "name": "continue",
+      "type": "keyword"
+    },
+    {
+      "name": "cp",
+      "type": "built-in"
+    },
+    {
+      "name": "date",
+      "type": "built-in"
+    },
+    {
+      "name": "date format",
+      "type": "built-in"
+    },
+    {
+      "name": "date from-human",
+      "type": "built-in"
+    },
+    {
+      "name": "date humanize",
+      "type": "built-in"
+    },
+    {
+      "name": "date list-timezone",
+      "type": "built-in"
+    },
+    {
+      "name": "date now",
+      "type": "built-in"
+    },
+    {
+      "name": "date to-timezone",
+      "type": "built-in"
+    },
+    {
+      "name": "debug",
+      "type": "built-in"
+    },
+    {
+      "name": "debug env",
+      "type": "built-in"
+    },
+    {
+      "name": "debug experimental-options",
+      "type": "built-in"
+    },
+    {
+      "name": "debug info",
+      "type": "built-in"
+    },
+    {
+      "name": "debug profile",
+      "type": "built-in"
+    },
+    {
+      "name": "decode",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base32",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base32hex",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base64",
+      "type": "built-in"
+    },
+    {
+      "name": "decode hex",
+      "type": "built-in"
+    },
+    {
+      "name": "def",
+      "type": "keyword"
+    },
+    {
+      "name": "default",
+      "type": "built-in"
+    },
+    {
+      "name": "describe",
+      "type": "built-in"
+    },
+    {
+      "name": "detect",
+      "type": "built-in"
+    },
+    {
+      "name": "detect columns",
+      "type": "built-in"
+    },
+    {
+      "name": "detect type",
+      "type": "built-in"
+    },
+    {
+      "name": "difference",
+      "type": "built-in"
+    },
+    {
+      "name": "do",
+      "type": "built-in"
+    },
+    {
+      "name": "drop",
+      "type": "built-in"
+    },
+    {
+      "name": "drop column",
+      "type": "built-in"
+    },
+    {
+      "name": "drop nth",
+      "type": "built-in"
+    },
+    {
+      "name": "du",
+      "type": "built-in"
+    },
+    {
+      "name": "each",
+      "type": "built-in"
+    },
+    {
+      "name": "each while",
+      "type": "built-in"
+    },
+    {
+      "name": "echo",
+      "type": "built-in"
+    },
+    {
+      "name": "encode",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base32",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base32hex",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base64",
+      "type": "built-in"
+    },
+    {
+      "name": "encode hex",
+      "type": "built-in"
+    },
+    {
+      "name": "enumerate",
+      "type": "built-in"
+    },
+    {
+      "name": "error",
+      "type": "built-in"
+    },
+    {
+      "name": "error make",
+      "type": "built-in"
+    },
+    {
+      "name": "every",
+      "type": "built-in"
+    },
+    {
+      "name": "exec",
+      "type": "built-in"
+    },
+    {
+      "name": "exit",
+      "type": "built-in"
+    },
+    {
+      "name": "explain",
+      "type": "built-in"
+    },
+    {
+      "name": "explore",
+      "type": "built-in"
+    },
+    {
+      "name": "explore config",
+      "type": "built-in"
+    },
+    {
+      "name": "explore regex",
+      "type": "built-in"
+    },
+    {
+      "name": "export",
+      "type": "keyword"
+    },
+    {
+      "name": "export alias",
+      "type": "keyword"
+    },
+    {
+      "name": "export const",
+      "type": "keyword"
+    },
+    {
+      "name": "export def",
+      "type": "keyword"
+    },
+    {
+      "name": "export extern",
+      "type": "keyword"
+    },
+    {
+      "name": "export module",
+      "type": "keyword"
+    },
+    {
+      "name": "export use",
+      "type": "keyword"
+    },
+    {
+      "name": "export-env",
+      "type": "keyword"
+    },
+    {
+      "name": "extern",
+      "type": "keyword"
+    },
+    {
+      "name": "fill",
+      "type": "built-in"
+    },
+    {
+      "name": "filter",
+      "type": "built-in"
+    },
+    {
+      "name": "find",
+      "type": "built-in"
+    },
+    {
+      "name": "first",
+      "type": "built-in"
+    },
+    {
+      "name": "flatten",
+      "type": "built-in"
+    },
+    {
+      "name": "for",
+      "type": "keyword"
+    },
+    {
+      "name": "format",
+      "type": "built-in"
+    },
+    {
+      "name": "format bits",
+      "type": "built-in"
+    },
+    {
+      "name": "format date",
+      "type": "built-in"
+    },
+    {
+      "name": "format duration",
+      "type": "built-in"
+    },
+    {
+      "name": "format filesize",
+      "type": "built-in"
+    },
+    {
+      "name": "format number",
+      "type": "built-in"
+    },
+    {
+      "name": "format pattern",
+      "type": "built-in"
+    },
+    {
+      "name": "from",
+      "type": "built-in"
+    },
+    {
+      "name": "from csv",
+      "type": "built-in"
+    },
+    {
+      "name": "from json",
+      "type": "built-in"
+    },
+    {
+      "name": "from kdl",
+      "type": "built-in"
+    },
+    {
+      "name": "from md",
+      "type": "built-in"
+    },
+    {
+      "name": "from msgpack",
+      "type": "built-in"
+    },
+    {
+      "name": "from msgpackz",
+      "type": "built-in"
+    },
+    {
+      "name": "from nuon",
+      "type": "built-in"
+    },
+    {
+      "name": "from ods",
+      "type": "built-in"
+    },
+    {
+      "name": "from ssv",
+      "type": "built-in"
+    },
+    {
+      "name": "from toml",
+      "type": "built-in"
+    },
+    {
+      "name": "from tsv",
+      "type": "built-in"
+    },
+    {
+      "name": "from url",
+      "type": "built-in"
+    },
+    {
+      "name": "from xlsx",
+      "type": "built-in"
+    },
+    {
+      "name": "from xml",
+      "type": "built-in"
+    },
+    {
+      "name": "from yaml",
+      "type": "built-in"
+    },
+    {
+      "name": "from yml",
+      "type": "built-in"
+    },
+    {
+      "name": "generate",
+      "type": "built-in"
+    },
+    {
+      "name": "get",
+      "type": "built-in"
+    },
+    {
+      "name": "glob",
+      "type": "built-in"
+    },
+    {
+      "name": "grid",
+      "type": "built-in"
+    },
+    {
+      "name": "group-by",
+      "type": "built-in"
+    },
+    {
+      "name": "hash",
+      "type": "built-in"
+    },
+    {
+      "name": "hash md5",
+      "type": "built-in"
+    },
+    {
+      "name": "hash sha256",
+      "type": "built-in"
+    },
+    {
+      "name": "headers",
+      "type": "built-in"
+    },
+    {
+      "name": "help",
+      "type": "built-in"
+    },
+    {
+      "name": "help aliases",
+      "type": "built-in"
+    },
+    {
+      "name": "help commands",
+      "type": "built-in"
+    },
+    {
+      "name": "help escapes",
+      "type": "built-in"
+    },
+    {
+      "name": "help externs",
+      "type": "built-in"
+    },
+    {
+      "name": "help modules",
+      "type": "built-in"
+    },
+    {
+      "name": "help operators",
+      "type": "built-in"
+    },
+    {
+      "name": "help pipe-and-redirect",
+      "type": "built-in"
+    },
+    {
+      "name": "hide",
+      "type": "keyword"
+    },
+    {
+      "name": "hide-env",
+      "type": "built-in"
+    },
+    {
+      "name": "histogram",
+      "type": "built-in"
+    },
+    {
+      "name": "history",
+      "type": "built-in"
+    },
+    {
+      "name": "history import",
+      "type": "built-in"
+    },
+    {
+      "name": "history session",
+      "type": "built-in"
+    },
+    {
+      "name": "http",
+      "type": "built-in"
+    },
+    {
+      "name": "http delete",
+      "type": "built-in"
+    },
+    {
+      "name": "http get",
+      "type": "built-in"
+    },
+    {
+      "name": "http head",
+      "type": "built-in"
+    },
+    {
+      "name": "http options",
+      "type": "built-in"
+    },
+    {
+      "name": "http patch",
+      "type": "built-in"
+    },
+    {
+      "name": "http pool",
+      "type": "built-in"
+    },
+    {
+      "name": "http post",
+      "type": "built-in"
+    },
+    {
+      "name": "http put",
+      "type": "built-in"
+    },
+    {
+      "name": "idx",
+      "type": "built-in"
+    },
+    {
+      "name": "idx dirs",
+      "type": "built-in"
+    },
+    {
+      "name": "idx drop",
+      "type": "built-in"
+    },
+    {
+      "name": "idx files",
+      "type": "built-in"
+    },
+    {
+      "name": "idx find",
+      "type": "built-in"
+    },
+    {
+      "name": "idx init",
+      "type": "built-in"
+    },
+    {
+      "name": "idx search",
+      "type": "built-in"
+    },
+    {
+      "name": "idx status",
+      "type": "built-in"
+    },
+    {
+      "name": "idx watch",
+      "type": "built-in"
+    },
+    {
+      "name": "if",
+      "type": "keyword"
+    },
+    {
+      "name": "ignore",
+      "type": "built-in"
+    },
+    {
+      "name": "input",
+      "type": "built-in"
+    },
+    {
+      "name": "input list",
+      "type": "built-in"
+    },
+    {
+      "name": "input listen",
+      "type": "built-in"
+    },
+    {
+      "name": "insert",
+      "type": "built-in"
+    },
+    {
+      "name": "inspect",
+      "type": "built-in"
+    },
+    {
+      "name": "interleave",
+      "type": "built-in"
+    },
+    {
+      "name": "intersect",
+      "type": "built-in"
+    },
+    {
+      "name": "into",
+      "type": "built-in"
+    },
+    {
+      "name": "into binary",
+      "type": "built-in"
+    },
+    {
+      "name": "into bool",
+      "type": "built-in"
+    },
+    {
+      "name": "into cell-path",
+      "type": "built-in"
+    },
+    {
+      "name": "into datetime",
+      "type": "built-in"
+    },
+    {
+      "name": "into duration",
+      "type": "built-in"
+    },
+    {
+      "name": "into filesize",
+      "type": "built-in"
+    },
+    {
+      "name": "into float",
+      "type": "built-in"
+    },
+    {
+      "name": "into glob",
+      "type": "built-in"
+    },
+    {
+      "name": "into int",
+      "type": "built-in"
+    },
+    {
+      "name": "into matrix",
+      "type": "built-in"
+    },
+    {
+      "name": "into record",
+      "type": "built-in"
+    },
+    {
+      "name": "into semver",
+      "type": "built-in"
+    },
+    {
+      "name": "into semver-range",
+      "type": "built-in"
+    },
+    {
+      "name": "into sqlite",
+      "type": "built-in"
+    },
+    {
+      "name": "into string",
+      "type": "built-in"
+    },
+    {
+      "name": "into value",
+      "type": "built-in"
+    },
+    {
+      "name": "is-admin",
+      "type": "built-in"
+    },
+    {
+      "name": "is-empty",
+      "type": "built-in"
+    },
+    {
+      "name": "is-not-empty",
+      "type": "built-in"
+    },
+    {
+      "name": "is-redirected",
+      "type": "built-in"
+    },
+    {
+      "name": "is-terminal",
+      "type": "built-in"
+    },
+    {
+      "name": "items",
+      "type": "built-in"
+    },
+    {
+      "name": "job",
+      "type": "built-in"
+    },
+    {
+      "name": "job describe",
+      "type": "built-in"
+    },
+    {
+      "name": "job flush",
+      "type": "built-in"
+    },
+    {
+      "name": "job id",
+      "type": "built-in"
+    },
+    {
+      "name": "job kill",
+      "type": "built-in"
+    },
+    {
+      "name": "job list",
+      "type": "built-in"
+    },
+    {
+      "name": "job recv",
+      "type": "built-in"
+    },
+    {
+      "name": "job send",
+      "type": "built-in"
+    },
+    {
+      "name": "job spawn",
+      "type": "built-in"
+    },
+    {
+      "name": "job unfreeze",
+      "type": "built-in"
+    },
+    {
+      "name": "join",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings default",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings list",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings listen",
+      "type": "built-in"
+    },
+    {
+      "name": "kill",
+      "type": "built-in"
+    },
+    {
+      "name": "last",
+      "type": "built-in"
+    },
+    {
+      "name": "length",
+      "type": "built-in"
+    },
+    {
+      "name": "let",
+      "type": "keyword"
+    },
+    {
+      "name": "let-env",
+      "type": "built-in"
+    },
+    {
+      "name": "lines",
+      "type": "built-in"
+    },
+    {
+      "name": "load-env",
+      "type": "built-in"
+    },
+    {
+      "name": "loop",
+      "type": "keyword"
+    },
+    {
+      "name": "ls",
+      "type": "built-in"
+    },
+    {
+      "name": "match",
+      "type": "keyword"
+    },
+    {
+      "name": "math",
+      "type": "built-in"
+    },
+    {
+      "name": "math abs",
+      "type": "built-in"
+    },
+    {
+      "name": "math arccos",
+      "type": "built-in"
+    },
+    {
+      "name": "math arccosh",
+      "type": "built-in"
+    },
+    {
+      "name": "math arcsin",
+      "type": "built-in"
+    },
+    {
+      "name": "math arcsinh",
+      "type": "built-in"
+    },
+    {
+      "name": "math arctan",
+      "type": "built-in"
+    },
+    {
+      "name": "math arctanh",
+      "type": "built-in"
+    },
+    {
+      "name": "math avg",
+      "type": "built-in"
+    },
+    {
+      "name": "math cbrt",
+      "type": "built-in"
+    },
+    {
+      "name": "math ceil",
+      "type": "built-in"
+    },
+    {
+      "name": "math cos",
+      "type": "built-in"
+    },
+    {
+      "name": "math cosh",
+      "type": "built-in"
+    },
+    {
+      "name": "math exp",
+      "type": "built-in"
+    },
+    {
+      "name": "math floor",
+      "type": "built-in"
+    },
+    {
+      "name": "math ln",
+      "type": "built-in"
+    },
+    {
+      "name": "math log",
+      "type": "built-in"
+    },
+    {
+      "name": "math max",
+      "type": "built-in"
+    },
+    {
+      "name": "math median",
+      "type": "built-in"
+    },
+    {
+      "name": "math min",
+      "type": "built-in"
+    },
+    {
+      "name": "math mode",
+      "type": "built-in"
+    },
+    {
+      "name": "math product",
+      "type": "built-in"
+    },
+    {
+      "name": "math round",
+      "type": "built-in"
+    },
+    {
+      "name": "math sin",
+      "type": "built-in"
+    },
+    {
+      "name": "math sinh",
+      "type": "built-in"
+    },
+    {
+      "name": "math sqrt",
+      "type": "built-in"
+    },
+    {
+      "name": "math stddev",
+      "type": "built-in"
+    },
+    {
+      "name": "math sum",
+      "type": "built-in"
+    },
+    {
+      "name": "math tan",
+      "type": "built-in"
+    },
+    {
+      "name": "math tanh",
+      "type": "built-in"
+    },
+    {
+      "name": "math variance",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix add",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix get-col",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix get-row",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix identity",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix into-nu",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix map",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix max",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix mean",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix multiply",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix reduce",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix reshape",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix scale",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix set-col",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix set-row",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix subtract",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix sum",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix transpose",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix zeros",
+      "type": "built-in"
+    },
+    {
+      "name": "merge",
+      "type": "built-in"
+    },
+    {
+      "name": "merge deep",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata access",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata set",
+      "type": "built-in"
+    },
+    {
+      "name": "mkdir",
+      "type": "built-in"
+    },
+    {
+      "name": "mktemp",
+      "type": "built-in"
+    },
+    {
+      "name": "module",
+      "type": "keyword"
+    },
+    {
+      "name": "move",
+      "type": "built-in"
+    },
+    {
+      "name": "mut",
+      "type": "keyword"
+    },
+    {
+      "name": "mv",
+      "type": "built-in"
+    },
+    {
+      "name": "nu-check",
+      "type": "built-in"
+    },
+    {
+      "name": "nu-highlight",
+      "type": "built-in"
+    },
+    {
+      "name": "open",
+      "type": "built-in"
+    },
+    {
+      "name": "overlay",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay hide",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay list",
+      "type": "built-in"
+    },
+    {
+      "name": "overlay new",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay use",
+      "type": "keyword"
+    },
+    {
+      "name": "panic",
+      "type": "built-in"
+    },
+    {
+      "name": "par-each",
+      "type": "built-in"
+    },
+    {
+      "name": "parse",
+      "type": "built-in"
+    },
+    {
+      "name": "path",
+      "type": "built-in"
+    },
+    {
+      "name": "path basename",
+      "type": "built-in"
+    },
+    {
+      "name": "path dirname",
+      "type": "built-in"
+    },
+    {
+      "name": "path exists",
+      "type": "built-in"
+    },
+    {
+      "name": "path expand",
+      "type": "built-in"
+    },
+    {
+      "name": "path join",
+      "type": "built-in"
+    },
+    {
+      "name": "path parse",
+      "type": "built-in"
+    },
+    {
+      "name": "path relative-to",
+      "type": "built-in"
+    },
+    {
+      "name": "path self",
+      "type": "built-in"
+    },
+    {
+      "name": "path split",
+      "type": "built-in"
+    },
+    {
+      "name": "path type",
+      "type": "built-in"
+    },
+    {
+      "name": "peek",
+      "type": "built-in"
+    },
+    {
+      "name": "permutations",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin add",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin list",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin rm",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin stop",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin use",
+      "type": "keyword"
+    },
+    {
+      "name": "port",
+      "type": "built-in"
+    },
+    {
+      "name": "prepend",
+      "type": "built-in"
+    },
+    {
+      "name": "print",
+      "type": "built-in"
+    },
+    {
+      "name": "ps",
+      "type": "built-in"
+    },
+    {
+      "name": "query",
+      "type": "built-in"
+    },
+    {
+      "name": "query db",
+      "type": "built-in"
+    },
+    {
+      "name": "random",
+      "type": "built-in"
+    },
+    {
+      "name": "random binary",
+      "type": "built-in"
+    },
+    {
+      "name": "random bool",
+      "type": "built-in"
+    },
+    {
+      "name": "random chars",
+      "type": "built-in"
+    },
+    {
+      "name": "random float",
+      "type": "built-in"
+    },
+    {
+      "name": "random int",
+      "type": "built-in"
+    },
+    {
+      "name": "random pass",
+      "type": "built-in"
+    },
+    {
+      "name": "random uuid",
+      "type": "built-in"
+    },
+    {
+      "name": "reduce",
+      "type": "built-in"
+    },
+    {
+      "name": "reject",
+      "type": "built-in"
+    },
+    {
+      "name": "rename",
+      "type": "built-in"
+    },
+    {
+      "name": "return",
+      "type": "keyword"
+    },
+    {
+      "name": "reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "rm",
+      "type": "built-in"
+    },
+    {
+      "name": "roll",
+      "type": "built-in"
+    },
+    {
+      "name": "roll down",
+      "type": "built-in"
+    },
+    {
+      "name": "roll left",
+      "type": "built-in"
+    },
+    {
+      "name": "roll right",
+      "type": "built-in"
+    },
+    {
+      "name": "roll up",
+      "type": "built-in"
+    },
+    {
+      "name": "rotate",
+      "type": "built-in"
+    },
+    {
+      "name": "run",
+      "type": "keyword"
+    },
+    {
+      "name": "run-external",
+      "type": "built-in"
+    },
+    {
+      "name": "run-internal",
+      "type": "built-in"
+    },
+    {
+      "name": "save",
+      "type": "built-in"
+    },
+    {
+      "name": "schema",
+      "type": "built-in"
+    },
+    {
+      "name": "scope",
+      "type": "built-in"
+    },
+    {
+      "name": "scope aliases",
+      "type": "built-in"
+    },
+    {
+      "name": "scope commands",
+      "type": "built-in"
+    },
+    {
+      "name": "scope engine-stats",
+      "type": "built-in"
+    },
+    {
+      "name": "scope externs",
+      "type": "built-in"
+    },
+    {
+      "name": "scope modules",
+      "type": "built-in"
+    },
+    {
+      "name": "scope variables",
+      "type": "built-in"
+    },
+    {
+      "name": "select",
+      "type": "built-in"
+    },
+    {
+      "name": "semver",
+      "type": "built-in"
+    },
+    {
+      "name": "semver bump",
+      "type": "built-in"
+    },
+    {
+      "name": "seq",
+      "type": "built-in"
+    },
+    {
+      "name": "seq char",
+      "type": "built-in"
+    },
+    {
+      "name": "seq date",
+      "type": "built-in"
+    },
+    {
+      "name": "shuffle",
+      "type": "built-in"
+    },
+    {
+      "name": "skip",
+      "type": "built-in"
+    },
+    {
+      "name": "skip until",
+      "type": "built-in"
+    },
+    {
+      "name": "skip while",
+      "type": "built-in"
+    },
+    {
+      "name": "sleep",
+      "type": "built-in"
+    },
+    {
+      "name": "slice",
+      "type": "built-in"
+    },
+    {
+      "name": "sort",
+      "type": "built-in"
+    },
+    {
+      "name": "sort-by",
+      "type": "built-in"
+    },
+    {
+      "name": "source",
+      "type": "keyword"
+    },
+    {
+      "name": "source-env",
+      "type": "keyword"
+    },
+    {
+      "name": "split",
+      "type": "built-in"
+    },
+    {
+      "name": "split cell-path",
+      "type": "built-in"
+    },
+    {
+      "name": "split chars",
+      "type": "built-in"
+    },
+    {
+      "name": "split column",
+      "type": "built-in"
+    },
+    {
+      "name": "split list",
+      "type": "built-in"
+    },
+    {
+      "name": "split row",
+      "type": "built-in"
+    },
+    {
+      "name": "split words",
+      "type": "built-in"
+    },
+    {
+      "name": "start",
+      "type": "built-in"
+    },
+    {
+      "name": "stor",
+      "type": "built-in"
+    },
+    {
+      "name": "stor create",
+      "type": "built-in"
+    },
+    {
+      "name": "stor delete",
+      "type": "built-in"
+    },
+    {
+      "name": "stor export",
+      "type": "built-in"
+    },
+    {
+      "name": "stor import",
+      "type": "built-in"
+    },
+    {
+      "name": "stor insert",
+      "type": "built-in"
+    },
+    {
+      "name": "stor open",
+      "type": "built-in"
+    },
+    {
+      "name": "stor reset",
+      "type": "built-in"
+    },
+    {
+      "name": "stor update",
+      "type": "built-in"
+    },
+    {
+      "name": "str",
+      "type": "built-in"
+    },
+    {
+      "name": "str camel-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str capitalize",
+      "type": "built-in"
+    },
+    {
+      "name": "str contains",
+      "type": "built-in"
+    },
+    {
+      "name": "str distance",
+      "type": "built-in"
+    },
+    {
+      "name": "str downcase",
+      "type": "built-in"
+    },
+    {
+      "name": "str ends-with",
+      "type": "built-in"
+    },
+    {
+      "name": "str escape-regex",
+      "type": "built-in"
+    },
+    {
+      "name": "str expand",
+      "type": "built-in"
+    },
+    {
+      "name": "str index-of",
+      "type": "built-in"
+    },
+    {
+      "name": "str join",
+      "type": "built-in"
+    },
+    {
+      "name": "str kebab-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str length",
+      "type": "built-in"
+    },
+    {
+      "name": "str lowercase",
+      "type": "built-in"
+    },
+    {
+      "name": "str pascal-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str replace",
+      "type": "built-in"
+    },
+    {
+      "name": "str reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "str screaming-snake-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str snake-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str starts-with",
+      "type": "built-in"
+    },
+    {
+      "name": "str stats",
+      "type": "built-in"
+    },
+    {
+      "name": "str substring",
+      "type": "built-in"
+    },
+    {
+      "name": "str title-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str trim",
+      "type": "built-in"
+    },
+    {
+      "name": "str upcase",
+      "type": "built-in"
+    },
+    {
+      "name": "str uppercase",
+      "type": "built-in"
+    },
+    {
+      "name": "sys",
+      "type": "built-in"
+    },
+    {
+      "name": "sys cpu",
+      "type": "built-in"
+    },
+    {
+      "name": "sys disks",
+      "type": "built-in"
+    },
+    {
+      "name": "sys host",
+      "type": "built-in"
+    },
+    {
+      "name": "sys mem",
+      "type": "built-in"
+    },
+    {
+      "name": "sys net",
+      "type": "built-in"
+    },
+    {
+      "name": "sys temp",
+      "type": "built-in"
+    },
+    {
+      "name": "sys users",
+      "type": "built-in"
+    },
+    {
+      "name": "table",
+      "type": "built-in"
+    },
+    {
+      "name": "take",
+      "type": "built-in"
+    },
+    {
+      "name": "take until",
+      "type": "built-in"
+    },
+    {
+      "name": "take while",
+      "type": "built-in"
+    },
+    {
+      "name": "tee",
+      "type": "built-in"
+    },
+    {
+      "name": "term",
+      "type": "built-in"
+    },
+    {
+      "name": "term query",
+      "type": "built-in"
+    },
+    {
+      "name": "term size",
+      "type": "built-in"
+    },
+    {
+      "name": "timeit",
+      "type": "built-in"
+    },
+    {
+      "name": "to",
+      "type": "built-in"
+    },
+    {
+      "name": "to csv",
+      "type": "built-in"
+    },
+    {
+      "name": "to html",
+      "type": "built-in"
+    },
+    {
+      "name": "to json",
+      "type": "built-in"
+    },
+    {
+      "name": "to kdl",
+      "type": "built-in"
+    },
+    {
+      "name": "to md",
+      "type": "built-in"
+    },
+    {
+      "name": "to msgpack",
+      "type": "built-in"
+    },
+    {
+      "name": "to msgpackz",
+      "type": "built-in"
+    },
+    {
+      "name": "to nuon",
+      "type": "built-in"
+    },
+    {
+      "name": "to text",
+      "type": "built-in"
+    },
+    {
+      "name": "to toml",
+      "type": "built-in"
+    },
+    {
+      "name": "to tsv",
+      "type": "built-in"
+    },
+    {
+      "name": "to txt",
+      "type": "built-in"
+    },
+    {
+      "name": "to xml",
+      "type": "built-in"
+    },
+    {
+      "name": "to yaml",
+      "type": "built-in"
+    },
+    {
+      "name": "to yml",
+      "type": "built-in"
+    },
+    {
+      "name": "touch",
+      "type": "built-in"
+    },
+    {
+      "name": "transpose",
+      "type": "built-in"
+    },
+    {
+      "name": "try",
+      "type": "keyword"
+    },
+    {
+      "name": "tutor",
+      "type": "built-in"
+    },
+    {
+      "name": "ulimit",
+      "type": "built-in"
+    },
+    {
+      "name": "umask",
+      "type": "built-in"
+    },
+    {
+      "name": "uname",
+      "type": "built-in"
+    },
+    {
+      "name": "union",
+      "type": "built-in"
+    },
+    {
+      "name": "uniq",
+      "type": "built-in"
+    },
+    {
+      "name": "uniq-by",
+      "type": "built-in"
+    },
+    {
+      "name": "unlet",
+      "type": "built-in"
+    },
+    {
+      "name": "update",
+      "type": "built-in"
+    },
+    {
+      "name": "update cells",
+      "type": "built-in"
+    },
+    {
+      "name": "upsert",
+      "type": "built-in"
+    },
+    {
+      "name": "url",
+      "type": "built-in"
+    },
+    {
+      "name": "url build-query",
+      "type": "built-in"
+    },
+    {
+      "name": "url decode",
+      "type": "built-in"
+    },
+    {
+      "name": "url encode",
+      "type": "built-in"
+    },
+    {
+      "name": "url join",
+      "type": "built-in"
+    },
+    {
+      "name": "url parse",
+      "type": "built-in"
+    },
+    {
+      "name": "url split-query",
+      "type": "built-in"
+    },
+    {
+      "name": "use",
+      "type": "keyword"
+    },
+    {
+      "name": "values",
+      "type": "built-in"
+    },
+    {
+      "name": "version",
+      "type": "built-in"
+    },
+    {
+      "name": "version check",
+      "type": "built-in"
+    },
+    {
+      "name": "view",
+      "type": "built-in"
+    },
+    {
+      "name": "view blocks",
+      "type": "built-in"
+    },
+    {
+      "name": "view files",
+      "type": "built-in"
+    },
+    {
+      "name": "view ir",
+      "type": "built-in"
+    },
+    {
+      "name": "view source",
+      "type": "built-in"
+    },
+    {
+      "name": "view span",
+      "type": "built-in"
+    },
+    {
+      "name": "watch",
+      "type": "built-in"
+    },
+    {
+      "name": "where",
+      "type": "keyword"
+    },
+    {
+      "name": "which",
+      "type": "built-in"
+    },
+    {
+      "name": "while",
+      "type": "keyword"
+    },
+    {
+      "name": "whoami",
+      "type": "built-in"
+    },
+    {
+      "name": "window",
+      "type": "built-in"
+    },
+    {
+      "name": "with-env",
+      "type": "built-in"
+    },
+    {
+      "name": "wrap",
+      "type": "built-in"
+    },
+    {
+      "name": "zip",
+      "type": "built-in"
+    }
+  ],
+  "with_std": [
+    {
+      "name": "abbr",
+      "type": "built-in"
+    },
+    {
+      "name": "abbr list",
+      "type": "built-in"
+    },
+    {
+      "name": "alias",
+      "type": "keyword"
+    },
+    {
+      "name": "all",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi gradient",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi link",
+      "type": "built-in"
+    },
+    {
+      "name": "ansi strip",
+      "type": "built-in"
+    },
+    {
+      "name": "any",
+      "type": "built-in"
+    },
+    {
+      "name": "append",
+      "type": "built-in"
+    },
+    {
+      "name": "ast",
+      "type": "built-in"
+    },
+    {
+      "name": "attr",
+      "type": "built-in"
+    },
+    {
+      "name": "attr category",
+      "type": "built-in"
+    },
+    {
+      "name": "attr complete",
+      "type": "built-in"
+    },
+    {
+      "name": "attr complete external",
+      "type": "built-in"
+    },
+    {
+      "name": "attr deprecated",
+      "type": "built-in"
+    },
+    {
+      "name": "attr example",
+      "type": "built-in"
+    },
+    {
+      "name": "attr interactive",
+      "type": "built-in"
+    },
+    {
+      "name": "attr search-terms",
+      "type": "built-in"
+    },
+    {
+      "name": "bits",
+      "type": "built-in"
+    },
+    {
+      "name": "bits and",
+      "type": "built-in"
+    },
+    {
+      "name": "bits not",
+      "type": "built-in"
+    },
+    {
+      "name": "bits or",
+      "type": "built-in"
+    },
+    {
+      "name": "bits rol",
+      "type": "built-in"
+    },
+    {
+      "name": "bits ror",
+      "type": "built-in"
+    },
+    {
+      "name": "bits shl",
+      "type": "built-in"
+    },
+    {
+      "name": "bits shr",
+      "type": "built-in"
+    },
+    {
+      "name": "bits xor",
+      "type": "built-in"
+    },
+    {
+      "name": "break",
+      "type": "keyword"
+    },
+    {
+      "name": "bytes",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes add",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes at",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes build",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes collect",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes ends-with",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes index-of",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes length",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes remove",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes replace",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes split",
+      "type": "built-in"
+    },
+    {
+      "name": "bytes starts-with",
+      "type": "built-in"
+    },
+    {
+      "name": "cal",
+      "type": "built-in"
+    },
+    {
+      "name": "cd",
+      "type": "built-in"
+    },
+    {
+      "name": "char",
+      "type": "built-in"
+    },
+    {
+      "name": "chunk-by",
+      "type": "built-in"
+    },
+    {
+      "name": "chunks",
+      "type": "built-in"
+    },
+    {
+      "name": "clear",
+      "type": "built-in"
+    },
+    {
+      "name": "collect",
+      "type": "keyword"
+    },
+    {
+      "name": "columns",
+      "type": "built-in"
+    },
+    {
+      "name": "combinations",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline complete",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline edit",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline get-cursor",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline set-cursor",
+      "type": "built-in"
+    },
+    {
+      "name": "commandline set-prompt",
+      "type": "built-in"
+    },
+    {
+      "name": "compact",
+      "type": "built-in"
+    },
+    {
+      "name": "complete",
+      "type": "built-in"
+    },
+    {
+      "name": "config",
+      "type": "built-in"
+    },
+    {
+      "name": "config env",
+      "type": "built-in"
+    },
+    {
+      "name": "config flatten",
+      "type": "built-in"
+    },
+    {
+      "name": "config nu",
+      "type": "built-in"
+    },
+    {
+      "name": "config reset",
+      "type": "built-in"
+    },
+    {
+      "name": "config use-colors",
+      "type": "built-in"
+    },
+    {
+      "name": "const",
+      "type": "keyword"
+    },
+    {
+      "name": "continue",
+      "type": "keyword"
+    },
+    {
+      "name": "cp",
+      "type": "built-in"
+    },
+    {
+      "name": "date",
+      "type": "built-in"
+    },
+    {
+      "name": "date format",
+      "type": "built-in"
+    },
+    {
+      "name": "date from-human",
+      "type": "built-in"
+    },
+    {
+      "name": "date humanize",
+      "type": "built-in"
+    },
+    {
+      "name": "date list-timezone",
+      "type": "built-in"
+    },
+    {
+      "name": "date now",
+      "type": "built-in"
+    },
+    {
+      "name": "date to-timezone",
+      "type": "built-in"
+    },
+    {
+      "name": "debug",
+      "type": "built-in"
+    },
+    {
+      "name": "debug env",
+      "type": "built-in"
+    },
+    {
+      "name": "debug experimental-options",
+      "type": "built-in"
+    },
+    {
+      "name": "debug info",
+      "type": "built-in"
+    },
+    {
+      "name": "debug profile",
+      "type": "built-in"
+    },
+    {
+      "name": "decode",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base32",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base32hex",
+      "type": "built-in"
+    },
+    {
+      "name": "decode base64",
+      "type": "built-in"
+    },
+    {
+      "name": "decode hex",
+      "type": "built-in"
+    },
+    {
+      "name": "def",
+      "type": "keyword"
+    },
+    {
+      "name": "default",
+      "type": "built-in"
+    },
+    {
+      "name": "describe",
+      "type": "built-in"
+    },
+    {
+      "name": "detect",
+      "type": "built-in"
+    },
+    {
+      "name": "detect columns",
+      "type": "built-in"
+    },
+    {
+      "name": "detect type",
+      "type": "built-in"
+    },
+    {
+      "name": "difference",
+      "type": "built-in"
+    },
+    {
+      "name": "do",
+      "type": "built-in"
+    },
+    {
+      "name": "drop",
+      "type": "built-in"
+    },
+    {
+      "name": "drop column",
+      "type": "built-in"
+    },
+    {
+      "name": "drop nth",
+      "type": "built-in"
+    },
+    {
+      "name": "du",
+      "type": "built-in"
+    },
+    {
+      "name": "each",
+      "type": "built-in"
+    },
+    {
+      "name": "each while",
+      "type": "built-in"
+    },
+    {
+      "name": "echo",
+      "type": "built-in"
+    },
+    {
+      "name": "encode",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base32",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base32hex",
+      "type": "built-in"
+    },
+    {
+      "name": "encode base64",
+      "type": "built-in"
+    },
+    {
+      "name": "encode hex",
+      "type": "built-in"
+    },
+    {
+      "name": "enumerate",
+      "type": "built-in"
+    },
+    {
+      "name": "error",
+      "type": "built-in"
+    },
+    {
+      "name": "error make",
+      "type": "built-in"
+    },
+    {
+      "name": "every",
+      "type": "built-in"
+    },
+    {
+      "name": "exec",
+      "type": "built-in"
+    },
+    {
+      "name": "exit",
+      "type": "built-in"
+    },
+    {
+      "name": "explain",
+      "type": "built-in"
+    },
+    {
+      "name": "explore",
+      "type": "built-in"
+    },
+    {
+      "name": "explore config",
+      "type": "built-in"
+    },
+    {
+      "name": "explore regex",
+      "type": "built-in"
+    },
+    {
+      "name": "export",
+      "type": "keyword"
+    },
+    {
+      "name": "export alias",
+      "type": "keyword"
+    },
+    {
+      "name": "export const",
+      "type": "keyword"
+    },
+    {
+      "name": "export def",
+      "type": "keyword"
+    },
+    {
+      "name": "export extern",
+      "type": "keyword"
+    },
+    {
+      "name": "export module",
+      "type": "keyword"
+    },
+    {
+      "name": "export use",
+      "type": "keyword"
+    },
+    {
+      "name": "export-env",
+      "type": "keyword"
+    },
+    {
+      "name": "extern",
+      "type": "keyword"
+    },
+    {
+      "name": "fill",
+      "type": "built-in"
+    },
+    {
+      "name": "filter",
+      "type": "built-in"
+    },
+    {
+      "name": "find",
+      "type": "built-in"
+    },
+    {
+      "name": "first",
+      "type": "built-in"
+    },
+    {
+      "name": "flatten",
+      "type": "built-in"
+    },
+    {
+      "name": "for",
+      "type": "keyword"
+    },
+    {
+      "name": "format",
+      "type": "built-in"
+    },
+    {
+      "name": "format bits",
+      "type": "built-in"
+    },
+    {
+      "name": "format date",
+      "type": "built-in"
+    },
+    {
+      "name": "format duration",
+      "type": "built-in"
+    },
+    {
+      "name": "format filesize",
+      "type": "built-in"
+    },
+    {
+      "name": "format number",
+      "type": "built-in"
+    },
+    {
+      "name": "format pattern",
+      "type": "built-in"
+    },
+    {
+      "name": "from",
+      "type": "built-in"
+    },
+    {
+      "name": "from csv",
+      "type": "built-in"
+    },
+    {
+      "name": "from json",
+      "type": "built-in"
+    },
+    {
+      "name": "from kdl",
+      "type": "built-in"
+    },
+    {
+      "name": "from md",
+      "type": "built-in"
+    },
+    {
+      "name": "from msgpack",
+      "type": "built-in"
+    },
+    {
+      "name": "from msgpackz",
+      "type": "built-in"
+    },
+    {
+      "name": "from nuon",
+      "type": "built-in"
+    },
+    {
+      "name": "from ods",
+      "type": "built-in"
+    },
+    {
+      "name": "from ssv",
+      "type": "built-in"
+    },
+    {
+      "name": "from toml",
+      "type": "built-in"
+    },
+    {
+      "name": "from tsv",
+      "type": "built-in"
+    },
+    {
+      "name": "from url",
+      "type": "built-in"
+    },
+    {
+      "name": "from xlsx",
+      "type": "built-in"
+    },
+    {
+      "name": "from xml",
+      "type": "built-in"
+    },
+    {
+      "name": "from yaml",
+      "type": "built-in"
+    },
+    {
+      "name": "from yml",
+      "type": "built-in"
+    },
+    {
+      "name": "generate",
+      "type": "built-in"
+    },
+    {
+      "name": "get",
+      "type": "built-in"
+    },
+    {
+      "name": "glob",
+      "type": "built-in"
+    },
+    {
+      "name": "grid",
+      "type": "built-in"
+    },
+    {
+      "name": "group-by",
+      "type": "built-in"
+    },
+    {
+      "name": "hash",
+      "type": "built-in"
+    },
+    {
+      "name": "hash md5",
+      "type": "built-in"
+    },
+    {
+      "name": "hash sha256",
+      "type": "built-in"
+    },
+    {
+      "name": "headers",
+      "type": "built-in"
+    },
+    {
+      "name": "help",
+      "type": "built-in"
+    },
+    {
+      "name": "help aliases",
+      "type": "built-in"
+    },
+    {
+      "name": "help commands",
+      "type": "built-in"
+    },
+    {
+      "name": "help escapes",
+      "type": "built-in"
+    },
+    {
+      "name": "help externs",
+      "type": "built-in"
+    },
+    {
+      "name": "help modules",
+      "type": "built-in"
+    },
+    {
+      "name": "help operators",
+      "type": "built-in"
+    },
+    {
+      "name": "help pipe-and-redirect",
+      "type": "built-in"
+    },
+    {
+      "name": "hide",
+      "type": "keyword"
+    },
+    {
+      "name": "hide-env",
+      "type": "built-in"
+    },
+    {
+      "name": "histogram",
+      "type": "built-in"
+    },
+    {
+      "name": "history",
+      "type": "built-in"
+    },
+    {
+      "name": "history import",
+      "type": "built-in"
+    },
+    {
+      "name": "history session",
+      "type": "built-in"
+    },
+    {
+      "name": "http",
+      "type": "built-in"
+    },
+    {
+      "name": "http delete",
+      "type": "built-in"
+    },
+    {
+      "name": "http get",
+      "type": "built-in"
+    },
+    {
+      "name": "http head",
+      "type": "built-in"
+    },
+    {
+      "name": "http options",
+      "type": "built-in"
+    },
+    {
+      "name": "http patch",
+      "type": "built-in"
+    },
+    {
+      "name": "http pool",
+      "type": "built-in"
+    },
+    {
+      "name": "http post",
+      "type": "built-in"
+    },
+    {
+      "name": "http put",
+      "type": "built-in"
+    },
+    {
+      "name": "idx",
+      "type": "built-in"
+    },
+    {
+      "name": "idx dirs",
+      "type": "built-in"
+    },
+    {
+      "name": "idx drop",
+      "type": "built-in"
+    },
+    {
+      "name": "idx files",
+      "type": "built-in"
+    },
+    {
+      "name": "idx find",
+      "type": "built-in"
+    },
+    {
+      "name": "idx init",
+      "type": "built-in"
+    },
+    {
+      "name": "idx search",
+      "type": "built-in"
+    },
+    {
+      "name": "idx status",
+      "type": "built-in"
+    },
+    {
+      "name": "idx watch",
+      "type": "built-in"
+    },
+    {
+      "name": "if",
+      "type": "keyword"
+    },
+    {
+      "name": "ignore",
+      "type": "built-in"
+    },
+    {
+      "name": "input",
+      "type": "built-in"
+    },
+    {
+      "name": "input list",
+      "type": "built-in"
+    },
+    {
+      "name": "input listen",
+      "type": "built-in"
+    },
+    {
+      "name": "insert",
+      "type": "built-in"
+    },
+    {
+      "name": "inspect",
+      "type": "built-in"
+    },
+    {
+      "name": "interleave",
+      "type": "built-in"
+    },
+    {
+      "name": "intersect",
+      "type": "built-in"
+    },
+    {
+      "name": "into",
+      "type": "built-in"
+    },
+    {
+      "name": "into binary",
+      "type": "built-in"
+    },
+    {
+      "name": "into bool",
+      "type": "built-in"
+    },
+    {
+      "name": "into cell-path",
+      "type": "built-in"
+    },
+    {
+      "name": "into datetime",
+      "type": "built-in"
+    },
+    {
+      "name": "into duration",
+      "type": "built-in"
+    },
+    {
+      "name": "into filesize",
+      "type": "built-in"
+    },
+    {
+      "name": "into float",
+      "type": "built-in"
+    },
+    {
+      "name": "into glob",
+      "type": "built-in"
+    },
+    {
+      "name": "into int",
+      "type": "built-in"
+    },
+    {
+      "name": "into matrix",
+      "type": "built-in"
+    },
+    {
+      "name": "into record",
+      "type": "built-in"
+    },
+    {
+      "name": "into semver",
+      "type": "built-in"
+    },
+    {
+      "name": "into semver-range",
+      "type": "built-in"
+    },
+    {
+      "name": "into sqlite",
+      "type": "built-in"
+    },
+    {
+      "name": "into string",
+      "type": "built-in"
+    },
+    {
+      "name": "into value",
+      "type": "built-in"
+    },
+    {
+      "name": "is-admin",
+      "type": "built-in"
+    },
+    {
+      "name": "is-empty",
+      "type": "built-in"
+    },
+    {
+      "name": "is-not-empty",
+      "type": "built-in"
+    },
+    {
+      "name": "is-redirected",
+      "type": "built-in"
+    },
+    {
+      "name": "is-terminal",
+      "type": "built-in"
+    },
+    {
+      "name": "items",
+      "type": "built-in"
+    },
+    {
+      "name": "job",
+      "type": "built-in"
+    },
+    {
+      "name": "job describe",
+      "type": "built-in"
+    },
+    {
+      "name": "job flush",
+      "type": "built-in"
+    },
+    {
+      "name": "job id",
+      "type": "built-in"
+    },
+    {
+      "name": "job kill",
+      "type": "built-in"
+    },
+    {
+      "name": "job list",
+      "type": "built-in"
+    },
+    {
+      "name": "job recv",
+      "type": "built-in"
+    },
+    {
+      "name": "job send",
+      "type": "built-in"
+    },
+    {
+      "name": "job spawn",
+      "type": "built-in"
+    },
+    {
+      "name": "job unfreeze",
+      "type": "built-in"
+    },
+    {
+      "name": "join",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings default",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings list",
+      "type": "built-in"
+    },
+    {
+      "name": "keybindings listen",
+      "type": "built-in"
+    },
+    {
+      "name": "kill",
+      "type": "built-in"
+    },
+    {
+      "name": "last",
+      "type": "built-in"
+    },
+    {
+      "name": "length",
+      "type": "built-in"
+    },
+    {
+      "name": "let",
+      "type": "keyword"
+    },
+    {
+      "name": "let-env",
+      "type": "built-in"
+    },
+    {
+      "name": "lines",
+      "type": "built-in"
+    },
+    {
+      "name": "load-env",
+      "type": "built-in"
+    },
+    {
+      "name": "loop",
+      "type": "keyword"
+    },
+    {
+      "name": "ls",
+      "type": "built-in"
+    },
+    {
+      "name": "match",
+      "type": "keyword"
+    },
+    {
+      "name": "math",
+      "type": "built-in"
+    },
+    {
+      "name": "math abs",
+      "type": "built-in"
+    },
+    {
+      "name": "math arccos",
+      "type": "built-in"
+    },
+    {
+      "name": "math arccosh",
+      "type": "built-in"
+    },
+    {
+      "name": "math arcsin",
+      "type": "built-in"
+    },
+    {
+      "name": "math arcsinh",
+      "type": "built-in"
+    },
+    {
+      "name": "math arctan",
+      "type": "built-in"
+    },
+    {
+      "name": "math arctanh",
+      "type": "built-in"
+    },
+    {
+      "name": "math avg",
+      "type": "built-in"
+    },
+    {
+      "name": "math cbrt",
+      "type": "built-in"
+    },
+    {
+      "name": "math ceil",
+      "type": "built-in"
+    },
+    {
+      "name": "math cos",
+      "type": "built-in"
+    },
+    {
+      "name": "math cosh",
+      "type": "built-in"
+    },
+    {
+      "name": "math exp",
+      "type": "built-in"
+    },
+    {
+      "name": "math floor",
+      "type": "built-in"
+    },
+    {
+      "name": "math ln",
+      "type": "built-in"
+    },
+    {
+      "name": "math log",
+      "type": "built-in"
+    },
+    {
+      "name": "math max",
+      "type": "built-in"
+    },
+    {
+      "name": "math median",
+      "type": "built-in"
+    },
+    {
+      "name": "math min",
+      "type": "built-in"
+    },
+    {
+      "name": "math mode",
+      "type": "built-in"
+    },
+    {
+      "name": "math product",
+      "type": "built-in"
+    },
+    {
+      "name": "math round",
+      "type": "built-in"
+    },
+    {
+      "name": "math sin",
+      "type": "built-in"
+    },
+    {
+      "name": "math sinh",
+      "type": "built-in"
+    },
+    {
+      "name": "math sqrt",
+      "type": "built-in"
+    },
+    {
+      "name": "math stddev",
+      "type": "built-in"
+    },
+    {
+      "name": "math sum",
+      "type": "built-in"
+    },
+    {
+      "name": "math tan",
+      "type": "built-in"
+    },
+    {
+      "name": "math tanh",
+      "type": "built-in"
+    },
+    {
+      "name": "math variance",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix add",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix get-col",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix get-row",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix identity",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix into-nu",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix map",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix max",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix mean",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix multiply",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix reduce",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix reshape",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix scale",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix set-col",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix set-row",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix subtract",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix sum",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix transpose",
+      "type": "built-in"
+    },
+    {
+      "name": "matrix zeros",
+      "type": "built-in"
+    },
+    {
+      "name": "merge",
+      "type": "built-in"
+    },
+    {
+      "name": "merge deep",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata access",
+      "type": "built-in"
+    },
+    {
+      "name": "metadata set",
+      "type": "built-in"
+    },
+    {
+      "name": "mkdir",
+      "type": "built-in"
+    },
+    {
+      "name": "mktemp",
+      "type": "built-in"
+    },
+    {
+      "name": "module",
+      "type": "keyword"
+    },
+    {
+      "name": "move",
+      "type": "built-in"
+    },
+    {
+      "name": "mut",
+      "type": "keyword"
+    },
+    {
+      "name": "mv",
+      "type": "built-in"
+    },
+    {
+      "name": "nu-check",
+      "type": "built-in"
+    },
+    {
+      "name": "nu-highlight",
+      "type": "built-in"
+    },
+    {
+      "name": "open",
+      "type": "built-in"
+    },
+    {
+      "name": "overlay",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay hide",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay list",
+      "type": "built-in"
+    },
+    {
+      "name": "overlay new",
+      "type": "keyword"
+    },
+    {
+      "name": "overlay use",
+      "type": "keyword"
+    },
+    {
+      "name": "panic",
+      "type": "built-in"
+    },
+    {
+      "name": "par-each",
+      "type": "built-in"
+    },
+    {
+      "name": "parse",
+      "type": "built-in"
+    },
+    {
+      "name": "path",
+      "type": "built-in"
+    },
+    {
+      "name": "path basename",
+      "type": "built-in"
+    },
+    {
+      "name": "path dirname",
+      "type": "built-in"
+    },
+    {
+      "name": "path exists",
+      "type": "built-in"
+    },
+    {
+      "name": "path expand",
+      "type": "built-in"
+    },
+    {
+      "name": "path join",
+      "type": "built-in"
+    },
+    {
+      "name": "path parse",
+      "type": "built-in"
+    },
+    {
+      "name": "path relative-to",
+      "type": "built-in"
+    },
+    {
+      "name": "path self",
+      "type": "built-in"
+    },
+    {
+      "name": "path split",
+      "type": "built-in"
+    },
+    {
+      "name": "path type",
+      "type": "built-in"
+    },
+    {
+      "name": "peek",
+      "type": "built-in"
+    },
+    {
+      "name": "permutations",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin add",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin list",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin rm",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin stop",
+      "type": "built-in"
+    },
+    {
+      "name": "plugin use",
+      "type": "keyword"
+    },
+    {
+      "name": "port",
+      "type": "built-in"
+    },
+    {
+      "name": "prepend",
+      "type": "built-in"
+    },
+    {
+      "name": "print",
+      "type": "built-in"
+    },
+    {
+      "name": "ps",
+      "type": "built-in"
+    },
+    {
+      "name": "query",
+      "type": "built-in"
+    },
+    {
+      "name": "query db",
+      "type": "built-in"
+    },
+    {
+      "name": "random",
+      "type": "built-in"
+    },
+    {
+      "name": "random binary",
+      "type": "built-in"
+    },
+    {
+      "name": "random bool",
+      "type": "built-in"
+    },
+    {
+      "name": "random chars",
+      "type": "built-in"
+    },
+    {
+      "name": "random float",
+      "type": "built-in"
+    },
+    {
+      "name": "random int",
+      "type": "built-in"
+    },
+    {
+      "name": "random pass",
+      "type": "built-in"
+    },
+    {
+      "name": "random uuid",
+      "type": "built-in"
+    },
+    {
+      "name": "reduce",
+      "type": "built-in"
+    },
+    {
+      "name": "reject",
+      "type": "built-in"
+    },
+    {
+      "name": "rename",
+      "type": "built-in"
+    },
+    {
+      "name": "return",
+      "type": "keyword"
+    },
+    {
+      "name": "reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "rm",
+      "type": "built-in"
+    },
+    {
+      "name": "roll",
+      "type": "built-in"
+    },
+    {
+      "name": "roll down",
+      "type": "built-in"
+    },
+    {
+      "name": "roll left",
+      "type": "built-in"
+    },
+    {
+      "name": "roll right",
+      "type": "built-in"
+    },
+    {
+      "name": "roll up",
+      "type": "built-in"
+    },
+    {
+      "name": "rotate",
+      "type": "built-in"
+    },
+    {
+      "name": "run",
+      "type": "keyword"
+    },
+    {
+      "name": "run-external",
+      "type": "built-in"
+    },
+    {
+      "name": "run-internal",
+      "type": "built-in"
+    },
+    {
+      "name": "save",
+      "type": "built-in"
+    },
+    {
+      "name": "schema",
+      "type": "built-in"
+    },
+    {
+      "name": "scope",
+      "type": "built-in"
+    },
+    {
+      "name": "scope aliases",
+      "type": "built-in"
+    },
+    {
+      "name": "scope commands",
+      "type": "built-in"
+    },
+    {
+      "name": "scope engine-stats",
+      "type": "built-in"
+    },
+    {
+      "name": "scope externs",
+      "type": "built-in"
+    },
+    {
+      "name": "scope modules",
+      "type": "built-in"
+    },
+    {
+      "name": "scope variables",
+      "type": "built-in"
+    },
+    {
+      "name": "select",
+      "type": "built-in"
+    },
+    {
+      "name": "semver",
+      "type": "built-in"
+    },
+    {
+      "name": "semver bump",
+      "type": "built-in"
+    },
+    {
+      "name": "seq",
+      "type": "built-in"
+    },
+    {
+      "name": "seq char",
+      "type": "built-in"
+    },
+    {
+      "name": "seq date",
+      "type": "built-in"
+    },
+    {
+      "name": "shuffle",
+      "type": "built-in"
+    },
+    {
+      "name": "skip",
+      "type": "built-in"
+    },
+    {
+      "name": "skip until",
+      "type": "built-in"
+    },
+    {
+      "name": "skip while",
+      "type": "built-in"
+    },
+    {
+      "name": "sleep",
+      "type": "built-in"
+    },
+    {
+      "name": "slice",
+      "type": "built-in"
+    },
+    {
+      "name": "sort",
+      "type": "built-in"
+    },
+    {
+      "name": "sort-by",
+      "type": "built-in"
+    },
+    {
+      "name": "source",
+      "type": "keyword"
+    },
+    {
+      "name": "source-env",
+      "type": "keyword"
+    },
+    {
+      "name": "split",
+      "type": "built-in"
+    },
+    {
+      "name": "split cell-path",
+      "type": "built-in"
+    },
+    {
+      "name": "split chars",
+      "type": "built-in"
+    },
+    {
+      "name": "split column",
+      "type": "built-in"
+    },
+    {
+      "name": "split list",
+      "type": "built-in"
+    },
+    {
+      "name": "split row",
+      "type": "built-in"
+    },
+    {
+      "name": "split words",
+      "type": "built-in"
+    },
+    {
+      "name": "start",
+      "type": "built-in"
+    },
+    {
+      "name": "stor",
+      "type": "built-in"
+    },
+    {
+      "name": "stor create",
+      "type": "built-in"
+    },
+    {
+      "name": "stor delete",
+      "type": "built-in"
+    },
+    {
+      "name": "stor export",
+      "type": "built-in"
+    },
+    {
+      "name": "stor import",
+      "type": "built-in"
+    },
+    {
+      "name": "stor insert",
+      "type": "built-in"
+    },
+    {
+      "name": "stor open",
+      "type": "built-in"
+    },
+    {
+      "name": "stor reset",
+      "type": "built-in"
+    },
+    {
+      "name": "stor update",
+      "type": "built-in"
+    },
+    {
+      "name": "str",
+      "type": "built-in"
+    },
+    {
+      "name": "str camel-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str capitalize",
+      "type": "built-in"
+    },
+    {
+      "name": "str contains",
+      "type": "built-in"
+    },
+    {
+      "name": "str distance",
+      "type": "built-in"
+    },
+    {
+      "name": "str downcase",
+      "type": "built-in"
+    },
+    {
+      "name": "str ends-with",
+      "type": "built-in"
+    },
+    {
+      "name": "str escape-regex",
+      "type": "built-in"
+    },
+    {
+      "name": "str expand",
+      "type": "built-in"
+    },
+    {
+      "name": "str index-of",
+      "type": "built-in"
+    },
+    {
+      "name": "str join",
+      "type": "built-in"
+    },
+    {
+      "name": "str kebab-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str length",
+      "type": "built-in"
+    },
+    {
+      "name": "str lowercase",
+      "type": "built-in"
+    },
+    {
+      "name": "str pascal-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str replace",
+      "type": "built-in"
+    },
+    {
+      "name": "str reverse",
+      "type": "built-in"
+    },
+    {
+      "name": "str screaming-snake-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str snake-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str starts-with",
+      "type": "built-in"
+    },
+    {
+      "name": "str stats",
+      "type": "built-in"
+    },
+    {
+      "name": "str substring",
+      "type": "built-in"
+    },
+    {
+      "name": "str title-case",
+      "type": "built-in"
+    },
+    {
+      "name": "str trim",
+      "type": "built-in"
+    },
+    {
+      "name": "str upcase",
+      "type": "built-in"
+    },
+    {
+      "name": "str uppercase",
+      "type": "built-in"
+    },
+    {
+      "name": "sys",
+      "type": "built-in"
+    },
+    {
+      "name": "sys cpu",
+      "type": "built-in"
+    },
+    {
+      "name": "sys disks",
+      "type": "built-in"
+    },
+    {
+      "name": "sys host",
+      "type": "built-in"
+    },
+    {
+      "name": "sys mem",
+      "type": "built-in"
+    },
+    {
+      "name": "sys net",
+      "type": "built-in"
+    },
+    {
+      "name": "sys temp",
+      "type": "built-in"
+    },
+    {
+      "name": "sys users",
+      "type": "built-in"
+    },
+    {
+      "name": "table",
+      "type": "built-in"
+    },
+    {
+      "name": "take",
+      "type": "built-in"
+    },
+    {
+      "name": "take until",
+      "type": "built-in"
+    },
+    {
+      "name": "take while",
+      "type": "built-in"
+    },
+    {
+      "name": "tee",
+      "type": "built-in"
+    },
+    {
+      "name": "term",
+      "type": "built-in"
+    },
+    {
+      "name": "term query",
+      "type": "built-in"
+    },
+    {
+      "name": "term size",
+      "type": "built-in"
+    },
+    {
+      "name": "timeit",
+      "type": "built-in"
+    },
+    {
+      "name": "to",
+      "type": "built-in"
+    },
+    {
+      "name": "to csv",
+      "type": "built-in"
+    },
+    {
+      "name": "to html",
+      "type": "built-in"
+    },
+    {
+      "name": "to json",
+      "type": "built-in"
+    },
+    {
+      "name": "to kdl",
+      "type": "built-in"
+    },
+    {
+      "name": "to md",
+      "type": "built-in"
+    },
+    {
+      "name": "to msgpack",
+      "type": "built-in"
+    },
+    {
+      "name": "to msgpackz",
+      "type": "built-in"
+    },
+    {
+      "name": "to nuon",
+      "type": "built-in"
+    },
+    {
+      "name": "to text",
+      "type": "built-in"
+    },
+    {
+      "name": "to toml",
+      "type": "built-in"
+    },
+    {
+      "name": "to tsv",
+      "type": "built-in"
+    },
+    {
+      "name": "to txt",
+      "type": "built-in"
+    },
+    {
+      "name": "to xml",
+      "type": "built-in"
+    },
+    {
+      "name": "to yaml",
+      "type": "built-in"
+    },
+    {
+      "name": "to yml",
+      "type": "built-in"
+    },
+    {
+      "name": "touch",
+      "type": "built-in"
+    },
+    {
+      "name": "transpose",
+      "type": "built-in"
+    },
+    {
+      "name": "try",
+      "type": "keyword"
+    },
+    {
+      "name": "tutor",
+      "type": "built-in"
+    },
+    {
+      "name": "ulimit",
+      "type": "built-in"
+    },
+    {
+      "name": "umask",
+      "type": "built-in"
+    },
+    {
+      "name": "uname",
+      "type": "built-in"
+    },
+    {
+      "name": "union",
+      "type": "built-in"
+    },
+    {
+      "name": "uniq",
+      "type": "built-in"
+    },
+    {
+      "name": "uniq-by",
+      "type": "built-in"
+    },
+    {
+      "name": "unlet",
+      "type": "built-in"
+    },
+    {
+      "name": "update",
+      "type": "built-in"
+    },
+    {
+      "name": "update cells",
+      "type": "built-in"
+    },
+    {
+      "name": "upsert",
+      "type": "built-in"
+    },
+    {
+      "name": "url",
+      "type": "built-in"
+    },
+    {
+      "name": "url build-query",
+      "type": "built-in"
+    },
+    {
+      "name": "url decode",
+      "type": "built-in"
+    },
+    {
+      "name": "url encode",
+      "type": "built-in"
+    },
+    {
+      "name": "url join",
+      "type": "built-in"
+    },
+    {
+      "name": "url parse",
+      "type": "built-in"
+    },
+    {
+      "name": "url split-query",
+      "type": "built-in"
+    },
+    {
+      "name": "use",
+      "type": "keyword"
+    },
+    {
+      "name": "values",
+      "type": "built-in"
+    },
+    {
+      "name": "version",
+      "type": "built-in"
+    },
+    {
+      "name": "version check",
+      "type": "built-in"
+    },
+    {
+      "name": "view",
+      "type": "built-in"
+    },
+    {
+      "name": "view blocks",
+      "type": "built-in"
+    },
+    {
+      "name": "view files",
+      "type": "built-in"
+    },
+    {
+      "name": "view ir",
+      "type": "built-in"
+    },
+    {
+      "name": "view source",
+      "type": "built-in"
+    },
+    {
+      "name": "view span",
+      "type": "built-in"
+    },
+    {
+      "name": "watch",
+      "type": "built-in"
+    },
+    {
+      "name": "where",
+      "type": "keyword"
+    },
+    {
+      "name": "which",
+      "type": "built-in"
+    },
+    {
+      "name": "while",
+      "type": "keyword"
+    },
+    {
+      "name": "whoami",
+      "type": "built-in"
+    },
+    {
+      "name": "window",
+      "type": "built-in"
+    },
+    {
+      "name": "with-env",
+      "type": "built-in"
+    },
+    {
+      "name": "wrap",
+      "type": "built-in"
+    },
+    {
+      "name": "zip",
+      "type": "built-in"
+    }
+  ]
+}

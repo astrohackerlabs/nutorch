@@ -546,10 +546,7 @@ fn main() -> Result<()> {
             .as_ref()
             .map(|value| value.item.as_str())
         {
-            Some("http") => {
-                let port = parsed_nu_cli_args.mcp_port.unwrap_or(8080);
-                nu_mcp::McpTransport::Http { port }
-            }
+            Some("http") => nu_mcp::McpTransport::http(None, parsed_nu_cli_args.mcp_port),
             _ => nu_mcp::McpTransport::Stdio,
         };
         nu_mcp::initialize_mcp_server(engine_state, transport)?;
