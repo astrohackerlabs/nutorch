@@ -260,7 +260,7 @@ pub(crate) fn run_repl(
                 );
                 eprintln!("{green}{bold}Shift+Tab:{reset}{fg} Nushell ↔ AI (unfinished){reset}");
                 eprintln!("{}", crate::banner_hints::ai_hint_line(fg, reset));
-                eprintln!("{fg}Type {cmd}ahweb{reset}{fg} to browse the web.{reset}");
+                eprintln!("{fg}Type {cmd}roamari{reset}{fg} to browse the web.{reset}");
                 eprintln!(
                     "{fg}Type {cmd}ah{reset}{fg} then {green}{bold}Tab{reset}{fg} to see more commands.{reset}"
                 );
@@ -287,7 +287,7 @@ pub(crate) fn run_repl(
                 eprintln!("{}", crate::banner_hints::ai_hint_line(fg, reset));
                 // Product suite discovery (Issue 26072710436325).
                 // Command names match Nu syntax: shape_external → cyan (not green).
-                eprintln!("{fg}Type {cmd}ahweb{reset}{fg} to browse the web.{reset}");
+                eprintln!("{fg}Type {cmd}roamari{reset}{fg} to browse the web.{reset}");
                 eprintln!(
                     "{fg}Type {cmd}ah{reset}{fg} then {green}{bold}Tab{reset}{fg} to see more commands.{reset}"
                 );

@@ -50,4 +50,4 @@ const server = Bun.serve({
     });
   },
 });
-console.log(`ntcom preview: http://${hostname}:${String(server.port)}`);
+console.log(`nutorch-com preview: http://${hostname}:${String(server.port)}`);

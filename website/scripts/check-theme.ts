@@ -766,8 +766,8 @@ try {
     );
     if (process.argv.includes("--references")) {
       for (const [name, url] of [
-        ["tscom", "http://127.0.0.1:3510/"],
-        ["ahcom", "http://127.0.0.1:5173/"],
+        ["termsurf-com", "http://127.0.0.1:3510/"],
+        ["astrohacker-com", "http://127.0.0.1:5173/"],
       ] as const) {
         for (const width of [1440, 390]) {
           await send("Emulation.setDeviceMetricsOverride", {

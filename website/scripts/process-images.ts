@@ -1,5 +1,5 @@
 // Experiment 11: author social/legacy ICO assets from canonical projections.
-// Run root sync-ntcom-brand-assets.nu first. Normal builds use committed bytes.
+// Run root sync-nutorch-com-brand-assets.nu first. Normal builds use committed bytes.
 import pngToIco from "png-to-ico";
 import sharp from "sharp";
 import { mkdir, writeFile } from "node:fs/promises";

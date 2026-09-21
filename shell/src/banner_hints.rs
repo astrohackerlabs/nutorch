@@ -1,12 +1,12 @@
 //! Startup banner product-discovery lines (Issue 26072710436325).
 //!
-//! Command tokens (`ahweb`, `ah`) are painted **cyan** in the banner
+//! Command tokens (`roamari`, `ah`) are painted **cyan** in the banner
 //! to match Nu default `color_config.shape_external` (first external command
 //! on the prompt), not green.
 
 /// Unstyled product-hint lines for Full/Short banners (after Shift+Tab / mode hint).
 pub const PRODUCT_HINT_LINES: &[&str] = &[
-    "Type ahweb to browse the web.",
+    "Type roamari to browse the web.",
     "Type ah then Tab to see more commands.",
 ];
 
@@ -30,9 +30,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn product_hints_mention_ahweb_and_tab() {
+    fn product_hints_mention_roamari_and_tab() {
         let joined = PRODUCT_HINT_LINES.join("\n");
-        assert!(joined.contains("ahweb"));
+        assert!(joined.contains("roamari"));
         assert!(joined.contains("browse the web"));
         assert!(!joined.contains("ahhelp"));
         assert!(joined.contains("ah then Tab") || joined.contains("Tab"));
