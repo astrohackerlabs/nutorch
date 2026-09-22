@@ -1,4 +1,3 @@
-mod banner_hints;
 #[allow(dead_code)]
 mod command;
 mod command_context;

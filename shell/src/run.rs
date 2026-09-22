@@ -8,7 +8,7 @@ use nu_cli::read_plugin_file;
 use nu_cli::{EvaluateCommandsOpts, evaluate_commands, evaluate_file, evaluate_repl};
 use nu_config::ConfigFileKind;
 use nu_protocol::{
-    PipelineData, ShellError, Spanned,
+    BannerKind, PipelineData, ShellError, Spanned,
     engine::{EngineState, Stack},
     report_shell_error,
 };
@@ -182,6 +182,34 @@ pub(crate) fn run_file(
     }
 }
 
+/// Interactive intro lines for Nushell's full and short banner settings.
+/// `BannerKind::None` prints nothing. A trailing empty string is the blank
+/// line after the banner.
+fn intro_banner_lines(
+    kind: BannerKind,
+    version: &str,
+    nu_version: &str,
+    startup: std::time::Duration,
+) -> Vec<String> {
+    let green = "\x1b[32m";
+    let bold = "\x1b[1m";
+    let reset = "\x1b[0m";
+    let fg = "\x1b[37m";
+    let startup_line = format!("{green}{bold}Startup Time:{reset}{fg} {startup:?}{reset}");
+    match kind {
+        BannerKind::None => Vec::new(),
+        BannerKind::Short => vec![startup_line, String::new()],
+        BannerKind::Full => vec![
+            format!(
+                "{fg}Welcome to {green}{bold}NuTorch{reset}{fg}, based on the {green}nu{reset}{fg} language{reset}"
+            ),
+            format!("{fg}Version: {green}{version}{fg} (nushell {green}{nu_version}{fg}){reset}"),
+            startup_line,
+            String::new(),
+        ],
+    }
+}
+
 pub(crate) fn run_repl(
     engine_state: &mut EngineState,
     mut stack: Stack,
@@ -235,7 +263,6 @@ pub(crate) fn run_repl(
     );
 
     {
-        use nu_protocol::BannerKind;
         let show_banner = engine_state.get_config().show_banner.clone();
         nu_cli::eval_source(
             engine_state,
@@ -245,63 +272,15 @@ pub(crate) fn run_repl(
             nu_protocol::PipelineData::empty(),
             false,
         );
-        match show_banner {
-            BannerKind::None => {}
-            BannerKind::Short => {
-                let green = "\x1b[32m";
-                // Nu default `shape_external: cyan` (first-token external commands).
-                let cmd = crate::banner_hints::SHAPE_EXTERNAL_ANSI;
-                let bold = "\x1b[1m";
-                let reset = "\x1b[0m";
-                let fg = "\x1b[37m";
-                eprintln!(
-                    "{green}{bold}Startup Time:{reset}{fg} {:?}{reset}",
-                    entire_start_time.elapsed()
-                );
-                eprintln!("{green}{bold}Shift+Tab:{reset}{fg} Nushell ↔ AI (unfinished){reset}");
-                eprintln!("{}", crate::banner_hints::ai_hint_line(fg, reset));
-                eprintln!("{fg}Type {cmd}roamari{reset}{fg} to browse the web.{reset}");
-                eprintln!(
-                    "{fg}Type {cmd}ah{reset}{fg} then {green}{bold}Tab{reset}{fg} to see more commands.{reset}"
-                );
-                eprintln!();
-            }
-            BannerKind::Full => {
-                let version = env!("CARGO_PKG_VERSION");
-                let nu_version = env!("NUSHELL_VERSION");
-                let green = "\x1b[32m";
-                // Nu default `shape_external: cyan` (first-token external commands).
-                let cmd = crate::banner_hints::SHAPE_EXTERNAL_ANSI;
-                let bold = "\x1b[1m";
-                let reset = "\x1b[0m";
-                let fg = "\x1b[37m";
-                eprintln!(
-                    "{fg}Welcome to {green}{bold}NuTorch{reset}{fg}, based on the {green}nu{reset}{fg} language{reset}"
-                );
-                eprintln!(
-                    "{fg}Version: {green}{version}{fg} (nushell {green}{nu_version}{fg}){reset}"
-                );
-                eprintln!(
-                    "{fg}Press {green}{bold}Shift+Tab{reset}{fg} to toggle between Nushell and AI (unfinished).{reset}"
-                );
-                eprintln!("{}", crate::banner_hints::ai_hint_line(fg, reset));
-                // Product suite discovery (Issue 26072710436325).
-                // Command names match Nu syntax: shape_external → cyan (not green).
-                eprintln!("{fg}Type {cmd}roamari{reset}{fg} to browse the web.{reset}");
-                eprintln!(
-                    "{fg}Type {cmd}ah{reset}{fg} then {green}{bold}Tab{reset}{fg} to see more commands.{reset}"
-                );
-                debug_assert_eq!(
-                    crate::banner_hints::PRODUCT_HINT_LINES.len(),
-                    2,
-                    "keep banner_hints::PRODUCT_HINT_LINES in sync with eprintln lines above"
-                );
-                eprintln!(
-                    "{green}{bold}Startup Time:{reset}{fg} {:?}{reset}",
-                    entire_start_time.elapsed()
-                );
-                eprintln!();
-            }
+        let version = env!("CARGO_PKG_VERSION");
+        let nu_version = env!("NUSHELL_VERSION");
+        for line in intro_banner_lines(
+            show_banner,
+            version,
+            nu_version,
+            entire_start_time.elapsed(),
+        ) {
+            eprintln!("{line}");
         }
     }
 
@@ -327,4 +306,57 @@ pub(crate) fn run_repl(
     }
 
     ret_val
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    const REMOVED_HINTS: &[&str] = &[
+        "Press Shift+Tab to toggle between Nushell and AI (unfinished).",
+        "The AI mode is unfinished; input is never executed.",
+        "Type roamari to browse the web.",
+        "Type ah then Tab to see more commands.",
+        "Shift+Tab: Nushell ↔ AI (unfinished)",
+    ];
+
+    #[test]
+    fn intro_banner_omits_hint_lines() {
+        let startup = Duration::from_millis(12);
+        let full = intro_banner_lines(BannerKind::Full, "2.0.9", "0.115.2", startup);
+        let short = intro_banner_lines(BannerKind::Short, "2.0.9", "0.115.2", startup);
+        let full_text = full.join("\n");
+        let short_text = short.join("\n");
+
+        for hint in REMOVED_HINTS {
+            assert!(
+                !full_text.contains(hint),
+                "{hint} still in full banner: {full_text:?}"
+            );
+            assert!(
+                !short_text.contains(hint),
+                "{hint} still in short banner: {short_text:?}"
+            );
+        }
+
+        let welcome = full_text.find("Welcome to").expect("welcome");
+        let version = full_text.find("Version:").expect("version");
+        let startup_at = full_text.find("Startup Time:").expect("startup");
+        assert!(welcome < version && version < startup_at);
+        assert!(full_text.contains("\u{1b}[32m\u{1b}[1mNuTorch"));
+        assert!(full_text.contains("2.0.9"));
+        assert!(full_text.contains("nushell \u{1b}[32m0.115.2"));
+        assert!(full_text.contains(&format!("{startup:?}")));
+        assert!(full_text.ends_with('\n'));
+
+        assert_eq!(short.len(), 2);
+        assert!(short[0].contains("Startup Time:"));
+        assert!(short[0].contains(&format!("{startup:?}")));
+        assert!(short[1].is_empty());
+        assert!(!short_text.contains("Welcome to"));
+        assert!(!short_text.contains("Version:"));
+
+        assert!(intro_banner_lines(BannerKind::None, "2.0.9", "0.115.2", startup).is_empty());
+    }
 }
