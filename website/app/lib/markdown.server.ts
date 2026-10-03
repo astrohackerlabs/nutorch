@@ -26,15 +26,16 @@ function syntax(): (tree: Root) => Promise<void> {
           code?.type === "element" &&
           code.tagName === "code"
         ) {
-          const lang = (
+          const rawLang = (
             code.properties.className?.find((c) => c.startsWith("language-")) ??
             "language-text"
           ).slice(9);
+          const lang = rawLang.replace(/:(?:no-)?line-numbers$/g, "") || "text";
           const text = code.children
             .map((c) => (c.type === "text" ? c.value : ""))
             .join("")
             .replace(/\n$/, "");
-          const rendered = await codeToHast(text, { lang, themes });
+          const rendered = await highlightTree(text, lang);
           const pre = rendered.children[0];
           if (pre?.type !== "element" || pre.tagName !== "pre") {
             throw new Error("Syntax highlighter did not return a pre element");
@@ -53,16 +54,54 @@ function syntax(): (tree: Root) => Promise<void> {
     await walk(tree);
   };
 }
+async function highlightTree(text: string, lang: string): Promise<Root> {
+  try {
+    return await codeToHast(text, { lang, themes });
+  } catch {
+    return await codeToHast(text, { lang: "text", themes });
+  }
+}
+
+/** Drop script and style. Keep kbd, br, and the command-title div. */
+function allowCommandHtml(): (tree: Root) => void {
+  return (tree: Root): void => {
+    function walk(node: Root | Element): void {
+      const next: unknown[] = [];
+      for (const child of node.children) {
+        if (child.type !== "element") {
+          next.push(child);
+          continue;
+        }
+        if (child.tagName === "script" || child.tagName === "style") continue;
+        const classes = child.properties.className ?? child.properties.class;
+        const names = Array.isArray(classes)
+          ? classes.map(String)
+          : String(classes ?? "").split(/\s+/);
+        if (child.tagName === "div" && !names.includes("command-title")) {
+          walk(child);
+          next.push(...child.children);
+          continue;
+        }
+        walk(child);
+        next.push(child);
+      }
+      node.children = next as typeof node.children;
+    }
+    walk(tree);
+  };
+}
+
 export async function renderMarkdown(content: string): Promise<string> {
   return String(
     await unified()
       .use(remarkParse)
       .use(remarkGfm)
       .use(remarkSmartypants)
-      .use(remarkRehype)
+      .use(remarkRehype, { allowDangerousHtml: true })
       .use(rehypeSlug)
+      .use(allowCommandHtml)
       .use(syntax)
-      .use(rehypeStringify)
+      .use(rehypeStringify, { allowDangerousHtml: true })
       .process(content),
   );
 }

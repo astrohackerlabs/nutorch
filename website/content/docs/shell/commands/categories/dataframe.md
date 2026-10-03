@@ -1,0 +1,128 @@
+---
+title: "Dataframe"
+description: "Dataframe"
+order: 1139
+section: "Commands · dataframe"
+---
+
+
+
+
+- [`polars`](/docs/shell/commands/polars/) — Operate with data in a dataframe format.
+- [`polars agg-groups`](/docs/shell/commands/polars_agg-groups/) — Creates an agg_groups expression.
+- [`polars all-false`](/docs/shell/commands/polars_all-false/) — Returns true if all values are false.
+- [`polars all-true`](/docs/shell/commands/polars_all-true/) — Returns true if all values are true.
+- [`polars append`](/docs/shell/commands/polars_append/) — Appends a new dataframe.
+- [`polars arg-max`](/docs/shell/commands/polars_arg-max/) — Return index for max value in series.
+- [`polars arg-min`](/docs/shell/commands/polars_arg-min/) — Return index for min value in series.
+- [`polars arg-sort`](/docs/shell/commands/polars_arg-sort/) — Returns indexes for a sorted series.
+- [`polars arg-true`](/docs/shell/commands/polars_arg-true/) — Returns indexes where values are true.
+- [`polars arg-unique`](/docs/shell/commands/polars_arg-unique/) — Returns indexes for unique values.
+- [`polars as-date`](/docs/shell/commands/polars_as-date/) — Converts string to date.
+- [`polars as-datetime`](/docs/shell/commands/polars_as-datetime/) — Converts string to datetime.
+- [`polars cache`](/docs/shell/commands/polars_cache/) — Caches operations in a new LazyFrame.
+- [`polars cast`](/docs/shell/commands/polars_cast/) — Cast a column to a different dtype.
+- [`polars columns`](/docs/shell/commands/polars_columns/) — Show dataframe columns.
+- [`polars concat`](/docs/shell/commands/polars_concat/) — Concatenate two or more dataframes.
+- [`polars contains`](/docs/shell/commands/polars_contains/) — Checks if a pattern is contained in a string.
+- [`polars convert-time-zone`](/docs/shell/commands/polars_convert-time-zone/) — Convert datetime to target timezone.
+- [`polars count`](/docs/shell/commands/polars_count/) — Returns the number of non-null values in the column.
+- [`polars count-null`](/docs/shell/commands/polars_count-null/) — Counts null values.
+- [`polars cumulative`](/docs/shell/commands/polars_cumulative/) — Cumulative calculation for a column or series.
+- [`polars cut`](/docs/shell/commands/polars_cut/) — Bin continuous values into discrete categories for a series.
+- [`polars decimal`](/docs/shell/commands/polars_decimal/) — Converts a string column into a decimal column
+- [`polars drop`](/docs/shell/commands/polars_drop/) — Creates a new dataframe by dropping the selected columns.
+- [`polars drop-duplicates`](/docs/shell/commands/polars_drop-duplicates/) — Drops duplicate values in dataframe.
+- [`polars drop-nulls`](/docs/shell/commands/polars_drop-nulls/) — Drops null values in dataframe.
+- [`polars dummies`](/docs/shell/commands/polars_dummies/) — Creates a new dataframe with dummy variables.
+- [`polars entropy`](/docs/shell/commands/polars_entropy/) — Compute the entropy as `-sum(pk * log(pk))` where `pk` are discrete probabilities.
+- [`polars expr-not`](/docs/shell/commands/polars_expr-not/) — Creates a not expression.
+- [`polars first`](/docs/shell/commands/polars_first/) — Show only the first number of rows or create a first expression
+- [`polars get`](/docs/shell/commands/polars_get/) — Creates dataframe with the selected columns.
+- [`polars get-day`](/docs/shell/commands/polars_get-day/) — Gets day from date.
+- [`polars get-hour`](/docs/shell/commands/polars_get-hour/) — Gets hour from datetime.
+- [`polars get-minute`](/docs/shell/commands/polars_get-minute/) — Gets minute from date.
+- [`polars get-month`](/docs/shell/commands/polars_get-month/) — Gets month from date.
+- [`polars get-nanosecond`](/docs/shell/commands/polars_get-nanosecond/) — Gets nanosecond from date.
+- [`polars get-ordinal`](/docs/shell/commands/polars_get-ordinal/) — Gets ordinal from date.
+- [`polars get-second`](/docs/shell/commands/polars_get-second/) — Gets second from date.
+- [`polars get-week`](/docs/shell/commands/polars_get-week/) — Gets week from date.
+- [`polars get-weekday`](/docs/shell/commands/polars_get-weekday/) — Gets weekday from date.
+- [`polars get-year`](/docs/shell/commands/polars_get-year/) — Gets year from date.
+- [`polars implode`](/docs/shell/commands/polars_implode/) — Aggregates values into a list.
+- [`polars integer`](/docs/shell/commands/polars_integer/) — Converts a string column into a integer column
+- [`polars into-df`](/docs/shell/commands/polars_into-df/) — Converts a list, table or record into a dataframe.
+- [`polars into-dtype`](/docs/shell/commands/polars_into-dtype/) — Convert a string to a specific datatype.
+- [`polars into-nu`](/docs/shell/commands/polars_into-nu/) — Converts a dataframe or an expression into nushell value for access and exploration.
+- [`polars into-repr`](/docs/shell/commands/polars_into-repr/) — Display a dataframe in its repr format.
+- [`polars into-schema`](/docs/shell/commands/polars_into-schema/) — Convert a value to a polars schema object
+- [`polars is-duplicated`](/docs/shell/commands/polars_is-duplicated/) — Creates mask indicating duplicated values.
+- [`polars is-not-null`](/docs/shell/commands/polars_is-not-null/) — Creates mask where value is not null.
+- [`polars is-null`](/docs/shell/commands/polars_is-null/) — Creates mask where value is null.
+- [`polars is-unique`](/docs/shell/commands/polars_is-unique/) — Creates mask indicating unique values.
+- [`polars last`](/docs/shell/commands/polars_last/) — Creates new dataframe with tail rows or creates a last expression.
+- [`polars len`](/docs/shell/commands/polars_len/) — Return the number of rows in the context. This is similar to COUNT(*) in SQL.
+- [`polars list-contains`](/docs/shell/commands/polars_list-contains/) — Checks if an element is contained in a list.
+- [`polars lowercase`](/docs/shell/commands/polars_lowercase/) — Lowercase the strings in the column.
+- [`polars map-batches`](/docs/shell/commands/polars_map-batches/) — Map a custom Nushell closure over one or more dataframe columns.
+- [`polars math`](/docs/shell/commands/polars_math/) — Collection of math functions to be applied on column expressions.
+- [`polars math abs`](/docs/shell/commands/polars_math_abs/) — Compute the absolute values of a column expression.
+- [`polars math bitwise-and`](/docs/shell/commands/polars_math_bitwise-and/) — Perform an aggregation of bitwise ANDs over a column expression.
+- [`polars math bitwise-count-ones`](/docs/shell/commands/polars_math_bitwise-count-ones/) — Compute the number of set bits for each element in an integer column expression.
+- [`polars math bitwise-count-zeros`](/docs/shell/commands/polars_math_bitwise-count-zeros/) — Compute the number of unset bits for each element in an integer column expression.
+- [`polars math bitwise-leading-ones`](/docs/shell/commands/polars_math_bitwise-leading-ones/) — Compute the number of leading set bits for each element in an integer column expression.
+- [`polars math bitwise-leading-zeros`](/docs/shell/commands/polars_math_bitwise-leading-zeros/) — Compute the number of leading unset bits for each element in an integer column expression.
+- [`polars math bitwise-or`](/docs/shell/commands/polars_math_bitwise-or/) — Perform an aggregation of bitwise ORs over a column expression.
+- [`polars math bitwise-trailing-ones`](/docs/shell/commands/polars_math_bitwise-trailing-ones/) — Compute the number of trailing set bits for each element in an integer column expression.
+- [`polars math bitwise-trailing-zeros`](/docs/shell/commands/polars_math_bitwise-trailing-zeros/) — Compute the number of trailing unset bits for each element in an integer column expression.
+- [`polars math bitwise-xor`](/docs/shell/commands/polars_math_bitwise-xor/) — Perform an aggregation of bitwise XORs over a column expression.
+- [`polars math cos`](/docs/shell/commands/polars_math_cos/) — Compute the element-wise cosine of a column expression.
+- [`polars math dot`](/docs/shell/commands/polars_math_dot/) — Compute the dot product of two column expressions.
+- [`polars math exp`](/docs/shell/commands/polars_math_exp/) — Compute element-wise e raised to the power of a column expression.
+- [`polars math log`](/docs/shell/commands/polars_math_log/) — Compute the element-wise logarithm of a column expression.
+- [`polars math log1p`](/docs/shell/commands/polars_math_log1p/) — Compute the element-wise natural log of 1 + x for a column expression.
+- [`polars math sign`](/docs/shell/commands/polars_math_sign/) — Compute the element-wise sign of a column expression, returning -1, 0, or 1.
+- [`polars math sin`](/docs/shell/commands/polars_math_sin/) — Compute the element-wise sine of a column expression.
+- [`polars math sqrt`](/docs/shell/commands/polars_math_sqrt/) — Compute the element-wise square root of a column expression.
+- [`polars max`](/docs/shell/commands/polars_max/) — Creates a max expression or aggregates columns to their max value.
+- [`polars mean`](/docs/shell/commands/polars_mean/) — Creates a mean expression for an aggregation or aggregates columns to their mean value.
+- [`polars min`](/docs/shell/commands/polars_min/) — Creates a min expression or aggregates columns to their min value.
+- [`polars n-unique`](/docs/shell/commands/polars_n-unique/) — Counts unique values.
+- [`polars not`](/docs/shell/commands/polars_not/) — Inverts boolean mask.
+- [`polars open`](/docs/shell/commands/polars_open/) — Opens CSV, JSON, NDJSON/JSON lines, arrow, avro, or parquet file to create dataframe. A lazy dataframe will be created by default, if supported.
+- [`polars pivot`](/docs/shell/commands/polars_pivot/) — Pivot a DataFrame from long to wide format.
+- [`polars profile`](/docs/shell/commands/polars_profile/) — Profile a lazy dataframe.
+- [`polars qcut`](/docs/shell/commands/polars_qcut/) — Bin continuous values into discrete categories based on their quantiles for a series.
+- [`polars query`](/docs/shell/commands/polars_query/) — Query dataframe using SQL. Note: The dataframe is always named 'df' in your query's from clause.
+- [`polars replace-time-zone`](/docs/shell/commands/polars_replace-time-zone/) — Replace the timezone information in a datetime column.
+- [`polars reverse`](/docs/shell/commands/polars_reverse/) — Reverses the LazyFrame
+- [`polars rolling`](/docs/shell/commands/polars_rolling/) — Rolling calculation for a series or expression, or a rolling group-by for a lazyframe.
+- [`polars sample`](/docs/shell/commands/polars_sample/) — Create sample dataframe.
+- [`polars schema`](/docs/shell/commands/polars_schema/) — Show schema for a dataframe.
+- [`polars set`](/docs/shell/commands/polars_set/) — Sets value where given mask is true.
+- [`polars set-with-idx`](/docs/shell/commands/polars_set-with-idx/) — Sets value in the given index.
+- [`polars shape`](/docs/shell/commands/polars_shape/) — Shows column and row size for a dataframe.
+- [`polars slice`](/docs/shell/commands/polars_slice/) — Creates new dataframe from a slice of rows.
+- [`polars std`](/docs/shell/commands/polars_std/) — Creates a std expression for an aggregation of std value from columns in a dataframe.
+- [`polars store-get`](/docs/shell/commands/polars_store-get/) — Gets a Dataframe or other object from the plugin cache.
+- [`polars store-ls`](/docs/shell/commands/polars_store-ls/) — Lists stored polars objects.
+- [`polars store-rm`](/docs/shell/commands/polars_store-rm/) — Removes a stored Dataframe or other object from the plugin cache.
+- [`polars str-join`](/docs/shell/commands/polars_str-join/) — Concatenates strings within a column or dataframes
+- [`polars str-lengths`](/docs/shell/commands/polars_str-lengths/) — Get lengths of all strings.
+- [`polars str-replace`](/docs/shell/commands/polars_str-replace/) — Replace the leftmost (sub)string by a regex pattern.
+- [`polars str-replace-all`](/docs/shell/commands/polars_str-replace-all/) — Replace all (sub)strings by a regex pattern.
+- [`polars str-slice`](/docs/shell/commands/polars_str-slice/) — Slices the string from the start position until the selected length.
+- [`polars str-split`](/docs/shell/commands/polars_str-split/) — Split the string by a substring. The resulting dtype is list<str>.
+- [`polars str-strip-chars`](/docs/shell/commands/polars_str-strip-chars/) — Strips specified characters from strings in a column
+- [`polars strftime`](/docs/shell/commands/polars_strftime/) — Formats date based on string rule.
+- [`polars struct-json-encode`](/docs/shell/commands/polars_struct-json-encode/) — Convert this struct to a string column with json values.
+- [`polars sum`](/docs/shell/commands/polars_sum/) — Creates a sum expression for an aggregation or aggregates columns to their sum value.
+- [`polars summary`](/docs/shell/commands/polars_summary/) — For a dataframe, produces descriptive statistics (summary statistics) for its numeric columns.
+- [`polars take`](/docs/shell/commands/polars_take/) — Creates new dataframe using the given indices.
+- [`polars unnest`](/docs/shell/commands/polars_unnest/) — Decompose struct columns into separate columns for each of their fields. The new columns will be inserted into the dataframe at the location of the struct column.
+- [`polars unpivot`](/docs/shell/commands/polars_unpivot/) — Unpivot a DataFrame from wide to long format.
+- [`polars uppercase`](/docs/shell/commands/polars_uppercase/) — Uppercase the strings in the column.
+- [`polars value-counts`](/docs/shell/commands/polars_value-counts/) — Returns a dataframe with the counts for unique values in series.
+- [`polars var`](/docs/shell/commands/polars_var/) — Create a var expression for an aggregation.
+
+Ported from [nushell/nushell.github.io](https://github.com/nushell/nushell.github.io). Copyright (c) 2021 Nushell Project. MIT License.

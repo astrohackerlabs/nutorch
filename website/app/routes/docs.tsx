@@ -10,6 +10,7 @@ import {
 import NotFound from "./not-found";
 import { metadata } from "../lib/metadata";
 import type { Route } from "./+types/docs";
+import { ReadingColumn } from "../components/reading-column";
 import Search from "../components/Search";
 import { documents } from "../lib/docs.server";
 import { renderMarkdown } from "../lib/markdown.server";
@@ -21,8 +22,12 @@ interface DocsData {
   indexable: boolean;
 }
 
+function documentSlug(wildcard = ""): string {
+  return wildcard.replace(/\/$/, "") || "getting-started";
+}
+
 export async function loader({ params }: Route.LoaderArgs): Promise<DocsData> {
-  const slug = params["*"].replace(/\/$/, "") || "getting-started";
+  const slug = documentSlug(params["*"]);
   const entry = documents.find((d) => d.slug === slug);
   if (!entry) throw new Response("Not found", { status: 404 });
   return {
@@ -99,8 +104,8 @@ export default function Docs({
     </div>
   );
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-10 md:flex-row">
-      <nav className="w-full shrink-0 md:w-48" aria-label="Documentation">
+    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 md:flex-row">
+      <nav className="w-full shrink-0 md:w-72" aria-label="Documentation">
         <div className="md:hidden">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -127,38 +132,40 @@ export default function Docs({
             </SheetContent>
           </Sheet>
         </div>
-        <div className="sticky top-24 hidden max-h-[calc(100dvh-7rem)] overflow-y-auto px-1 py-1 md:block">
+        <div className="hidden px-1 md:sticky md:top-16 md:block md:max-h-[calc(100dvh-4rem)] md:self-start md:overflow-y-auto md:pt-8">
           {nav}
         </div>
       </nav>
-      <article
-        className="prose-nutorch min-w-0 flex-1"
-        data-pagefind-body={data.indexable ? true : undefined}
-      >
-        <Search />
-        <h1>{data.entry.title}</h1>
-        <div dangerouslySetInnerHTML={{ __html: data.html }} />
-        <div className="mt-12 flex justify-between gap-4 border-t border-border pt-6 text-sm">
-          {previous ? (
-            <Link
-              to={address(previous.slug)}
-              className="text-muted hover:text-foreground"
-            >
-              ← {previous.title}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {next && (
-            <Link
-              to={address(next.slug)}
-              className="text-right font-medium text-primary hover:text-primary-strong"
-            >
-              {next.title} →
-            </Link>
-          )}
-        </div>
-      </article>
+      <ReadingColumn>
+        <article
+          className="prose-nutorch min-w-0 flex-1"
+          data-pagefind-body={data.indexable ? true : undefined}
+        >
+          <Search />
+          <h1>{data.entry.title}</h1>
+          <div dangerouslySetInnerHTML={{ __html: data.html }} />
+          <div className="mt-12 flex justify-between gap-4 border-t border-border pt-6 text-sm">
+            {previous ? (
+              <Link
+                to={address(previous.slug)}
+                className="text-muted hover:text-foreground"
+              >
+                ← {previous.title}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <Link
+                to={address(next.slug)}
+                className="text-right font-medium text-primary hover:text-primary-strong"
+              >
+                {next.title} →
+              </Link>
+            )}
+          </div>
+        </article>
+      </ReadingColumn>
     </div>
   );
 }

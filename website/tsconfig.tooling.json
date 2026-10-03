@@ -2,6 +2,7 @@
   "extends": "./tsconfig.browser.json",
   "compilerOptions": { "types": ["node", "bun", "react", "react-dom"] },
   "include": [
+    "types/css.d.ts",
     "scripts/**/*.ts",
     "server.ts",
     "app/**/*.test.ts",

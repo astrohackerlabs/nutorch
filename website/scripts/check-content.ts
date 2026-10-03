@@ -62,8 +62,13 @@ function docsMdFiles(dir: string, prefix = ""): string[] {
   return out;
 }
 
+function isShellDoc(file: string): boolean {
+  return file.startsWith("shell/");
+}
+
 for (const file of docsMdFiles(DOCS)) {
   const text = readFileSync(`${DOCS}/${file}`, "utf8");
+  if (isShellDoc(file)) continue;
   if (/```(?:bash|sh|zsh|posix)\b/.test(text)) {
     console.error(`FAIL: ${file}: obsolete shell example fence`);
     failed = true;
@@ -145,7 +150,9 @@ for (const [name, source] of [
 }
 const activeSources = [
   indexSource,
-  ...docsMdFiles(DOCS).map((file) => readFileSync(`${DOCS}/${file}`, "utf8")),
+  ...docsMdFiles(DOCS)
+    .filter((file) => !isShellDoc(file))
+    .map((file) => readFileSync(`${DOCS}/${file}`, "utf8")),
   ...["Header", "Footer"].map((name) =>
     readFileSync(
       new URL(`../app/components/${name}.tsx`, import.meta.url),

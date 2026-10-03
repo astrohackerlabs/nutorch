@@ -64,6 +64,78 @@ fn xdg_socket_startup_is_quiet_and_exit_preserves_siblings() {
     }
 }
 
+#[test]
+fn startup_shows_tip_meta_and_pipes() {
+    let home = tempfile::Builder::new()
+        .prefix("nttip-")
+        .tempdir_in("/tmp")
+        .unwrap();
+    let mut terminal = Terminal::start(home.path());
+    let meta = "Type nutorch tip for more tips.";
+    terminal.wait_for(meta);
+    let banner = terminal.output.clone();
+    let meta_at = banner.find(meta).unwrap();
+    let meta_line_start = banner[..meta_at]
+        .rfind('\n')
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    let meta_line = banner[meta_line_start..meta_at + meta.len()].trim_end_matches('\r');
+    assert_eq!(meta_line, meta, "{banner:?}");
+    let before = &banner[..meta_line_start];
+    let label_at = before
+        .rfind("Tip · ")
+        .unwrap_or_else(|| panic!("{banner:?}"));
+    let label_end = before[label_at..]
+        .find('\n')
+        .map(|index| label_at + index)
+        .unwrap_or(before.len());
+    assert!(
+        !before[label_at..label_end].contains('\u{1b}'),
+        "{banner:?}"
+    );
+    let body = &before[label_end..];
+    assert!(body.contains('\u{1b}'), "{banner:?}");
+    assert!(
+        strip_ansi(body).contains('#'),
+        "intro body lost its lesson: {banner:?}"
+    );
+    terminal.send("nutorch tip --type pipes\r");
+    terminal.wait_for("Tip · nushell · pipelines");
+    let shown = terminal.output.clone();
+    let at = shown
+        .find("Tip · nushell · pipelines")
+        .unwrap_or_else(|| panic!("{shown:?}"));
+    let line_end = shown[at..]
+        .find('\n')
+        .map(|index| at + index)
+        .unwrap_or(shown.len());
+    assert!(!shown[at..line_end].contains('\u{1b}'), "{shown:?}");
+    let printed = &shown[line_end..];
+    assert!(printed.contains('\u{1b}'), "{shown:?}");
+    assert!(
+        strip_ansi(printed).contains('#'),
+        "pipes body lost its lesson: {shown:?}"
+    );
+}
+
+fn strip_ansi(text: &str) -> String {
+    let mut out = String::new();
+    let mut chars = text.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '\u{1b}' && chars.peek() == Some(&'[') {
+            chars.next();
+            for next in chars.by_ref() {
+                if next.is_ascii_alphabetic() {
+                    break;
+                }
+            }
+            continue;
+        }
+        out.push(ch);
+    }
+    out
+}
+
 impl Terminal {
     fn start(home: &std::path::Path) -> Self {
         Self::start_with_env(home, None)
@@ -92,6 +164,9 @@ impl Terminal {
             .env("XDG_DATA_HOME", home)
             .env_remove("NUTORCH_SYNC_SOCKET")
             .env_remove("NUTORCH_SYNC_TOKEN")
+            .env_remove("NO_COLOR")
+            .env_remove("FORCE_COLOR")
+            .env_remove("CLICOLOR")
             .env(
                 "PATH",
                 format!(
@@ -136,6 +211,18 @@ impl Terminal {
         }
         self.output.clear();
         self.master.write_all(input.as_bytes()).unwrap();
+    }
+
+    fn wait_for(&mut self, text: &str) {
+        let deadline = Instant::now() + Duration::from_secs(20);
+        while !self.output.contains(text) {
+            assert!(
+                Instant::now() < deadline,
+                "waiting for {text:?}: {:?}",
+                self.output
+            );
+            self.read_output();
+        }
     }
 
     fn expect(&mut self, text: &str) {

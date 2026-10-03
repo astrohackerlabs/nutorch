@@ -1,0 +1,1862 @@
+[
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "intro",
+    "body": "# Each value can flow into the next command.\n[1 2 3] | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "intro",
+    "body": "# A bare value is already a complete command.\nprint 42"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "basic",
+    "body": "# Sum a list, then take the absolute value.\n[1 2 3] | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "basic",
+    "body": "# Describe a result after you compute it.\n[1 2 3] | math sum | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "intermediate",
+    "body": "# Turn a sum into text and count its characters.\n[1 2 3 4] | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "intermediate",
+    "body": "# Keep the numbers that pass a test.\n[1 2 3] | where {|n| $n > 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "thinking-in-nu",
+    "level": "advanced",
+    "body": "# Chain four steps from a list to a length.\n[1 2 3 4] | math sum | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "intro",
+    "body": "# A pipe sends one command's output into the next.\n[1 2 3] | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "intro",
+    "body": "# Parentheses run a pipeline where a value is expected.\n1 + (2 | math abs)"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "basic",
+    "body": "# Two pipes can compute and then format.\n[8 1] | math max | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "basic",
+    "body": "# skip drops a prefix before length counts.\n[1 2 3 4] | skip 1 | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "intermediate",
+    "body": "# Three pipes reduce, convert, and measure.\n[5 5] | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "intermediate",
+    "body": "# A closure in the middle is still a pipeline.\n[1 2 3] | each {|n| $n + 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "pipelines",
+    "level": "advanced",
+    "body": "# Four pipes is a small program.\n[1 2 3 4] | math sum | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "intro",
+    "body": "# describe reports the type of a value.\n42 | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "intro",
+    "body": "# A record is a set of named fields.\n{name: \"nu\"} | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "basic",
+    "body": "# into string changes a number into text.\n7 | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "basic",
+    "body": "# into int reads digits from text.\n\"12\" | into int | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "intermediate",
+    "body": "# Convert, measure, and convert back.\n99 | into string | str length | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "intermediate",
+    "body": "# Check the type of each list item.\n[1 \"a\"] | each {|n| $n | describe} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "types",
+    "level": "advanced",
+    "body": "# Walk a number through four conversions.\n12 | into string | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "intro",
+    "body": "# str uppercase changes letters to capitals.\n\"nushell\" | str uppercase"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "intro",
+    "body": "# str length counts characters.\n\"tips\" | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "basic",
+    "body": "# Split text, then count the pieces.\n\"a-b-c\" | split row \"-\" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "basic",
+    "body": "# Replace a word, then measure the text.\n\"red fish\" | str replace \"red\" \"blue\" | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "intermediate",
+    "body": "# Trim, split, and count the words.\n\" a b \" | str trim | split row \" \" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "intermediate",
+    "body": "# Build a line from each word.\n[\"do\" \"learn\"] | each {|w| $\"go ($w)\"} | str join \" \""
+  },
+  {
+    "kind": "nushell",
+    "type": "strings",
+    "level": "advanced",
+    "body": "# Four string steps from trim to a count.\n\" a-b \" | str trim | split row \"-\" | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "intro",
+    "body": "# length counts the items in a list.\n[1 2 3] | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "intro",
+    "body": "# first returns the item at the front.\n[4 5 6] | first"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "basic",
+    "body": "# append adds an item, then sum the list.\n[1 2] | append 3 | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "basic",
+    "body": "# skip drops a prefix, then length counts.\n[1 2 3 4] | skip 1 | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "intermediate",
+    "body": "# reverse, take, and sum a short list.\n[1 2 3 4] | reverse | take 2 | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "intermediate",
+    "body": "# Add one to each item, then sum.\n[1 2 3] | each {|n| $n + 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "lists",
+    "level": "advanced",
+    "body": "# Sort, skip, take, and sum.\n[3 1 4 2] | sort | skip 1 | take 2 | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "intro",
+    "body": "# get reads one field from a record.\n{name: \"nu\"} | get name"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "intro",
+    "body": "# columns lists the field names.\n{a: 1, b: 2} | columns"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "basic",
+    "body": "# insert adds a field you can read back.\n{a: 1} | insert b 2 | get b"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "basic",
+    "body": "# upsert writes a field even when it exists.\n{a: 1} | upsert a 5 | get a"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "intermediate",
+    "body": "# Merge two records and count the fields.\n{a: 1} | merge {b: 2} | columns | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "intermediate",
+    "body": "# Visit each field value.\n{a: 1, b: 2} | items {|k, v| $v} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "records",
+    "level": "advanced",
+    "body": "# Insert a field, then measure its text.\n{a: 1} | insert b 22 | get b | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "intro",
+    "body": "# get pulls one column from a table.\n[{a: 1} {a: 2}] | get a"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "intro",
+    "body": "# length counts the rows of a table.\n[{a: 1} {a: 2}] | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "basic",
+    "body": "# Sum one column of a table.\n[{a: 1} {a: 4}] | get a | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "basic",
+    "body": "# select keeps the columns you name.\n[{a: 1, b: 2}] | select a | get a"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "intermediate",
+    "body": "# Reject a column, then count what remains.\n[{a: 1, b: 2}] | reject b | columns | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "intermediate",
+    "body": "# Update a cell with a small closure.\n[{a: 1}] | update a {|row| $row.a + 1} | get a"
+  },
+  {
+    "kind": "nushell",
+    "type": "tables",
+    "level": "advanced",
+    "body": "# Sum a column and report its width.\n[{n: 3} {n: 4}] | get n | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "intro",
+    "body": "# A cell path walks nested fields.\n{user: {name: \"nu\"}} | get user.name"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "intro",
+    "body": "# get can read a list by index.\n[10 20 30] | get 1"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "basic",
+    "body": "# Step through nested fields one by one.\n{user: {name: \"nu\"}} | get user | get name"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "basic",
+    "body": "# Read a nested record from a one-row table.\n[{user: {name: \"nu\"}}] | get user | get name"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "intermediate",
+    "body": "# A path, a row, and a length.\n[{user: {name: \"ada\"}}] | get user.name | first | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "intermediate",
+    "body": "# Choose rows, then read a field.\n[{n: 1} {n: 3}] | where {|row| $row.n > 1} | get n"
+  },
+  {
+    "kind": "nushell",
+    "type": "navigating-data",
+    "level": "advanced",
+    "body": "# Drill into a column and measure the text.\n[{user: {name: \"ada\"}}] | get user.name | first | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "intro",
+    "body": "# let names a value for later lines.\nlet x = 3\n$x"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "intro",
+    "body": "# Use a stored list in one pipe.\nlet n = [1 2 3]\n$n | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "basic",
+    "body": "# Add a stored number, then take abs.\nlet n = 4\n($n + 1) | math abs | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "basic",
+    "body": "# mut lets a later line change the value.\nmut n = 1\n$n = 2\n$n | math abs | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "intermediate",
+    "body": "# Three steps from a stored list.\nlet n = [1 2 3 4]\n$n | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "intermediate",
+    "body": "# A closure can read an outer variable.\nlet bonus = 2\n[1 2] | each {|n| $n + $bonus} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "variables",
+    "level": "advanced",
+    "body": "# Store a list, then run four pipes.\nlet n = [1 2 3 4]\n$n | math sum | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "intro",
+    "body": "# + adds two numbers.\n2 + 3"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "intro",
+    "body": "# == compares two values.\n2 == 2"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "basic",
+    "body": "# Parentheses group two abs calls.\n(3 | math abs | math abs)"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "basic",
+    "body": "# Add two piped absolute values.\n(1 | math abs) + (2 | math abs)"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "intermediate",
+    "body": "# Three math steps inside parentheses.\n(8 | math abs | into string | str length)"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "intermediate",
+    "body": "# Compare each number with a closure.\n[1 2 3] | where {|n| $n > 2} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "operators",
+    "level": "advanced",
+    "body": "# Four arithmetic stages on a list.\n[2 3 4] | math sum | math abs | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "intro",
+    "body": "# if chooses one branch.\nif 1 < 2 { \"yes\" } else { \"no\" }"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "intro",
+    "body": "# match picks a branch by value.\nmatch 2 { 2 => \"two\" }"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "basic",
+    "body": "# A pipe can feed the condition.\nif ([1 2 3] | math sum | math abs) > 0 { \"ok\" }"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "basic",
+    "body": "# for walks a list and a later line sums it.\nmut total = 0\nfor n in [1 2] { $total = $total + $n }\n$total | math abs | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "intermediate",
+    "body": "# Three pipes decide the branch.\nif ([1 2 3 4] | math sum | into string | str length) > 0 { \"ok\" }"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "intermediate",
+    "body": "# each can branch on every item.\n[1 2 3] | each {|n| if $n > 1 { $n } else { 0 }} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "control-flow",
+    "level": "advanced",
+    "body": "# A command can choose a word from a number.\ndef label [n: int] {\n  if $n > 1 { \"big\" } else { \"small\" }\n}\nlabel 3 | str length | math abs | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "intro",
+    "body": "# first keeps the opening item.\n[9 8 7] | first"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "intro",
+    "body": "# last 1 keeps the final item.\n[9 8 7] | last 1"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "basic",
+    "body": "# take and skip window a list.\n[1 2 3 4] | skip 1 | take 2"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "basic",
+    "body": "# uniq drops repeated items.\n[1 1 2 2] | uniq | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "intermediate",
+    "body": "# where can test a column without a closure.\n[{n: 1} {n: 2} {n: 3}] | where n > 1 | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "intermediate",
+    "body": "# where with a closure keeps the matches.\n[1 2 3 4] | where {|n| $n > 2} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "filters",
+    "level": "advanced",
+    "body": "# skip, take, sum, and abs.\n[1 2 3 4] | skip 1 | take 2 | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "intro",
+    "body": "# do runs a block and returns its value.\ndo { \"hello\" }"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "intro",
+    "body": "# A block can hold one expression.\ndo { 1 + 2 }"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "basic",
+    "body": "# Pipe the block result twice.\ndo { [1 2 3] } | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "basic",
+    "body": "# A block can produce the list you sum.\ndo { [1 2 3] } | math sum | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "intermediate",
+    "body": "# Three pipes after a do block.\ndo { [1 2 3 4] } | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "intermediate",
+    "body": "# each is an anonymous command.\n[1 2 3] | each {|n| $n * 2} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "custom-commands",
+    "level": "advanced",
+    "body": "# Define a command and call it with one argument.\ndef greet [name: string] {\n  $\"hi ($name)\"\n}\ngreet nushell"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "intro",
+    "body": "# An empty module still has a name.\nmodule demo {}"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "intro",
+    "body": "# Another module can be only a name.\nmodule sample {}"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "basic",
+    "body": "# scope modules lists the module you defined.\nmodule demo {}\nscope modules | where name == \"demo\" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "basic",
+    "body": "# A second name is found the same way.\nmodule tools {}\nscope modules | where name == \"tools\" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "intermediate",
+    "body": "# Read the name column after the filter.\nmodule demo {}\nscope modules | where name == \"demo\" | get name | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "intermediate",
+    "body": "# each can read every module name.\nmodule demo {}\nscope modules | each {|m| $m.name} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "modules",
+    "level": "advanced",
+    "body": "# Export a greeting and call it by its module name.\nmodule greet {\n  export def hello [name: string] {\n    $\"hi ($name)\"\n  }\n}\nuse greet\ngreet hello tips"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "intro",
+    "body": "# version reports this shell.\nversion | get version"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "intro",
+    "body": "# version alone is a complete command.\nversion"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "basic",
+    "body": "# Measure the version text.\nversion | get version | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "basic",
+    "body": "# The major number can become text.\nversion | get major | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "intermediate",
+    "body": "# Split the version into numeric pieces.\nversion | get version | split row \".\" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "intermediate",
+    "body": "# Walk each column of the version record.\nversion | columns | each {|c| $c} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "scripts",
+    "level": "advanced",
+    "body": "# Four steps from the version text to a count.\nversion | get version | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "intro",
+    "body": "# PWD is the current directory.\n$env.PWD | path basename"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "intro",
+    "body": "# pwd prints the working directory.\npwd"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "basic",
+    "body": "# path split breaks a directory into parts.\n$env.PWD | path split | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "basic",
+    "body": "# Measure the last part of the working directory.\npwd | path basename | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "intermediate",
+    "body": "# Reverse the parts of the working directory.\n$env.PWD | path split | reverse | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "intermediate",
+    "body": "# Read one environment value by name.\n[\"PWD\"] | each {|n| $env | get $n} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "environment",
+    "level": "advanced",
+    "body": "# Four steps from the directory to a count.\n$env.PWD | path basename | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "intro",
+    "body": "# edit_mode names the line editing style.\n$env.config.edit_mode"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "intro",
+    "body": "# show_banner says whether the intro is on.\n$env.config.show_banner | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "basic",
+    "body": "# Measure the edit mode name.\n$env.config.edit_mode | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "basic",
+    "body": "# use_ansi_coloring is true or false.\n$env.config.use_ansi_coloring | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "intermediate",
+    "body": "# Count the edit mode, then count that text.\n$env.config.edit_mode | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "intermediate",
+    "body": "# Find one column of the config record.\n$env.config | columns | where {|c| $c == \"edit_mode\"} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "configuration",
+    "level": "advanced",
+    "body": "# Four steps from the edit mode name.\n$env.config.edit_mode | str length | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "intro",
+    "body": "# pwd shows where you are.\npwd"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "intro",
+    "body": "# The last part of pwd is the folder name.\npwd | path basename"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "basic",
+    "body": "# ls lists the working directory.\nls | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "basic",
+    "body": "# path split and last name the folder.\npwd | path split | last"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "intermediate",
+    "body": "# Count the names ls returns.\nls | get name | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "intermediate",
+    "body": "# where can look at each listed name.\nls | where {|f| $f.name != \"\"} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "moving-around",
+    "level": "advanced",
+    "body": "# Four steps from ls to a character count.\nls | get name | length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "intro",
+    "body": "# from json reads a JSON value.\n'{ \"n\": 1 }' | from json"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "intro",
+    "body": "# from csv reads comma-separated text.\n\"a,b\\n1,2\" | from csv"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "basic",
+    "body": "# get pulls a field out of JSON.\n'{ \"n\": 1 }' | from json | get n"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "basic",
+    "body": "# from toml reads a simple assignment.\n\"n = 1\\n\" | from toml | get n"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "intermediate",
+    "body": "# Read a JSON number and take abs.\n'{ \"n\": 12 }' | from json | get n | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "intermediate",
+    "body": "# Walk each number in a JSON list.\n'[1, 2, 3]' | from json | each {|n| $n} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "loading-data",
+    "level": "advanced",
+    "body": "# JSON to a number, then to a character count.\n'{ \"n\": 12 }' | from json | get n | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "intro",
+    "body": "# str replace -r uses a regular expression.\n\"ab\" | str replace -r \"b\" \"c\""
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "intro",
+    "body": "# parse -r captures a pattern into columns.\n\"abc123\" | parse -r '(?P<n>\\d+)'"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "basic",
+    "body": "# Read the digits a pattern captured.\n\"a1\" | parse -r '(?P<d>\\d)' | get d"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "basic",
+    "body": "# Replace a pattern, then measure the text.\n\"red\" | str replace -r \"re\" \"go\" | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "intermediate",
+    "body": "# Count the captures from a pattern.\n\"a1b2\" | parse -r '(?P<d>\\d)' | get d | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "intermediate",
+    "body": "# Replace a digit in each string.\n[\"a1\" \"b2\"] | each {|s| $s | str replace -r '\\d' \"n\"} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "regex",
+    "level": "advanced",
+    "body": "# Capture digits and measure the text.\n\"abc123\" | parse -r '(?P<n>\\d+)' | get n | first | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "intro",
+    "body": "# job spawn runs a block and returns its id.\njob spawn { 1 }"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "intro",
+    "body": "# The id can be turned into text.\njob spawn { 2 } | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "basic",
+    "body": "# Measure the text of a job id.\njob spawn { 1 } | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "basic",
+    "body": "# job list shows the jobs still recorded.\njob spawn { 3 }\njob list | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "intermediate",
+    "body": "# Three steps from a job id to a number.\njob spawn { 1 } | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "intermediate",
+    "body": "# each can read the id of each job.\njob spawn { 1 }\njob list | each {|j| $j.id} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "jobs",
+    "level": "advanced",
+    "body": "# Four steps from a job id to a count.\njob spawn { 4 } | into string | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "intro",
+    "body": "# alias gives a short name to a command.\nalias hi = print hello\nhi"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "intro",
+    "body": "# An alias can stand in for math abs.\nalias twice = math abs\n-3 | twice"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "basic",
+    "body": "# Pipe text into an alias.\nalias shout = str uppercase\n\"nu\" | shout | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "basic",
+    "body": "# An alias can be the last step of a pipe.\nalias add1 = math abs\n[1 2] | math sum | add1"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "intermediate",
+    "body": "# Measure, convert, and measure again.\nalias measure = str length\n\"nushell\" | measure | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "intermediate",
+    "body": "# An alias can follow a closure.\nalias bump = math abs\n[1 2] | each {|n| $n} | bump"
+  },
+  {
+    "kind": "nushell",
+    "type": "aliases",
+    "level": "advanced",
+    "body": "# Four steps using an alias twice.\nalias measure = str length\n\"tips\" | measure | into string | measure | into int"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "intro",
+    "body": "# ^true runs the true program.\n^true"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "intro",
+    "body": "# ^printf writes the text you give it.\n^printf '%s' hi"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "basic",
+    "body": "# Pipe external output into two commands.\n^printf '%s' hi | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "basic",
+    "body": "# ^true succeeds, then a pipe measures text.\n^true\n\"ok\" | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "intermediate",
+    "body": "# Three pipes from printf to a count.\n^printf '%s' hi | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "intermediate",
+    "body": "# Split external text and visit each character.\n^printf '%s' ab | split chars | each {|c| $c} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "externs",
+    "level": "advanced",
+    "body": "# Four pipes from printf to a number.\n^printf '%s' hi | str length | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "intro",
+    "body": "# edit_mode is emacs, vi, or helix.\n$env.config.edit_mode"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "intro",
+    "body": "# keybindings list shows the current keys.\nkeybindings list | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "basic",
+    "body": "# Count the characters in the edit mode name.\n$env.config.edit_mode | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "basic",
+    "body": "# get name reads the keybinding column.\nkeybindings list | get name | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "intermediate",
+    "body": "# Count the keys, then count that text.\nkeybindings list | length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "intermediate",
+    "body": "# where can keep every named keybinding.\nkeybindings list | where {|k| $k.name != \"\"} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "line-editor",
+    "level": "advanced",
+    "body": "# Four steps from the keybinding count.\nkeybindings list | length | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "intro",
+    "body": "# help par-each describes the parallel command.\nhelp par-each | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "intro",
+    "body": "# describe says help returned text.\nhelp par-each | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "basic",
+    "body": "# Measure the par-each help text.\nhelp par-each | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "basic",
+    "body": "# lines splits help text into rows.\nhelp par-each | lines | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "intermediate",
+    "body": "# par-each runs a closure over a list.\n[1 2 3] | par-each {|n| $n + 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "intermediate",
+    "body": "# Sum the parallel results and take abs.\n[1 2 3 4] | par-each {|n| $n} | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "parallelism",
+    "level": "advanced",
+    "body": "# Four pipes through par-each to a count.\n[1 2] | par-each {|n| $n + 1} | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "intro",
+    "body": "# metadata attaches a span to a value.\nmetadata 1 | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "intro",
+    "body": "# metadata works on text too.\nmetadata \"tip\""
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "basic",
+    "body": "# The span record has an end field.\nmetadata 1 | get span | get end"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "basic",
+    "body": "# columns lists the metadata fields.\nmetadata \"ab\" | columns | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "intermediate",
+    "body": "# Count the fields inside the span.\nmetadata 7 | get span | columns | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "intermediate",
+    "body": "# Describe the metadata of each item.\n[1 2] | each {|n| metadata $n} | describe"
+  },
+  {
+    "kind": "nushell",
+    "type": "metadata",
+    "level": "advanced",
+    "body": "# Four steps from a span end to a count.\nmetadata 7 | get span | get end | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "intro",
+    "body": "# math abs drops the sign.\n(-3) | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "intro",
+    "body": "# math sum adds a list.\n[1 2 3] | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "basic",
+    "body": "# Sum, then take the absolute value.\n[1 2 3] | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "basic",
+    "body": "# math avg and math round meet at an integer.\n[1 2 3 4] | math avg | math round"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "intermediate",
+    "body": "# Sum, convert, and count.\n[1 2 3 4] | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "intermediate",
+    "body": "# Take abs inside a closure, then sum.\n[1 2 3] | each {|n| $n | math abs} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "math",
+    "level": "advanced",
+    "body": "# Four math and text steps.\n[1 2 3 4] | math sum | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "intro",
+    "body": "# path parse splits a path into fields.\n\"/a/b.txt\" | path parse"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "intro",
+    "body": "# path basename keeps the file name.\n\"/a/b.txt\" | path basename"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "basic",
+    "body": "# The stem is the name without the extension.\n\"/a/b.txt\" | path parse | get stem"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "basic",
+    "body": "# path join adds one more part.\n\"/a/b\" | path join c | path basename"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "intermediate",
+    "body": "# dirname, join, and basename.\n\"/a/b.txt\" | path dirname | path join c | path basename"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "intermediate",
+    "body": "# Take the basename of each path.\n[\"/a/b\" \"/a/c\"] | each {|p| $p | path basename} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "path",
+    "level": "advanced",
+    "body": "# Four steps from a directory to a count.\n\"/a/b.txt\" | path dirname | path basename | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "intro",
+    "body": "# date now reads the current time.\ndate now"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "intro",
+    "body": "# format date can print just the year.\ndate now | format date \"%Y\""
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "basic",
+    "body": "# The year text can become an integer.\ndate now | format date \"%Y\" | into int"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "basic",
+    "body": "# The month text can become an integer.\ndate now | format date \"%m\" | into int"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "intermediate",
+    "body": "# Year, integer, then text again.\ndate now | format date \"%Y\" | into int | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "intermediate",
+    "body": "# Split a year-month string into parts.\ndate now | format date \"%Y-%m\" | split row \"-\" | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "date",
+    "level": "advanced",
+    "body": "# Four steps from the year to a count.\ndate now | format date \"%Y\" | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "intro",
+    "body": "# into string turns a number into text.\n1 | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "intro",
+    "body": "# into int turns digits into a number.\n\"3\" | into int"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "basic",
+    "body": "# into string and into int round-trip a number.\n1 | into string | into int"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "basic",
+    "body": "# into float and math round meet at an integer.\n4 | into float | math round"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "intermediate",
+    "body": "# Text, a count, then text again.\n12 | into string | str length | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "intermediate",
+    "body": "# Convert each number inside a closure.\n[1 2] | each {|n| $n | into string} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "conversions",
+    "level": "advanced",
+    "body": "# Four conversions from a number to a count.\n12 | into string | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "intro",
+    "body": "# random int draws from a range.\nrandom int 1..3"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "intro",
+    "body": "# random bool is true or false.\nrandom bool | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "basic",
+    "body": "# A random integer can be shown as text.\nrandom int 1..5 | math abs | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "basic",
+    "body": "# random uuid is text you can measure.\nrandom uuid | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "intermediate",
+    "body": "# Three steps from a random integer.\nrandom int 1..9 | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "intermediate",
+    "body": "# Draw a bool for each list item.\n[1 2 3] | each {|n| random bool} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "random",
+    "level": "advanced",
+    "body": "# Four steps from a random integer to a count.\nrandom int 1..9 | into string | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "intro",
+    "body": "# bits and keeps the bits set in both numbers.\n2 | bits and 3"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "intro",
+    "body": "# bits shl shifts bits to the left.\n1 | bits shl 3"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "basic",
+    "body": "# or, then and, combines two bit checks.\n2 | bits or 1 | bits and 3"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "basic",
+    "body": "# Shift left, then take abs.\n1 | bits shl 2 | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "intermediate",
+    "body": "# Shift left, shift right, then abs.\n1 | bits shl 3 | bits shr 1 | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "intermediate",
+    "body": "# Shift each number inside a closure.\n[1 2 3] | each {|n| $n | bits shl 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "bits",
+    "level": "advanced",
+    "body": "# Four bit and text steps.\n1 | bits shl 4 | bits shr 1 | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "intro",
+    "body": "# bytes length counts binary bytes.\n0x[01 02] | bytes length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "intro",
+    "body": "# encode utf8 turns text into bytes.\n\"ab\" | encode utf8"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "basic",
+    "body": "# Count the bytes in a short string.\n\"hi\" | encode utf8 | bytes length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "basic",
+    "body": "# bytes reverse flips the byte order.\n0x[01 02 03] | bytes reverse | bytes length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "intermediate",
+    "body": "# A byte count can become text.\n\"hi\" | encode utf8 | bytes length | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "intermediate",
+    "body": "# Encode each string inside a closure.\n[\"a\" \"b\"] | each {|s| $s | encode utf8} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "bytes",
+    "level": "advanced",
+    "body": "# Four steps from text to a character count.\n\"hi\" | encode utf8 | bytes length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "intro",
+    "body": "# sys host includes the hostname.\nsys host | get hostname"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "intro",
+    "body": "# sys cpu returns one row per cpu.\nsys cpu | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "basic",
+    "body": "# Measure the hostname.\nsys host | get hostname | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "basic",
+    "body": "# The cpu row count is a number.\nsys cpu | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "intermediate",
+    "body": "# Hostname length, then abs.\nsys host | get hostname | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "intermediate",
+    "body": "# each can visit every cpu row.\nsys cpu | each {|c| $c} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "system",
+    "level": "advanced",
+    "body": "# Four steps from the hostname to a count.\nsys host | get hostname | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "intro",
+    "body": "# history lists commands from this shell.\nhistory | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "intro",
+    "body": "# history session is the current session id.\nhistory session | into string"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "basic",
+    "body": "# The history length is a number.\nhistory | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "basic",
+    "body": "# Measure the session id text.\nhistory session | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "intermediate",
+    "body": "# Count the history, then count that text.\nhistory | length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "intermediate",
+    "body": "# Filter the history column names.\nhistory | columns | where {|c| $c != \"\"} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "history",
+    "level": "advanced",
+    "body": "# Four steps from the history length.\nhistory | length | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "intro",
+    "body": "# hash md5 fingerprints text.\n\"hi\" | hash md5"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "intro",
+    "body": "# hash sha256 is a longer fingerprint.\n\"hi\" | hash sha256"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "basic",
+    "body": "# An md5 fingerprint has a fixed length.\n\"hi\" | hash md5 | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "basic",
+    "body": "# A sha256 fingerprint has a fixed length.\n\"tip\" | hash sha256 | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "intermediate",
+    "body": "# Measure a fingerprint and take abs.\n\"hi\" | hash md5 | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "intermediate",
+    "body": "# Hash each string inside a closure.\n[\"a\" \"b\"] | each {|s| $s | hash md5} | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "hash",
+    "level": "advanced",
+    "body": "# Four steps from text to a character count.\n\"hi\" | hash md5 | str length | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "intro",
+    "body": "# seq builds a range of numbers.\nseq 1 3 | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "intro",
+    "body": "# length counts the numbers seq made.\nseq 1 4 | length"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "basic",
+    "body": "# Sum a sequence, then take abs.\nseq 1 4 | math sum | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "basic",
+    "body": "# seq char walks letters.\nseq char a c | length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "intermediate",
+    "body": "# Sum a sequence and count the text.\nseq 1 5 | math sum | into string | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "intermediate",
+    "body": "# Add one to each generated number.\nseq 1 3 | each {|n| $n + 1} | math sum"
+  },
+  {
+    "kind": "nushell",
+    "type": "generators",
+    "level": "advanced",
+    "body": "# Four steps from a sequence to a count.\nseq 1 4 | math sum | into string | str length | math abs"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "intro",
+    "body": "# url parse splits a URL into fields.\n\"https://example.com/a\" | url parse"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "intro",
+    "body": "# A different URL parses the same way.\n\"https://example.com/b\" | url parse"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "basic",
+    "body": "# get host reads the host field.\n\"https://example.com/a\" | url parse | get host"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "basic",
+    "body": "# url join rebuilds a URL from its fields.\n\"https://example.com/a\" | url parse | url join"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "intermediate",
+    "body": "# Measure the host name.\n\"https://example.com/docs\" | url parse | get host | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "intermediate",
+    "body": "# Measure the path field.\n\"https://example.com/a?b=1\" | url parse | get path | str length"
+  },
+  {
+    "kind": "nushell",
+    "type": "network",
+    "level": "advanced",
+    "body": "# Four steps from a URL to a number.\n\"https://e.com/docs\" | url parse | get host | str length | math abs"
+  },
+  {
+    "kind": "torch",
+    "type": "tensors",
+    "level": "intro",
+    "body": "# A tensor is a native array of numbers.\nuse torch\ntorch tensor [1 2 3] | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "tensors",
+    "level": "basic",
+    "body": "# Read the shape, then count its axes.\nuse torch\ntorch tensor [1 2 3] | torch shape | length"
+  },
+  {
+    "kind": "torch",
+    "type": "tensors",
+    "level": "intermediate",
+    "body": "# Sum the values and describe the result.\nuse torch\ntorch tensor [1 2 3] | torch sum | torch value | describe"
+  },
+  {
+    "kind": "torch",
+    "type": "tensors",
+    "level": "advanced",
+    "body": "# Sum, show, and measure the printed form.\nuse torch\ntorch tensor [1 2 3] | torch sum | torch value | describe | str length"
+  },
+  {
+    "kind": "torch",
+    "type": "creation",
+    "level": "intro",
+    "body": "# ones builds a tensor filled with one.\nuse torch\ntorch ones [2]"
+  },
+  {
+    "kind": "torch",
+    "type": "creation",
+    "level": "basic",
+    "body": "# Sum a vector of ones and read it.\nuse torch\ntorch ones [2] | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "creation",
+    "level": "intermediate",
+    "body": "# An identity matrix summed down to a scalar.\nuse torch\ntorch eye 2 | torch sum | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "creation",
+    "level": "advanced",
+    "body": "# Build, negate, sum, and read a vector.\nuse torch\ntorch ones [2] | torch neg | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "pointwise",
+    "level": "intro",
+    "body": "# abs flips negative numbers to positive.\nuse torch\ntorch tensor [-1 2] | torch abs"
+  },
+  {
+    "kind": "torch",
+    "type": "pointwise",
+    "level": "basic",
+    "body": "# Multiply a tensor by itself.\nuse torch\nlet x = torch tensor [2 3]\n$x | torch mul $x | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "pointwise",
+    "level": "intermediate",
+    "body": "# Square a tensor, then take abs.\nuse torch\nlet x = torch tensor [-2 3]\n$x | torch mul $x | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "pointwise",
+    "level": "advanced",
+    "body": "# Square, clean, sum, and read.\nuse torch\nlet x = torch tensor [1 2 3]\n$x | torch mul $x | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "reduction",
+    "level": "intro",
+    "body": "# sum adds every element.\nuse torch\ntorch tensor [1 2 3] | torch sum"
+  },
+  {
+    "kind": "torch",
+    "type": "reduction",
+    "level": "basic",
+    "body": "# mean of a small vector.\nuse torch\ntorch tensor [1.0 3.0] | torch mean | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "reduction",
+    "level": "intermediate",
+    "body": "# Sum of absolute values.\nuse torch\ntorch tensor [-1 2] | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "reduction",
+    "level": "advanced",
+    "body": "# Absolute value, sum, abs, and value.\nuse torch\ntorch tensor [1 2 3] | torch abs | torch sum | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "shape",
+    "level": "intro",
+    "body": "# reshape changes the axes, not the values.\nuse torch\ntorch tensor [1 2 3 4] | torch reshape [2 2]"
+  },
+  {
+    "kind": "torch",
+    "type": "shape",
+    "level": "basic",
+    "body": "# Count axes after a reshape.\nuse torch\ntorch tensor [1 2 3 4] | torch reshape [2 2] | torch shape"
+  },
+  {
+    "kind": "torch",
+    "type": "shape",
+    "level": "intermediate",
+    "body": "# Transpose, flatten, and count axes.\nuse torch\ntorch eye 2 | torch t | torch flatten | torch shape"
+  },
+  {
+    "kind": "torch",
+    "type": "shape",
+    "level": "advanced",
+    "body": "# Transpose, flatten, sum, and read.\nuse torch\ntorch eye 2 | torch t | torch flatten | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "linalg",
+    "level": "intro",
+    "body": "# trace adds the diagonal of a matrix.\nuse torch\ntorch eye 2 | torch trace"
+  },
+  {
+    "kind": "torch",
+    "type": "linalg",
+    "level": "basic",
+    "body": "# Multiply a matrix by itself.\nuse torch\nlet a = torch eye 2\n$a | torch mm $a | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "linalg",
+    "level": "intermediate",
+    "body": "# Trace, abs, and value.\nuse torch\ntorch eye 2 | torch trace | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "linalg",
+    "level": "advanced",
+    "body": "# Transpose, trace, abs, and value.\nuse torch\ntorch eye 2 | torch t | torch trace | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "loss",
+    "level": "intro",
+    "body": "# mse_loss compares a guess with a target.\nuse torch\nlet pred = torch tensor [1.0 0.0]\nlet target = torch tensor [1.0 0.0]\ntorch mse_loss $pred $target"
+  },
+  {
+    "kind": "torch",
+    "type": "loss",
+    "level": "basic",
+    "body": "# Read the mean squared error as a value.\nuse torch\nlet p = torch tensor [1.0 0.0]\nlet t = torch tensor [1.0 0.0]\ntorch mse_loss $p $t | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "loss",
+    "level": "intermediate",
+    "body": "# Absolute error, summed and read.\nuse torch\nlet p = torch tensor [1.0 0.0]\nlet t = torch tensor [0.0 1.0]\ntorch l1_loss $p $t | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "loss",
+    "level": "advanced",
+    "body": "# Four steps from a loss to a value.\nuse torch\nlet p = torch tensor [1.0]\nlet t = torch tensor [0.0]\ntorch l1_loss $p $t | torch abs | torch sum | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "comparison",
+    "level": "intro",
+    "body": "# eq compares a tensor with itself.\nuse torch\nlet a = torch tensor [1 2]\n$a | torch eq $a"
+  },
+  {
+    "kind": "torch",
+    "type": "comparison",
+    "level": "basic",
+    "body": "# allclose reports whether two tensors agree.\nuse torch\nlet a = torch tensor [1.0]\n$a | torch allclose $a | into string"
+  },
+  {
+    "kind": "torch",
+    "type": "comparison",
+    "level": "intermediate",
+    "body": "# Sum an equality mask and read it.\nuse torch\nlet a = torch tensor [1 2]\n$a | torch eq $a | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "comparison",
+    "level": "advanced",
+    "body": "# Equality, sum, abs, and value.\nuse torch\nlet a = torch tensor [1 2]\n$a | torch eq $a | torch sum | torch abs | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "utility",
+    "level": "intro",
+    "body": "# manual_seed makes the next random draw repeatable.\nuse torch\ntorch manual_seed 1\ntorch ones [1]"
+  },
+  {
+    "kind": "torch",
+    "type": "utility",
+    "level": "basic",
+    "body": "# Seed, then sum a vector of ones.\nuse torch\ntorch manual_seed 1\ntorch ones [2] | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "utility",
+    "level": "intermediate",
+    "body": "# Seed, then sum the absolute values.\nuse torch\ntorch manual_seed 2\ntorch ones [2] | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "utility",
+    "level": "advanced",
+    "body": "# Seed, negate, abs, sum, and read.\nuse torch\ntorch manual_seed 3\ntorch ones [2] | torch neg | torch abs | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "autograd",
+    "level": "intro",
+    "body": "# requires-grad marks a tensor for differentiation.\nuse torch\nlet x = torch tensor [2.0] --requires-grad\n$x | torch sum"
+  },
+  {
+    "kind": "torch",
+    "type": "autograd",
+    "level": "basic",
+    "body": "# Sum a tracked vector and read the scalar.\nuse torch\nlet x = torch tensor [2.0] --requires-grad\n$x | torch sum | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "autograd",
+    "level": "intermediate",
+    "body": "# Square, sum, and backpropagate.\nuse torch\nlet x = torch tensor [2.0] --requires-grad\n$x | torch mul $x | torch sum | torch backward"
+  },
+  {
+    "kind": "torch",
+    "type": "autograd",
+    "level": "advanced",
+    "body": "# Backpropagate, then read the gradient.\nuse torch\nlet x = torch tensor [2.0] --requires-grad\n$x | torch mul $x | torch sum | torch backward\n$x | torch grad | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "neural-networks",
+    "level": "intro",
+    "body": "# A linear layer maps features to outputs.\nuse torch\ntorch nn linear 2 1"
+  },
+  {
+    "kind": "torch",
+    "type": "neural-networks",
+    "level": "basic",
+    "body": "# Forward a row through a new linear layer.\nuse torch\nlet model = torch nn linear 2 1\ntorch tensor [1.0 0.0] | torch forward $model | torch value"
+  },
+  {
+    "kind": "torch",
+    "type": "neural-networks",
+    "level": "intermediate",
+    "body": "# Build a tiny stack and describe it.\nuse torch\nlet model = torch nn sequential (torch nn linear 2 1) (torch nn relu)\ntorch nn info $model | describe | str length | math abs"
+  },
+  {
+    "kind": "torch",
+    "type": "neural-networks",
+    "level": "advanced",
+    "body": "# Call one forward pass from a command you can reuse.\nuse torch\ndef score [] {\n  let model = torch nn linear 2 1\n  torch tensor [1.0 0.0] | torch forward $model | torch value\n}\nscore"
+  }
+]

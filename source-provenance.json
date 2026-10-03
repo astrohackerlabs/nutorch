@@ -4,6 +4,7 @@
     {
       "name": "nushell",
       "checkout": "forks/nushell",
+      "upstream": "https://github.com/nushell/nushell.git",
       "base": "b6e6562a9a385df439ae864714c609c60314fde9",
       "branch": "issue-26091523132966-exp1-environment-sync",
       "expected_head": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
@@ -19,6 +20,7 @@
     {
       "name": "reedline",
       "checkout": "forks/reedline",
+      "upstream": "https://github.com/nushell/reedline.git",
       "base": "d9db2f7979471b70eb3c3901a2eba3ef5197b656",
       "branch": "issue-26091316465368-exp1-upstream-update",
       "expected_head": "4acac3aeba448c0ce5274d048335846fad36d627",

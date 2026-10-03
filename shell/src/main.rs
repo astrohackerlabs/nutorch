@@ -69,6 +69,9 @@ fn current_dir_from_environment() -> PathBuf {
 }
 
 fn main() -> Result<()> {
+    if let Some(code) = nutorch::tips::early_cli() {
+        std::process::exit(code);
+    }
     if let Some(code) = nutorch::sync::early_cli() {
         std::process::exit(code);
     }
@@ -98,6 +101,7 @@ fn main() -> Result<()> {
 
     let mut engine_state = command_context::add_command_context(engine_state);
     nutorch::sync::add_context(&mut engine_state, sync_context.clone());
+    nutorch::tips::add_context(&mut engine_state);
 
     // Provide `version` the features of this nu binary
     let cargo_features = env!("NU_FEATURES").split(",").map(Cow::Borrowed).collect();

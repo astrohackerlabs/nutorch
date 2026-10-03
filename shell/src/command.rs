@@ -1243,6 +1243,7 @@ fn cli_help_text() -> String {
     let mut output = help::start(&[
         "nutorch [options] [script file] [script args]",
         "nutorch sync",
+        "nutorch tip",
     ]);
     help::section(&mut output, "Commands");
     writeln!(output, "  {HELP_SUBCMD_COLOR}sync{RESET_COLOR}")
@@ -1251,6 +1252,14 @@ fn cli_help_text() -> String {
         "Queue exported environment variables in the enclosing NuTorch.",
         "Updates apply at its next prompt. Missing keys are not deleted.",
         "Run nutorch sync --help for details.",
+    ] {
+        help::description(&mut output, description, 6);
+    }
+    writeln!(output, "  {HELP_SUBCMD_COLOR}tip{RESET_COLOR}")
+        .expect("writing to a String is infallible");
+    for description in [
+        "Print one usage tip from the built-in catalog.",
+        "Run nutorch tip --help for kinds, categories, and levels.",
     ] {
         help::description(&mut output, description, 6);
     }

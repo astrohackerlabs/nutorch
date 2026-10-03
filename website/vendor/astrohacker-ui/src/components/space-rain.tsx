@@ -20,15 +20,17 @@ export function SpaceRain({
   className = "pointer-events-none fixed inset-0 z-1 block h-dvh w-dvw",
   motionMode = "system",
   ...props
-}: SpaceRainProps = {}): ReactElement {
+}: SpaceRainProps = {}): ReactElement | null {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [motion] = useState(() => createMotionModeSource(motionMode));
+  const shown = motionMode !== "no-graphics";
 
   useEffect(() => {
     motion.setMode(motionMode);
   }, [motion, motionMode]);
 
   useEffect(() => {
+    if (!shown) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -37,7 +39,9 @@ export function SpaceRain({
     return (): void => {
       owner.abort();
     };
-  }, [motion]);
+  }, [motion, shown]);
+
+  if (!shown) return null;
 
   return (
     <canvas

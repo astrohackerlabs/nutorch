@@ -14,6 +14,7 @@ use nu_protocol::{
 };
 use nu_utils::perf;
 use nu_utils::time::Instant;
+use std::io::IsTerminal;
 
 pub(crate) fn run_commands(
     engine_state: &mut EngineState,
@@ -190,6 +191,7 @@ fn intro_banner_lines(
     version: &str,
     nu_version: &str,
     startup: std::time::Duration,
+    intro_tip: Option<&str>,
 ) -> Vec<String> {
     let green = "\x1b[32m";
     let bold = "\x1b[1m";
@@ -199,14 +201,26 @@ fn intro_banner_lines(
     match kind {
         BannerKind::None => Vec::new(),
         BannerKind::Short => vec![startup_line, String::new()],
-        BannerKind::Full => vec![
-            format!(
-                "{fg}Welcome to {green}{bold}NuTorch{reset}{fg}, based on the {green}nu{reset}{fg} language{reset}"
-            ),
-            format!("{fg}Version: {green}{version}{fg} (nushell {green}{nu_version}{fg}){reset}"),
-            startup_line,
-            String::new(),
-        ],
+        BannerKind::Full => {
+            let mut lines = vec![
+                format!(
+                    "{fg}Welcome to {green}{bold}NuTorch{reset}{fg}, based on the {green}nu{reset}{fg} language{reset}"
+                ),
+                format!(
+                    "{fg}Version: {green}{version}{fg} (nushell {green}{nu_version}{fg}){reset}"
+                ),
+                startup_line,
+                String::new(),
+            ];
+            if let Some(tip) = intro_tip {
+                for line in tip.trim_end_matches('\n').split('\n') {
+                    lines.push(line.to_string());
+                }
+                lines.push(nutorch::tips::META_LINE.to_string());
+            }
+            lines.push(String::new());
+            lines
+        }
     }
 }
 
@@ -274,11 +288,23 @@ pub(crate) fn run_repl(
         );
         let version = env!("CARGO_PKG_VERSION");
         let nu_version = env!("NUSHELL_VERSION");
+        let rendered = nutorch::tips::render(&nutorch::tips::pick_intro());
+        let intro_tip = if show_banner == BannerKind::Full {
+            nutorch::tips::present(
+                engine_state,
+                &stack,
+                &rendered,
+                std::io::stderr().is_terminal(),
+            )
+        } else {
+            rendered
+        };
         for line in intro_banner_lines(
             show_banner,
             version,
             nu_version,
             entire_start_time.elapsed(),
+            Some(&intro_tip),
         ) {
             eprintln!("{line}");
         }
@@ -322,10 +348,11 @@ mod tests {
     ];
 
     #[test]
-    fn intro_banner_omits_hint_lines() {
+    fn intro_banner_shows_tip_and_omits_hints() {
         let startup = Duration::from_millis(12);
-        let full = intro_banner_lines(BannerKind::Full, "2.0.9", "0.115.2", startup);
-        let short = intro_banner_lines(BannerKind::Short, "2.0.9", "0.115.2", startup);
+        let tip = "Tip · nushell · pipelines · intro\n[1 2 3] | math sum";
+        let full = intro_banner_lines(BannerKind::Full, "2.0.9", "0.115.2", startup, Some(tip));
+        let short = intro_banner_lines(BannerKind::Short, "2.0.9", "0.115.2", startup, Some(tip));
         let full_text = full.join("\n");
         let short_text = short.join("\n");
 
@@ -343,7 +370,14 @@ mod tests {
         let welcome = full_text.find("Welcome to").expect("welcome");
         let version = full_text.find("Version:").expect("version");
         let startup_at = full_text.find("Startup Time:").expect("startup");
-        assert!(welcome < version && version < startup_at);
+        let tip_at = full_text
+            .find("Tip · nushell · pipelines · intro")
+            .expect("tip");
+        let meta_at = full_text.find(nutorch::tips::META_LINE).expect("meta");
+        assert!(
+            welcome < version && version < startup_at && startup_at < tip_at && tip_at < meta_at
+        );
+        assert!(full_text.contains("[1 2 3] | math sum"));
         assert!(full_text.contains("\u{1b}[32m\u{1b}[1mNuTorch"));
         assert!(full_text.contains("2.0.9"));
         assert!(full_text.contains("nushell \u{1b}[32m0.115.2"));
@@ -356,7 +390,11 @@ mod tests {
         assert!(short[1].is_empty());
         assert!(!short_text.contains("Welcome to"));
         assert!(!short_text.contains("Version:"));
+        assert!(!short_text.contains("Tip ·"));
+        assert!(!short_text.contains(nutorch::tips::META_LINE));
 
-        assert!(intro_banner_lines(BannerKind::None, "2.0.9", "0.115.2", startup).is_empty());
+        assert!(
+            intro_banner_lines(BannerKind::None, "2.0.9", "0.115.2", startup, Some(tip)).is_empty()
+        );
     }
 }

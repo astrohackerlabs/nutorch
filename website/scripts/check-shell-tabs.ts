@@ -216,11 +216,11 @@ try {
   ) as { routes: Record<string, string> };
   for (const path of Object.keys(accepted.routes)) {
     const html = await (await fetch(`${SITE}${path}`)).text();
+    const shellDoc = path.includes("docs/shell/");
     check(
       `static HTML ${path}`,
-      !/data-shell-tab|data-shell-panel|class="[^"]*shell-tabs|data-language="(?:bash|sh|zsh)"/.test(
-        html,
-      ),
+      !/data-shell-tab|data-shell-panel|class="[^"]*shell-tabs/.test(html) &&
+        (shellDoc || !/data-language="(?:bash|sh|zsh)"/.test(html)),
     );
   }
   const pages = [

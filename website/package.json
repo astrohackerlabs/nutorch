@@ -18,8 +18,8 @@
     "check:parity": "nu scripts/check-parity.nu",
     "check:analytics": "bun test app/lib/umami.test.ts app/lib/umami.browser.test.ts",
     "lint": "oxlint --config ../../../oxlint.config.ts --deny-warnings .",
-    "format": "prettier --ignore-path ../../../.prettierignore --ignore-path .prettierignore --write .",
-    "format:check": "prettier --ignore-path ../../../.prettierignore --ignore-path .prettierignore --check .",
+    "format": "oxfmt --threads 1 --config oxfmt.config.mjs --ignore-path ../../../.prettierignore --ignore-path .prettierignore --write .",
+    "format:check": "oxfmt --threads 1 --config oxfmt.config.mjs --ignore-path ../../../.prettierignore --ignore-path .prettierignore --check .",
     "lint:fix": "oxlint --config ../../../oxlint.config.ts --deny-warnings --fix ."
   },
   "dependencies": {
@@ -54,8 +54,7 @@
     "pagefind": "1.5.2",
     "playwright": "1.63.0",
     "png-to-ico": "3.0.1",
-    "prettier": "3.9.6",
-    "prettier-plugin-tailwindcss": "0.8.1",
+    "oxfmt": "0.70.0",
     "sharp": "0.34.5",
     "tailwindcss": "4.3.0",
     "typescript": "7.0.2",

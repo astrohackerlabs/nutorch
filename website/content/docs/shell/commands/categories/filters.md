@@ -1,0 +1,110 @@
+---
+title: "Filters"
+description: "Filters"
+order: 1399
+section: "Commands · filters"
+---
+
+
+
+
+- [`all`](/docs/shell/commands/all/) — Test if every element of the input fulfills a predicate expression.
+- [`any`](/docs/shell/commands/any/) — Tests if any element of the input fulfills a predicate expression.
+- [`append`](/docs/shell/commands/append/) — Append any number of rows to a table.
+- [`chunk-by`](/docs/shell/commands/chunk-by/) — Divides a sequence into sub-sequences based on a closure.
+- [`chunks`](/docs/shell/commands/chunks/) — Divide a list, table or binary input into chunks of `chunk_size`. For binary input, `chunk_size` can also be specified as a filesize.
+- [`columns`](/docs/shell/commands/columns/) — Given a record or table, produce a list of its columns' names.
+- [`combinations`](/docs/shell/commands/combinations/) — Generates all combinations of size k from the input list.
+- [`compact`](/docs/shell/commands/compact/) — Creates a table with non-empty rows.
+- [`default`](/docs/shell/commands/default/) — Sets a default value if a row's column is missing or null.
+- [`difference`](/docs/shell/commands/difference/) — Returns a list of unique elements in the input that are not present in the other list.
+- [`drop`](/docs/shell/commands/drop/) — Remove items/rows from the end of the input list/table, or remove bytes from the end of binary data. Counterpart of `skip`. Opposite of `last`. For binary input, `rows` can also...
+- [`drop column`](/docs/shell/commands/drop_column/) — Remove N columns at the right-hand end of the input table. To remove columns by name, use `reject`.
+- [`drop nth`](/docs/shell/commands/drop_nth/) — Drop the selected rows.
+- [`each`](/docs/shell/commands/each/) — Run a closure on each row of the input list, creating a new list with the results.
+- [`each while`](/docs/shell/commands/each_while/) — Run a closure on each row of the input list until a null is found, then create a new list with the results.
+- [`enumerate`](/docs/shell/commands/enumerate/) — Enumerate the elements in a stream.
+- [`every`](/docs/shell/commands/every/) — Show (or skip) every n-th row, starting from the first one.
+- [`filter`](/docs/shell/commands/filter/) — Filter values based on a predicate closure.
+- [`find`](/docs/shell/commands/find/) — Search for terms in the input data.
+- [`first`](/docs/shell/commands/first/) — Return only the first several rows of the input. Counterpart of `last`. Opposite of `skip`. For binary input, rows can also be specified as a filesize.
+- [`flatten`](/docs/shell/commands/flatten/) — Flatten a table by extracting nested values.
+- [`get`](/docs/shell/commands/get/) — Extract data using a cell path.
+- [`group-by`](/docs/shell/commands/group-by/) — Splits a list or table into groups, and returns a record containing those groups.
+- [`headers`](/docs/shell/commands/headers/) — Use the first row of the table as column names.
+- [`insert`](/docs/shell/commands/insert/) — Insert a new column, using an expression or closure to create each row's values.
+- [`interleave`](/docs/shell/commands/interleave/) — Read multiple streams in parallel and combine them into one stream.
+- [`intersect`](/docs/shell/commands/intersect/) — Returns a list of unique elements present in both the input and the provided list.
+- [`is-empty`](/docs/shell/commands/is-empty/) — Check for empty values.
+- [`is-not-empty`](/docs/shell/commands/is-not-empty/) — Check for non-empty values.
+- [`items`](/docs/shell/commands/items/) — Given a record, iterate on each pair of column name and associated value.
+- [`join`](/docs/shell/commands/join/) — Join two tables.
+- [`last`](/docs/shell/commands/last/) — Return only the last several rows of the input. Counterpart of `first`. Opposite of `drop`. For binary input, rows can also be specified as a filesize.
+- [`length`](/docs/shell/commands/length/) — Count the number of items in an input list, rows in a table, or bytes in binary data.
+- [`lines`](/docs/shell/commands/lines/) — Converts input to lines.
+- [`matrix`](/docs/shell/commands/matrix/) — Various commands for working with matrices.
+- [`matrix add`](/docs/shell/commands/matrix_add/) — Add a matrix or scalar to a matrix.
+- [`matrix get-col`](/docs/shell/commands/matrix_get-col/) — Extract a column from a 2D matrix.
+- [`matrix get-row`](/docs/shell/commands/matrix_get-row/) — Extract a row from a matrix.
+- [`matrix identity`](/docs/shell/commands/matrix_identity/) — Create an identity matrix of the given size.
+- [`matrix map`](/docs/shell/commands/matrix_map/) — Apply a closure to each element of a matrix and return a new matrix.
+- [`matrix max`](/docs/shell/commands/matrix_max/) — Find the maximum value in a matrix, or max along an axis.
+- [`matrix mean`](/docs/shell/commands/matrix_mean/) — Compute the mean of all elements in a matrix.
+- [`matrix multiply`](/docs/shell/commands/matrix_multiply/) — Multiply two matrices using dot product.
+- [`matrix reduce`](/docs/shell/commands/matrix_reduce/) — Reduce all elements of a matrix to a single value.
+- [`matrix reshape`](/docs/shell/commands/matrix_reshape/) — Change the dimensions of a matrix.
+- [`matrix scale`](/docs/shell/commands/matrix_scale/) — Multiply all elements of a matrix by a scalar.
+- [`matrix set-col`](/docs/shell/commands/matrix_set-col/) — Replace a column in a 2D matrix.
+- [`matrix set-row`](/docs/shell/commands/matrix_set-row/) — Replace a row in a matrix.
+- [`matrix subtract`](/docs/shell/commands/matrix_subtract/) — Subtract a matrix or scalar from a matrix.
+- [`matrix sum`](/docs/shell/commands/matrix_sum/) — Sum all elements of a matrix, or sum along an axis.
+- [`matrix transpose`](/docs/shell/commands/matrix_transpose/) — Transpose a matrix (swap rows and columns). For n-dimensional arrays, reverses all axes.
+- [`matrix zeros`](/docs/shell/commands/matrix_zeros/) — Create a matrix filled with zeros.
+- [`merge`](/docs/shell/commands/merge/) — Merge the input with a record or table, overwriting values in matching columns.
+- [`merge deep`](/docs/shell/commands/merge_deep/) — Merge the input with a record or table, recursively merging values in matching columns.
+- [`move`](/docs/shell/commands/move/) — Moves columns relative to other columns or make them the first/last columns. Flags are mutually exclusive.
+- [`par-each`](/docs/shell/commands/par-each/) — Run a closure on each row of the input list in parallel, creating a new list with the results.
+- [`permutations`](/docs/shell/commands/permutations/) — Generates all permutations of the input list.
+- [`prepend`](/docs/shell/commands/prepend/) — Prepend any number of rows to a table.
+- [`query`](/docs/shell/commands/query/) — Show all the query commands
+- [`query json`](/docs/shell/commands/query_json/) — execute json query on json file (open --raw <file> | query json 'query string')
+- [`query xml`](/docs/shell/commands/query_xml/) — Execute XPath 1.0 query on XML input
+- [`reduce`](/docs/shell/commands/reduce/) — Aggregate a list (starting from the left) to a single value using an accumulator closure.
+- [`reject`](/docs/shell/commands/reject/) — Remove the given columns or rows from the table. Opposite of `select`.
+- [`rename`](/docs/shell/commands/rename/) — Creates a new table with columns renamed.
+- [`reverse`](/docs/shell/commands/reverse/) — Reverses the input list or table.
+- [`roll`](/docs/shell/commands/roll/) — Rolling commands for tables.
+- [`roll down`](/docs/shell/commands/roll_down/) — Roll table rows down.
+- [`roll left`](/docs/shell/commands/roll_left/) — Roll record or table columns left.
+- [`roll right`](/docs/shell/commands/roll_right/) — Roll table columns right.
+- [`roll up`](/docs/shell/commands/roll_up/) — Roll table rows up.
+- [`rotate`](/docs/shell/commands/rotate/) — Rotates a table or record clockwise (default) or counter-clockwise (use --ccw flag).
+- [`select`](/docs/shell/commands/select/) — Select only these columns or rows from the input. Opposite of `reject`.
+- [`semver`](/docs/shell/commands/semver/) — Various commands for working with semantic versions.
+- [`semver bump`](/docs/shell/commands/semver_bump/) — Bump a semantic version to the next level.
+- [`shuffle`](/docs/shell/commands/shuffle/) — Shuffle rows randomly.
+- [`skip`](/docs/shell/commands/skip/) — Skip the first several rows of the input. Counterpart of `drop`. Opposite of `first`. For binary input, n can also be specified as a filesize.
+- [`skip until`](/docs/shell/commands/skip_until/) — Skip elements of the input until a predicate is true.
+- [`skip while`](/docs/shell/commands/skip_while/) — Skip elements of the input while a predicate is true.
+- [`slice`](/docs/shell/commands/slice/) — Return only the selected rows.
+- [`sort`](/docs/shell/commands/sort/) — Sort the input in increasing order.
+- [`sort-by`](/docs/shell/commands/sort-by/) — Sort by the given cell path or closure.
+- [`split list`](/docs/shell/commands/split_list/) — Split a list into multiple lists using a separator.
+- [`take`](/docs/shell/commands/take/) — Take only the first n elements of a list, or the first n bytes of a binary value. For binary input, n can also be specified as a filesize.
+- [`take until`](/docs/shell/commands/take_until/) — Take elements of the input until a predicate is true.
+- [`take while`](/docs/shell/commands/take_while/) — Take elements of the input while a predicate is true.
+- [`tee`](/docs/shell/commands/tee/) — Copy a stream to another command in parallel.
+- [`transpose`](/docs/shell/commands/transpose/) — Transposes the table contents so rows become columns and columns become rows.
+- [`union`](/docs/shell/commands/union/) — Returns a list of unique elements from both the input and the provided list.
+- [`uniq`](/docs/shell/commands/uniq/) — Return the distinct values in the input.
+- [`uniq-by`](/docs/shell/commands/uniq-by/) — Return the distinct values in the input by the given column(s).
+- [`update`](/docs/shell/commands/update/) — Update an existing column to have a new value.
+- [`update cells`](/docs/shell/commands/update_cells/) — Update the table cells.
+- [`upsert`](/docs/shell/commands/upsert/) — Update an existing column to have a new value, or insert a new column.
+- [`values`](/docs/shell/commands/values/) — Given a record or table, produce a list of its columns' values.
+- [`where`](/docs/shell/commands/where/) — Filter values of an input list based on a condition.
+- [`window`](/docs/shell/commands/window/) — Creates a sliding window of `window_size` that slide by n rows/elements across input.
+- [`wrap`](/docs/shell/commands/wrap/) — Wrap the value into a column.
+- [`zip`](/docs/shell/commands/zip/) — Combine a stream with the input.
+
+Ported from [nushell/nushell.github.io](https://github.com/nushell/nushell.github.io). Copyright (c) 2021 Nushell Project. MIT License.
