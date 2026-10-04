@@ -180,15 +180,39 @@ fn auto_color(engine: &EngineState, destination_is_terminal: bool) -> bool {
 }
 
 /// Highlight each source line. The caller decides whether color is on.
+///
+/// Nushell drops comments from the highlight shapes, and the default theme
+/// has no comment color, so a lesson line would otherwise be unstyled.
 pub fn highlight_body(engine: &EngineState, stack: &Stack, body: &str) -> String {
+    let config = stack.get_config(engine);
+    let hint = nu_color_config::get_shape_color("hints", &config);
     let highlighter = nu_cli::NuHighlighter::new(Arc::new(engine.clone()), Arc::new(stack.clone()));
     body.split('\n')
-        .map(|line| Highlighter::highlight(&highlighter, line, 0).render_simple())
+        .map(|line| {
+            if line.trim_start().starts_with('#') {
+                hint.paint(line).to_string()
+            } else {
+                Highlighter::highlight(&highlighter, line, 0).render_simple()
+            }
+        })
         .collect::<Vec<_>>()
         .join("\n")
 }
 
-/// Keep a plain `render` result, coloring only its body when the config allows.
+/// Color `nutorch tip` as a command and the rest of the meta line as a hint.
+pub fn styled_meta_line(engine: &EngineState, stack: &Stack) -> String {
+    let config = stack.get_config(engine);
+    let hint = nu_color_config::get_shape_color("hints", &config);
+    let command = nu_color_config::get_shape_color("shape_internalcall", &config);
+    format!(
+        "{}{}{}",
+        hint.paint("Type "),
+        command.paint("nutorch tip"),
+        hint.paint(" for more tips.")
+    )
+}
+
+/// Keep a plain `render` result, coloring the header and body when allowed.
 pub fn present(
     engine: &EngineState,
     stack: &Stack,
@@ -207,7 +231,27 @@ fn highlight_rendered(engine: &EngineState, stack: &Stack, rendered: &str) -> St
     let Some((label, body)) = rendered.split_once('\n') else {
         return format!("{rendered}\n");
     };
-    format!("{label}\n{}\n", highlight_body(engine, stack, body))
+    format!(
+        "{}\n{}\n",
+        style_label(&stack.get_config(engine), label),
+        highlight_body(engine, stack, body)
+    )
+}
+
+fn style_label(config: &nu_protocol::Config, label: &str) -> String {
+    let mut parts = label.split(" · ");
+    let Some(head) = parts.next() else {
+        return label.to_string();
+    };
+    let header = nu_color_config::get_shape_color("header", config);
+    let hint = nu_color_config::get_shape_color("hints", config);
+    let field = nu_color_config::get_shape_color("shape_string", config);
+    let mut out = header.paint(head).to_string();
+    for part in parts {
+        out.push_str(&hint.paint(" · ").to_string());
+        out.push_str(&field.paint(part).to_string());
+    }
+    out
 }
 
 pub fn query(
@@ -1146,6 +1190,7 @@ mod tests {
         assert!(sgr_sequences(&painted).len() >= 2, "{painted:?}");
         assert_eq!(strip_ansi(&painted), pipeline);
         let comment = highlight_body(&engine, &stack, lesson);
+        assert!(comment.contains('\u{1b}'), "{comment:?}");
         assert_eq!(strip_ansi(&comment), lesson);
         let pipeline_styled = styled(&engine, pipeline);
         let lesson_styled = styled(&engine, lesson);
@@ -1183,9 +1228,44 @@ mod tests {
         let colored = present(&on, &stack, &rendered, false);
         let mut lines = colored.lines();
         let label = lines.next().unwrap();
-        assert!(!label.contains('\u{1b}'), "{label:?}");
-        assert!(colored.contains('\u{1b}'), "{colored:?}");
+        assert!(label.contains('\u{1b}'), "{label:?}");
+        assert_eq!(strip_ansi(label), "Tip · nushell · math · intro");
+        let separator = " · ";
+        let separator_at = label.find(separator).expect(label);
+        let field_at = separator_at + separator.len();
+        let next_separator = label[field_at..]
+            .find(separator)
+            .map(|index| field_at + index)
+            .unwrap_or(label.len());
+        assert_ne!(
+            sgr_sequences(&label[..separator_at]),
+            sgr_sequences(&label[separator_at..field_at]),
+            "{label:?}"
+        );
+        assert_ne!(
+            sgr_sequences(&label[separator_at..field_at]),
+            sgr_sequences(&label[field_at..next_separator]),
+            "{label:?}"
+        );
+        let lesson = lines.next().unwrap();
+        assert!(lesson.contains('\u{1b}'), "{lesson:?}");
+        assert_eq!(strip_ansi(lesson), "# add the list");
+        let code = lines.next().unwrap();
+        assert!(code.contains('\u{1b}'), "{code:?}");
+        assert_eq!(strip_ansi(code), "[1 2 3] | math sum");
+        assert_ne!(sgr_sequences(lesson), sgr_sequences(code), "{colored:?}");
         assert_eq!(strip_ansi(&colored), rendered);
+
+        let meta = styled_meta_line(&on, &stack);
+        assert_eq!(strip_ansi(&meta), META_LINE);
+        let opening = |marker: &str| {
+            let at = meta.find(marker).unwrap_or_else(|| panic!("{meta:?}"));
+            let start = meta[..at]
+                .rfind('\u{1b}')
+                .unwrap_or_else(|| panic!("{meta:?}"));
+            meta[start..at].to_string()
+        };
+        assert_ne!(opening("Type "), opening("nutorch tip"), "{meta:?}");
 
         let mut auto = engine.clone();
         set_color(&mut auto, nu_protocol::UseAnsiColoring::Auto);

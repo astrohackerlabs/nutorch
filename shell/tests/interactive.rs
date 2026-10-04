@@ -72,44 +72,65 @@ fn startup_shows_tip_meta_and_pipes() {
         .unwrap();
     let mut terminal = Terminal::start(home.path());
     let meta = "Type nutorch tip for more tips.";
-    terminal.wait_for(meta);
+    terminal.wait_for("nutorch tip");
     let banner = terminal.output.clone();
-    let meta_at = banner.find(meta).unwrap();
-    let meta_line_start = banner[..meta_at]
+    let plain = strip_ansi(&banner);
+    let plain_meta = plain.find(meta).unwrap_or_else(|| panic!("{plain:?}"));
+    assert!(
+        plain[..plain_meta].ends_with("\n\n")
+            || plain[..plain_meta].ends_with("\r\n\r\n")
+            || plain[..plain_meta].ends_with("\n\r\n"),
+        "{plain:?}"
+    );
+    let raw_at = banner.find("nutorch tip").unwrap();
+    let meta_line_start = banner[..raw_at]
         .rfind('\n')
         .map(|index| index + 1)
         .unwrap_or(0);
-    let meta_line = banner[meta_line_start..meta_at + meta.len()].trim_end_matches('\r');
-    assert_eq!(meta_line, meta, "{banner:?}");
-    let before = &banner[..meta_line_start];
-    let label_at = before
-        .rfind("Tip · ")
-        .unwrap_or_else(|| panic!("{banner:?}"));
-    let label_end = before[label_at..]
+    let meta_line_end = banner[raw_at..]
         .find('\n')
-        .map(|index| label_at + index)
-        .unwrap_or(before.len());
-    assert!(
-        !before[label_at..label_end].contains('\u{1b}'),
-        "{banner:?}"
-    );
-    let body = &before[label_end..];
+        .map(|index| raw_at + index)
+        .unwrap_or(banner.len());
+    let meta_line = banner[meta_line_start..meta_line_end].trim_end_matches('\r');
+    assert_eq!(strip_ansi(meta_line), meta, "{banner:?}");
+    assert!(meta_line.contains('\u{1b}'), "{banner:?}");
+    let tip_word = banner[..meta_line_start]
+        .rfind("Tip")
+        .unwrap_or_else(|| panic!("{banner:?}"));
+    let label_start = banner[..tip_word]
+        .rfind('\n')
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    let label_end = banner[tip_word..]
+        .find('\n')
+        .map(|index| tip_word + index)
+        .unwrap_or(banner.len());
+    let label = &banner[label_start..label_end];
+    assert!(label.contains('\u{1b}'), "{banner:?}");
+    assert!(strip_ansi(label).starts_with("Tip · "), "{banner:?}");
+    let body = &banner[label_end..meta_line_start];
     assert!(body.contains('\u{1b}'), "{banner:?}");
     assert!(
         strip_ansi(body).contains('#'),
         "intro body lost its lesson: {banner:?}"
     );
     terminal.send("nutorch tip --type pipes\r");
-    terminal.wait_for("Tip · nushell · pipelines");
+    terminal.wait_for("pipelines");
     let shown = terminal.output.clone();
     let at = shown
-        .find("Tip · nushell · pipelines")
+        .find("pipelines")
         .unwrap_or_else(|| panic!("{shown:?}"));
+    let line_start = shown[..at].rfind('\n').map(|index| index + 1).unwrap_or(0);
     let line_end = shown[at..]
         .find('\n')
         .map(|index| at + index)
         .unwrap_or(shown.len());
-    assert!(!shown[at..line_end].contains('\u{1b}'), "{shown:?}");
+    let printed_label = &shown[line_start..line_end];
+    assert!(printed_label.contains('\u{1b}'), "{shown:?}");
+    assert!(
+        strip_ansi(printed_label).contains("Tip · nushell · pipelines"),
+        "{shown:?}"
+    );
     let printed = &shown[line_end..];
     assert!(printed.contains('\u{1b}'), "{shown:?}");
     assert!(

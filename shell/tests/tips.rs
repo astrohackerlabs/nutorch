@@ -287,12 +287,18 @@ fn tip_torch_tensors_intro_is_highlighted_on_a_pty() {
     assert!(!output.contains("Welcome to"), "{output}");
     assert!(!output.contains("tensor<shape="), "{output}");
     let label = "Tip · torch · tensors · intro";
-    let label_at = output.find(label).unwrap_or_else(|| panic!("{output}"));
-    let label_end = output[label_at..]
+    let marker = output.find("tensors").unwrap_or_else(|| panic!("{output}"));
+    let label_start = output[..marker]
+        .rfind('\n')
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    let label_end = output[marker..]
         .find('\n')
-        .map(|index| label_at + index)
+        .map(|index| marker + index)
         .unwrap_or(output.len());
-    assert!(!output[label_at..label_end].contains('\u{1b}'), "{output}");
+    let label_line = output[label_start..label_end].trim_end_matches('\r');
+    assert!(label_line.contains('\u{1b}'), "{output}");
+    assert_eq!(strip_ansi(label_line), label, "{output}");
     let body = &output[label_end..];
     assert!(body.contains('\u{1b}'), "{output}");
     let source = strip_ansi(body);

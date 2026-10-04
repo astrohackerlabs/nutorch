@@ -19,6 +19,7 @@ typetag = "0.2"
 reedline = { version = "0.51.0", path = "../forks/reedline", default-features = false, features = ["sqlite", "bashisms"] }
 
 nu-cli = { version = "0.115.2", path = "../forks/nushell/crates/nu-cli", package = "shannon-nu-cli", default-features = false }
+nu-color-config = { version = "0.115.2", path = "../forks/nushell/crates/nu-color-config" }
 nu-cmd-base = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-base" }
 nu-cmd-extra = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-extra" }
 nu-cmd-lang = { version = "0.115.2", path = "../forks/nushell/crates/nu-cmd-lang" }

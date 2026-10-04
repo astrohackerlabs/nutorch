@@ -192,6 +192,7 @@ fn intro_banner_lines(
     nu_version: &str,
     startup: std::time::Duration,
     intro_tip: Option<&str>,
+    meta_line: &str,
 ) -> Vec<String> {
     let green = "\x1b[32m";
     let bold = "\x1b[1m";
@@ -216,7 +217,8 @@ fn intro_banner_lines(
                 for line in tip.trim_end_matches('\n').split('\n') {
                     lines.push(line.to_string());
                 }
-                lines.push(nutorch::tips::META_LINE.to_string());
+                lines.push(String::new());
+                lines.push(meta_line.to_string());
             }
             lines.push(String::new());
             lines
@@ -289,15 +291,21 @@ pub(crate) fn run_repl(
         let version = env!("CARGO_PKG_VERSION");
         let nu_version = env!("NUSHELL_VERSION");
         let rendered = nutorch::tips::render(&nutorch::tips::pick_intro());
-        let intro_tip = if show_banner == BannerKind::Full {
-            nutorch::tips::present(
+        let color_intro = show_banner == BannerKind::Full
+            && nutorch::tips::coloring_enabled(
                 engine_state,
                 &stack,
-                &rendered,
                 std::io::stderr().is_terminal(),
-            )
+            );
+        let intro_tip = if color_intro {
+            nutorch::tips::present(engine_state, &stack, &rendered, true)
         } else {
             rendered
+        };
+        let meta_line = if color_intro {
+            nutorch::tips::styled_meta_line(engine_state, &stack)
+        } else {
+            nutorch::tips::META_LINE.to_string()
         };
         for line in intro_banner_lines(
             show_banner,
@@ -305,6 +313,7 @@ pub(crate) fn run_repl(
             nu_version,
             entire_start_time.elapsed(),
             Some(&intro_tip),
+            &meta_line,
         ) {
             eprintln!("{line}");
         }
@@ -351,8 +360,22 @@ mod tests {
     fn intro_banner_shows_tip_and_omits_hints() {
         let startup = Duration::from_millis(12);
         let tip = "Tip · nushell · pipelines · intro\n[1 2 3] | math sum";
-        let full = intro_banner_lines(BannerKind::Full, "2.0.9", "0.115.2", startup, Some(tip));
-        let short = intro_banner_lines(BannerKind::Short, "2.0.9", "0.115.2", startup, Some(tip));
+        let full = intro_banner_lines(
+            BannerKind::Full,
+            "2.0.9",
+            "0.115.2",
+            startup,
+            Some(tip),
+            nutorch::tips::META_LINE,
+        );
+        let short = intro_banner_lines(
+            BannerKind::Short,
+            "2.0.9",
+            "0.115.2",
+            startup,
+            Some(tip),
+            nutorch::tips::META_LINE,
+        );
         let full_text = full.join("\n");
         let short_text = short.join("\n");
 
@@ -377,6 +400,12 @@ mod tests {
         assert!(
             welcome < version && version < startup_at && startup_at < tip_at && tip_at < meta_at
         );
+        let example_at = full
+            .iter()
+            .position(|line| line.contains("[1 2 3] | math sum"))
+            .expect("example");
+        assert!(full[example_at + 1].is_empty(), "{full:?}");
+        assert_eq!(full[example_at + 2], nutorch::tips::META_LINE);
         assert!(full_text.contains("[1 2 3] | math sum"));
         assert!(full_text.contains("\u{1b}[32m\u{1b}[1mNuTorch"));
         assert!(full_text.contains("2.0.9"));
@@ -394,7 +423,15 @@ mod tests {
         assert!(!short_text.contains(nutorch::tips::META_LINE));
 
         assert!(
-            intro_banner_lines(BannerKind::None, "2.0.9", "0.115.2", startup, Some(tip)).is_empty()
+            intro_banner_lines(
+                BannerKind::None,
+                "2.0.9",
+                "0.115.2",
+                startup,
+                Some(tip),
+                nutorch::tips::META_LINE,
+            )
+            .is_empty()
         );
     }
 }
