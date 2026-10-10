@@ -2,6 +2,8 @@
 
 use std::process::Command;
 
+mod support;
+
 const CATEGORIES: &[&str] = &[
     "thinking-in-nu",
     "pipelines",
@@ -223,6 +225,68 @@ fn tip_command_runs_inside_the_process() {
 #[cfg(unix)]
 #[test]
 fn tip_torch_tensors_intro_is_highlighted_on_a_pty() {
+    let output = tip_on_pty(&[
+        "tip", "--kind", "torch", "--type", "tensors", "--level", "intro",
+    ]);
+    assert!(!output.contains("Welcome to"), "{output}");
+    assert!(!output.contains("tensor<shape="), "{output}");
+    let label = "Tip · torch · tensors · intro";
+    let marker = output.find("tensors").unwrap_or_else(|| panic!("{output}"));
+    let label_start = output[..marker]
+        .rfind('\n')
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    let label_end = output[marker..]
+        .find('\n')
+        .map(|index| marker + index)
+        .unwrap_or(output.len());
+    let label_line = output[label_start..label_end].trim_end_matches('\r');
+    assert!(label_line.contains('\u{1b}'), "{output}");
+    assert_eq!(strip_ansi(label_line), label, "{output}");
+    let body = &output[label_end..];
+    assert!(body.contains('\u{1b}'), "{output}");
+    let source = strip_ansi(body);
+    assert!(source.contains("torch tensor"), "{source}");
+    assert!(source.contains("use torch"), "{source}");
+}
+
+#[cfg(unix)]
+#[test]
+fn tip_loss_scope_is_highlighted_on_both_cli_paths() {
+    let config = nu_protocol::Config::default();
+    let variable = nu_color_config::get_shape_color("shape_variable", &config);
+    let command = nu_color_config::get_shape_color("shape_internalcall", &config);
+    let tip = nutorch::tips::catalog()
+        .iter()
+        .find(|tip| tip.kind == "torch" && tip.r#type == "loss" && tip.level == "intro")
+        .unwrap();
+    for args in [
+        vec![
+            "tip", "--kind", "torch", "--type", "loss", "--level", "intro",
+        ],
+        vec![
+            "--no-config-file",
+            "-c",
+            "nutorch tip --kind torch --type loss --level intro",
+        ],
+    ] {
+        let output = tip_on_pty(&args).replace("\r\n", "\n");
+        assert_eq!(strip_ansi(&output), nutorch::tips::render(tip));
+        for name in ["$pred", "$target"] {
+            assert!(
+                output.contains(&variable.paint(name).to_string()),
+                "{output:?}"
+            );
+        }
+        assert!(
+            output.contains(&command.paint("torch mse_loss").to_string()),
+            "{output:?}"
+        );
+    }
+}
+
+#[cfg(unix)]
+fn tip_on_pty(args: &[&str]) -> String {
     use std::fs::File;
     use std::os::fd::AsRawFd;
     use std::os::unix::process::CommandExt;
@@ -236,13 +300,11 @@ fn tip_torch_tensors_intro_is_highlighted_on_a_pty() {
         ws_xpixel: 0,
         ws_ypixel: 0,
     };
-    let pty = nix::pty::openpty(Some(&size), None).unwrap();
+    let pty = support::open_pty(Some(&size));
     let slave = File::from(pty.slave);
     let mut command = Command::new(env!("CARGO_BIN_EXE_nutorch"));
     command
-        .args([
-            "tip", "--kind", "torch", "--type", "tensors", "--level", "intro",
-        ])
+        .args(args)
         .env("HOME", home.path())
         .env("XDG_CONFIG_HOME", home.path())
         .env_remove("NUTORCH_SYNC_SOCKET")
@@ -284,26 +346,7 @@ fn tip_torch_tensors_intro_is_highlighted_on_a_pty() {
         assert!(Instant::now() < deadline, "{output}");
     };
     assert!(status.success(), "{output}");
-    assert!(!output.contains("Welcome to"), "{output}");
-    assert!(!output.contains("tensor<shape="), "{output}");
-    let label = "Tip · torch · tensors · intro";
-    let marker = output.find("tensors").unwrap_or_else(|| panic!("{output}"));
-    let label_start = output[..marker]
-        .rfind('\n')
-        .map(|index| index + 1)
-        .unwrap_or(0);
-    let label_end = output[marker..]
-        .find('\n')
-        .map(|index| marker + index)
-        .unwrap_or(output.len());
-    let label_line = output[label_start..label_end].trim_end_matches('\r');
-    assert!(label_line.contains('\u{1b}'), "{output}");
-    assert_eq!(strip_ansi(label_line), label, "{output}");
-    let body = &output[label_end..];
-    assert!(body.contains('\u{1b}'), "{output}");
-    let source = strip_ansi(body);
-    assert!(source.contains("torch tensor"), "{source}");
-    assert!(source.contains("use torch"), "{source}");
+    output
 }
 
 #[cfg(unix)]

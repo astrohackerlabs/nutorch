@@ -167,10 +167,7 @@ fn linear_case(c: &Value) {
     assert_eq!(json(output.data().unwrap()), c["expect_output"]);
     output.sum(None, false).unwrap().backward().unwrap();
     let parameters = model.parameters().unwrap();
-    assert_eq!(
-        json(parameters[0].grad().unwrap().data().unwrap()),
-        c["expect_weight_grad"]
-    );
+    assert_linear_weight_grad(c, json(parameters[0].grad().unwrap().data().unwrap()));
     if !c["expect_bias_grad"].is_null() {
         assert_eq!(
             json(parameters[1].grad().unwrap().data().unwrap()),
@@ -178,16 +175,91 @@ fn linear_case(c: &Value) {
         );
     }
     // Sequential retains the live child, so its gradients remain observable.
-    assert_eq!(
+    assert_linear_weight_grad(
+        c,
         json(
             layer.parameters().unwrap()[0]
                 .grad()
                 .unwrap()
                 .data()
-                .unwrap()
+                .unwrap(),
         ),
-        c["expect_weight_grad"]
     );
+}
+
+fn assert_linear_weight_grad(case: &Value, actual: Value) {
+    let expected = &case["expect_weight_grad"];
+    if case["name"] == "nn_linear_sigmoid" {
+        // Direct CPU/MPS probes and the f64 derivative differ by one float32
+        // step here. Keep this bound specific to the sigmoid weight gradient.
+        assert!(
+            within_one_float32_step(&actual, expected),
+            "{}: {actual} != {expected}",
+            case["name"]
+        );
+    } else {
+        assert_eq!(&actual, expected);
+    }
+}
+
+fn within_one_float32_step(actual: &Value, expected: &Value) -> bool {
+    match (actual, expected) {
+        (Value::Array(a), Value::Array(b)) => {
+            a.len() == b.len() && a.iter().zip(b).all(|(a, b)| within_one_float32_step(a, b))
+        }
+        (Value::Number(a), Value::Number(b)) if a.is_f64() && b.is_f64() => {
+            let a64 = a.as_f64().unwrap();
+            let b64 = b.as_f64().unwrap();
+            let a = a64 as f32;
+            let b = b64 as f32;
+            a.is_finite()
+                && b.is_finite()
+                && f64::from(a) == a64
+                && f64::from(b) == b64
+                && (a == b
+                    || (a.is_sign_negative() == b.is_sign_negative()
+                        && a.to_bits().abs_diff(b.to_bits()) <= 1))
+        }
+        _ => actual == expected,
+    }
+}
+
+#[test]
+fn sigmoid_gradient_bound_rejects_larger_errors_and_shape_changes() {
+    let expected = 0.30337610840797424_f32;
+    let value = |v: f32| serde_json::json!([[f64::from(v)]]);
+    assert!(within_one_float32_step(
+        &value(f32::from_bits(expected.to_bits() - 1)),
+        &value(expected)
+    ));
+    assert!(!within_one_float32_step(
+        &value(f32::from_bits(expected.to_bits() - 2)),
+        &value(expected)
+    ));
+    assert!(!within_one_float32_step(
+        &value(-expected),
+        &value(expected)
+    ));
+    assert!(!within_one_float32_step(
+        &serde_json::json!([expected]),
+        &value(expected)
+    ));
+    assert!(!within_one_float32_step(
+        &serde_json::json!([[expected, expected]]),
+        &value(expected)
+    ));
+    assert!(!within_one_float32_step(
+        &serde_json::json!([[1]]),
+        &value(1.0)
+    ));
+    assert!(!within_one_float32_step(
+        &serde_json::json!([[true]]),
+        &value(1.0)
+    ));
+    assert!(!within_one_float32_step(
+        &serde_json::json!([[f64::from(expected) + 1e-12]]),
+        &value(expected)
+    ));
 }
 fn optimizer_case(c: &Value) {
     let layer = linear(&c["weight0"], &Value::Null);

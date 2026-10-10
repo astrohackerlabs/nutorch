@@ -33,3 +33,5 @@ shares the tensor; it does not detach or copy it.
 
 Use [native optimizers](/docs/neural-networks/) for parameter updates.
 Ctrl+C interrupts loops between commands; it does not preempt a GPU kernel.
+
+Tips for these commands are at the bottom of [Autograd ops](/docs/reference/autograd/#tips).

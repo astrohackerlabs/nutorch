@@ -4073,7 +4073,7 @@ dependencies = [
 
 [[package]]
 name = "nutorch"
-version = "2.0.12"
+version = "2.0.13"
 dependencies = [
  "chrono",
  "crossterm",
@@ -4121,7 +4121,7 @@ dependencies = [
 
 [[package]]
 name = "nutorch-core"
-version = "2.0.12"
+version = "2.0.13"
 dependencies = [
  "nutorch-ops",
  "serde_json",
@@ -4131,7 +4131,7 @@ dependencies = [
 
 [[package]]
 name = "nutorch-ops"
-version = "2.0.12"
+version = "2.0.13"
 
 [[package]]
 name = "objc2"

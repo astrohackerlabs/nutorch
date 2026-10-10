@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
+import { appendTips } from "./tips";
 
 const directory = fileURLToPath(
   new URL("../../content/docs/", import.meta.url),
@@ -19,13 +20,14 @@ export const documents = readdirSync(directory, { recursive: true })
     ) {
       throw new Error(`Invalid document frontmatter: ${name}`);
     }
+    const slug = name.replace(/\.md$/, "");
     return {
-      slug: name.replace(/\.md$/, ""),
+      slug,
       title: data.title,
       description: data.description,
       order: data.order,
       section: (data.section ?? "") as string,
-      content,
+      content: appendTips(slug, content),
     };
   })
   .sort((a, b) => a.order - b.order);

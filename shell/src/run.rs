@@ -357,6 +357,41 @@ mod tests {
     ];
 
     #[test]
+    fn intro_banner_preserves_loss_tip_highlighting() {
+        let engine = nutorch::tensor::add_context(nu_cmd_lang::add_default_context(
+            nu_protocol::engine::EngineState::new(),
+        ));
+        let stack = nu_protocol::engine::Stack::new();
+        let tip = nutorch::tips::catalog()
+            .iter()
+            .find(|tip| tip.kind == "torch" && tip.r#type == "loss" && tip.level == "intro")
+            .unwrap();
+        let rendered = nutorch::tips::present(&engine, &stack, &nutorch::tips::render(tip), true);
+        let meta = nutorch::tips::styled_meta_line(&engine, &stack);
+        let banner = intro_banner_lines(
+            BannerKind::Full,
+            "2.0.12",
+            "0.115.2",
+            Duration::from_millis(12),
+            Some(&rendered),
+            &meta,
+        )
+        .join("\n");
+        let variable = nu_color_config::get_shape_color("shape_variable", &engine.config);
+        for name in ["$pred", "$target"] {
+            assert!(
+                banner.contains(&variable.paint(name).to_string()),
+                "{banner:?}"
+            );
+        }
+        assert!(
+            banner.contains(rendered.trim_end_matches('\n')),
+            "{banner:?}"
+        );
+        assert!(banner.contains(&meta), "{banner:?}");
+    }
+
+    #[test]
     fn intro_banner_shows_tip_and_omits_hints() {
         let startup = Duration::from_millis(12);
         let tip = "Tip · nushell · pipelines · intro\n[1 2 3] | math sum";

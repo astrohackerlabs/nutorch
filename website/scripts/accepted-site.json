@@ -3,12 +3,12 @@
   "styleAmendment": "Issue 26090715198117 Experiment 11, design b04a09e4f: shared Austin Night CSS and SVG-derived brand assets. Markdown, hero bytes, routes and content metadata retain their original oracle.",
   "sources": {
     "app/styles/global.css": "4885bf427ba932a1f607a8bc7527e2b15ab30aa5acc301802ee64ceecac75704",
-    "content/docs/autograd.md": "650e754191053fc537478b001a43af99af0acfc738162fb7d64b929a67975b7e",
+    "content/docs/autograd.md": "6c021f6f8b054c8e07844a2013b8a79d31afd6bd5ac297a58f839cec0a210f4b",
     "content/docs/daemon.md": "cdfadeb53c9bfcf217a560a5bd0b86658d98e67502ef4255354769cc64720381",
     "content/docs/getting-started.md": "0585a03a0c9dd4a7aa31d802fb14d6a876fcdc55057e5cda870a3f2636b5d610",
     "content/docs/install-from-source.md": "7b4d80da023f1e94a0d067b837cd5d26e22eea7808262af56d95190195f734ac",
     "content/docs/neural-networks.md": "fded4247cb9d82cbbec870d42f697d4e0e1723308a99282e27f5e547bb4a5076",
-    "content/docs/nushell.md": "0c4f3065a2eb7ac4e751844153bbba9b3e33f6e938bf49f7686024ac4fd7298c",
+    "content/docs/nushell.md": "2e513ee2431187c08edd77d2c8f75782ba68f998ec604e82071b9b0140f9c515",
     "content/docs/ops.md": "07796c7ed27a4ccb8be4392c86adce6c3bdd4f3d68b0a342c9abcbbf32c431a1",
     "content/docs/reference/autograd.md": "95a13312ea6a63e3e95ea07423f4306ed4696d07b14271210b0f08ecbea9e826",
     "content/docs/reference/comparison.md": "4866711ff73b642f4b38708f6386324d4f0c0b01439c12c6f5caef49142b1108",
@@ -1944,5 +1944,15 @@
     "experiment": 1,
     "design_commit": "f1d67b05f",
     "scope": "English Nushell book, language guide, cookbook, and command reference beside the existing torch docs. Source hashes and route metadata describe this catalog."
+  },
+  "tipsOnPagesAmendment": {
+    "issue": "26100417480050",
+    "experiment": 1,
+    "design_commit": "33b95650c",
+    "scope": "Append catalog tips to the existing topic page for each category. Update the shell page pointer and the autograd concept link.",
+    "changed_sources": [
+      "content/docs/nushell.md",
+      "content/docs/autograd.md"
+    ]
   }
 }

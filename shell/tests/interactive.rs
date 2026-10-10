@@ -1,5 +1,7 @@
 #![cfg(unix)]
 
+mod support;
+
 use std::{
     fs::File,
     io::{Read, Write},
@@ -12,6 +14,19 @@ struct Terminal {
     child: Child,
     master: File,
     output: String,
+}
+
+#[test]
+fn parallel_terminal_allocation() {
+    std::thread::scope(|scope| {
+        for _ in 0..16 {
+            scope.spawn(|| {
+                for _ in 0..64 {
+                    let _pty = support::open_pty(None);
+                }
+            });
+        }
+    });
 }
 
 #[test]
@@ -139,6 +154,79 @@ fn startup_shows_tip_meta_and_pipes() {
     );
 }
 
+// Ignore only color sequences when matching text. Cursor movement and other
+// controls separate redraws, so text from two frames cannot form one match.
+fn text_match_end(raw: &str, expected: &str) -> Option<usize> {
+    let bytes = raw.as_bytes();
+    let mut plain = String::new();
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == 0x1b {
+            index += 1;
+            match *bytes.get(index)? {
+                b'[' => {
+                    index += 1;
+                    while !(0x40..=0x7e).contains(bytes.get(index)?) {
+                        index += 1;
+                    }
+                    let color = bytes[index] == b'm';
+                    index += 1;
+                    if color {
+                        continue;
+                    }
+                }
+                b']' => {
+                    index += 1;
+                    loop {
+                        match *bytes.get(index)? {
+                            7 => {
+                                index += 1;
+                                break;
+                            }
+                            0x1b if bytes.get(index + 1) == Some(&b'\\') => {
+                                index += 2;
+                                break;
+                            }
+                            _ => index += 1,
+                        }
+                    }
+                }
+                _ => index += 1,
+            }
+            plain.push('\0');
+        } else {
+            let ch = raw[index..].chars().next()?;
+            index += ch.len_utf8();
+            plain.push(ch);
+        }
+        if plain.ends_with(expected) {
+            return Some(index);
+        }
+    }
+    None
+}
+
+#[test]
+fn displayed_text_matches_colors_but_not_redraws() {
+    let raw = "\x1b]133;A\x1b\\\x1b[32mtorch tenso\x1b[0m\x1b[7;32mr\x1b[0m";
+    let end = raw.find("r\x1b[0m").unwrap() + 1;
+    for split in 0..end {
+        assert_eq!(text_match_end(&raw[..split], "torch tensor"), None);
+    }
+    assert_eq!(text_match_end(raw, "torch tensor"), Some(end));
+    assert_eq!(
+        text_match_end("torch tenso\x1b[1;1Hr", "torch tensor"),
+        None
+    );
+    assert_eq!(text_match_end("torch tenso\r\nr", "torch tensor"), None);
+    assert_eq!(
+        text_match_end("\x1b]0;torch tensor\x07", "torch tensor"),
+        None
+    );
+    let variable = "\x1b[35m$env\x1b[0m.\x1b[32mNAME";
+    assert_eq!(text_match_end(variable, "$env.NAME"), Some(variable.len()));
+}
+
 fn strip_ansi(text: &str) -> String {
     let mut out = String::new();
     let mut chars = text.chars().peekable();
@@ -158,6 +246,22 @@ fn strip_ansi(text: &str) -> String {
 }
 
 impl Terminal {
+    fn expect_text(&mut self, text: &str) {
+        let deadline = Instant::now() + Duration::from_secs(20);
+        loop {
+            if let Some(end) = text_match_end(&self.output, text) {
+                self.output.drain(..end);
+                return;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "waiting for displayed {text:?}: {:?}",
+                self.output
+            );
+            self.read_output();
+        }
+    }
+
     fn start(home: &std::path::Path) -> Self {
         Self::start_with_env(home, None)
     }
@@ -169,7 +273,7 @@ impl Terminal {
             ws_xpixel: 0,
             ws_ypixel: 0,
         };
-        let pty = nix::pty::openpty(Some(&size), None).unwrap();
+        let pty = support::open_pty(Some(&size));
         let slave = File::from(pty.slave);
         let mut command = Command::new(env!("CARGO_BIN_EXE_nutorch"));
         if let Some(env_file) = env_file {
@@ -341,6 +445,11 @@ fn sync_codec_aliases_loaded_at_startup_import_child_environment() {
 
 #[test]
 fn sync_ordinary_shells_and_fullscreen_terminal_return() {
+    let editor = Command::new("vim")
+        .arg("--version")
+        .output()
+        .expect("Fullscreen tests require vim on PATH");
+    assert!(editor.status.success(), "vim --version failed");
     for shell in ["/bin/zsh -f", "/bin/bash --noprofile --norc"] {
         let home = tempfile::Builder::new()
             .prefix("ntpty-")
@@ -366,7 +475,7 @@ fn sync_ordinary_shells_and_fullscreen_terminal_return() {
         terminal.expect("Queued environment snapshot");
         terminal.expect("CHILD_ready");
         for command in [
-            "nvim --clean -n".to_string(),
+            "vim -Nu NONE -n -i NONE".to_string(),
             format!("less '{}'", document.display()),
         ] {
             terminal.send(&format!("{command}\r"));
@@ -375,7 +484,7 @@ fn sync_ordinary_shells_and_fullscreen_terminal_return() {
             let group = unsafe { libc::tcgetpgrp(terminal.master.as_raw_fd()) };
             assert!(group > 0);
             assert_ne!(group, terminal.child.id() as i32);
-            terminal.send(if command.starts_with("nvim") {
+            terminal.send(if command.starts_with("vim") {
                 ":q!\r"
             } else {
                 "q"
@@ -638,7 +747,7 @@ fn sync_while_editing_waits_and_killed_sessions_leave_isolated_stale_sockets() {
     terminal.send("print ('NEXT_' + $env.EDIT_SYNC)\r");
     terminal.expect("NEXT_new");
     terminal.send("$env.NUTORCH_TEST_SYNC_COMPL\t");
-    terminal.expect("$env.NUTORCH_TEST_SYNC_COMPLETION");
+    terminal.expect_text("$env.NUTORCH_TEST_SYNC_COMPLETION");
     terminal.send("\r");
     terminal.expect("completed");
     terminal.child.kill().unwrap();
@@ -740,13 +849,13 @@ fn check_torch_completion(quick: bool) {
     terminal.expect("Create a native MPS tensor");
     terminal.expect("[nu]");
     terminal.send("torch tenso\t");
-    terminal.expect("torch tensor");
+    terminal.expect_text("torch tensor");
     // Upstream now accepts a lone asynchronous result when quick completion is
     // enabled. With quick and partial insertion disabled, Enter accepts the
     // open menu selection rather than submitting an already-completed line.
     if !quick {
         terminal.send("\r");
-        terminal.expect("torch tensor");
+        terminal.expect_text("torch tensor");
     }
     terminal.send(" [2 3] | torch value | to json --raw\r");
     terminal.expect("[2.0,3.0]");

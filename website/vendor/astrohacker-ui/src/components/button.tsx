@@ -7,6 +7,8 @@ import { cn } from "../utils";
 /**
  * shadcn Button (new-york), customized for Astrohacker / Tokyo Night.
  * Outline + lg recipes match historical HudCta / brand outline + lg CTAs.
+ * Typography defaults to `ui` (sans, semibold, normal case and spacing);
+ * pass `typography="brand"` for the uppercase heading style.
  */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-md whitespace-nowrap no-underline transition-all outline-none focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -96,7 +98,7 @@ const buttonVariants = cva(
       },
     ],
     defaultVariants: {
-      typography: "brand",
+      typography: "ui",
       variant: "outline",
       size: "default",
     },
@@ -107,7 +109,7 @@ function Button({
   className,
   variant = "outline",
   size = "default",
-  typography = "brand",
+  typography = "ui",
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &

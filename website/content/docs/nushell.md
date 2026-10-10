@@ -58,3 +58,7 @@ Run your own scripts with `nutorch path/to/script.nu` so its native commands are
 Plain Nushell does not gain tensor commands by installing a module.
 Live tensors, modules and optimizers belong to their process and cannot be
 passed to external programs as handles.
+
+## Tips
+
+Tips for each topic are at the bottom of that page. In the shell, `nutorch tip` prints one tip.

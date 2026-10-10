@@ -179,7 +179,7 @@ fn auto_color(engine: &EngineState, destination_is_terminal: bool) -> bool {
     destination_is_terminal
 }
 
-/// Highlight each source line. The caller decides whether color is on.
+/// Highlight the complete source. The caller decides whether color is on.
 ///
 /// Nushell drops comments from the highlight shapes, and the default theme
 /// has no comment color, so a lesson line would otherwise be unstyled.
@@ -187,29 +187,43 @@ pub fn highlight_body(engine: &EngineState, stack: &Stack, body: &str) -> String
     let config = stack.get_config(engine);
     let hint = nu_color_config::get_shape_color("hints", &config);
     let highlighter = nu_cli::NuHighlighter::new(Arc::new(engine.clone()), Arc::new(stack.clone()));
-    body.split('\n')
-        .map(|line| {
-            if line.trim_start().starts_with('#') {
-                hint.paint(line).to_string()
-            } else {
-                Highlighter::highlight(&highlighter, line, 0).render_simple()
+    let styled = Highlighter::highlight(&highlighter, body, 0);
+    let (tokens, _) = nu_parser::lex(body.as_bytes(), 0, &[], &[], false);
+    let comments: Vec<_> = tokens
+        .iter()
+        .filter(|token| token.contents == nu_parser::TokenContents::Comment)
+        .map(|token| token.span)
+        .collect();
+    let mut output = reedline::StyledText::new();
+    let mut offset = 0;
+    for (style, text) in styled.buffer {
+        let end = offset + text.len();
+        let mut start = offset;
+        for comment in &comments {
+            let comment_start = comment.start.max(offset);
+            let comment_end = comment.end.min(end);
+            if comment_start < comment_end {
+                if start < comment_start {
+                    output.push((style, body[start..comment_start].to_string()));
+                }
+                output.push((hint, body[comment_start..comment_end].to_string()));
+                start = comment_end;
             }
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
+        }
+        if start < end {
+            output.push((style, body[start..end].to_string()));
+        }
+        offset = end;
+    }
+    output.render_simple()
 }
 
-/// Color `nutorch tip` as a command and the rest of the meta line as a hint.
+/// Color `nutorch tip` as a command. The rest of the sentence stays the
+/// terminal's normal foreground.
 pub fn styled_meta_line(engine: &EngineState, stack: &Stack) -> String {
     let config = stack.get_config(engine);
-    let hint = nu_color_config::get_shape_color("hints", &config);
     let command = nu_color_config::get_shape_color("shape_internalcall", &config);
-    format!(
-        "{}{}{}",
-        hint.paint("Type "),
-        command.paint("nutorch tip"),
-        hint.paint(" for more tips.")
-    )
+    format!("Type {} for more tips.", command.paint("nutorch tip"))
 }
 
 /// Keep a plain `render` result, coloring the header and body when allowed.
@@ -1180,6 +1194,102 @@ mod tests {
     }
 
     #[test]
+    fn tip_highlight_preserves_loss_variable_scope() {
+        let engine = test_engine();
+        let body = "# mse_loss compares a guess with a target.\nuse torch\nlet pred = torch tensor [1.0 0.0]\nlet target = torch tensor [1.0 0.0]\ntorch mse_loss $pred $target";
+        let painted = highlight_body(&engine, &Stack::new(), body);
+        let variable = nu_color_config::get_shape_color("shape_variable", &engine.config);
+        for name in ["$pred", "$target"] {
+            assert!(
+                painted.contains(&variable.paint(name).to_string()),
+                "{painted:?}"
+            );
+        }
+        let command = nu_color_config::get_shape_color("shape_internalcall", &engine.config);
+        assert!(
+            painted.contains(&command.paint("torch mse_loss").to_string()),
+            "{painted:?}"
+        );
+        assert_eq!(strip_ansi(&painted), body);
+    }
+
+    #[test]
+    fn tip_highlight_preserves_custom_styles_and_real_errors() {
+        let mut engine = test_engine();
+        let config = Arc::make_mut(&mut engine.config);
+        config
+            .color_config
+            .insert("shape_variable".into(), Value::test_string("blue_bold"));
+        config
+            .color_config
+            .insert("shape_garbage".into(), Value::test_string("yellow_reverse"));
+        let body = "let answer = (\n  40 + 2\n)\n$answer\n$not_declared";
+        let painted = highlight_body(&engine, &Stack::new(), body);
+        for (shape, token) in [
+            ("shape_variable", "$answer"),
+            ("shape_garbage", "$not_declared"),
+        ] {
+            let style = nu_color_config::get_shape_color(shape, &engine.config);
+            assert!(
+                painted.contains(&style.paint(token).to_string()),
+                "{painted:?}"
+            );
+        }
+        assert_eq!(strip_ansi(&painted), body);
+    }
+
+    #[test]
+    fn tip_highlight_preserves_comments_strings_and_source_bytes() {
+        let engine = test_engine();
+        let body = "  # café\n\nlet text = 'first\n# string content\nlast'\n$text\n# end\n\n";
+        let painted = highlight_body(&engine, &Stack::new(), body);
+        let hint = nu_color_config::get_shape_color("hints", &engine.config);
+        let string = nu_color_config::get_shape_color("shape_string", &engine.config);
+        assert!(
+            painted.contains(&hint.paint("# café").to_string()),
+            "{painted:?}"
+        );
+        assert!(
+            painted.contains(&hint.paint("# end").to_string()),
+            "{painted:?}"
+        );
+        assert!(
+            painted.contains(&string.paint("'first\n# string content\nlast'").to_string()),
+            "{painted:?}"
+        );
+        assert_eq!(strip_ansi(&painted), body);
+        for body in ["", "\n", "\n\n", "# comment", "# comment\n"] {
+            assert_eq!(
+                strip_ansi(&highlight_body(&engine, &Stack::new(), body)),
+                body
+            );
+        }
+    }
+
+    #[test]
+    fn tip_highlight_does_not_execute_or_change_scope() {
+        let engine = test_engine();
+        let stack = Stack::new();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("must-not-exist");
+        let body = format!(
+            "let tip_only = 42\n$tip_only | save '{}'\nuse torch",
+            path.display()
+        );
+        let painted = highlight_body(&engine, &stack, &body);
+        assert_eq!(strip_ansi(&painted), body);
+        assert!(!path.exists());
+        let working = StateWorkingSet::new(&engine);
+        assert!(working.find_variable(b"$tip_only").is_none());
+        assert!(working.find_decl(b"torch mse_loss").is_none());
+        let error = nu_color_config::get_shape_color("shape_garbage", &engine.config);
+        assert_eq!(
+            highlight_body(&engine, &stack, "$tip_only"),
+            error.paint("$tip_only").to_string()
+        );
+    }
+
+    #[test]
     fn tip_highlight_uses_distinct_styles_and_strips_clean() {
         let engine = test_engine();
         let stack = Stack::new();
@@ -1258,14 +1368,12 @@ mod tests {
 
         let meta = styled_meta_line(&on, &stack);
         assert_eq!(strip_ansi(&meta), META_LINE);
-        let opening = |marker: &str| {
-            let at = meta.find(marker).unwrap_or_else(|| panic!("{meta:?}"));
-            let start = meta[..at]
-                .rfind('\u{1b}')
-                .unwrap_or_else(|| panic!("{meta:?}"));
-            meta[start..at].to_string()
-        };
-        assert_ne!(opening("Type "), opening("nutorch tip"), "{meta:?}");
+        assert!(meta.starts_with("Type "), "{meta:?}");
+        assert!(meta.ends_with(" for more tips."), "{meta:?}");
+        let command_at = meta
+            .find("nutorch tip")
+            .unwrap_or_else(|| panic!("{meta:?}"));
+        assert!(meta[..command_at].contains('\u{1b}'), "{meta:?}");
 
         let mut auto = engine.clone();
         set_color(&mut auto, nu_protocol::UseAnsiColoring::Auto);

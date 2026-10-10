@@ -12,6 +12,29 @@ use std::{
 
 const TIMEOUT: Duration = Duration::from_secs(30);
 
+fn test_openssl() -> PathBuf {
+    let candidates = if let Some(path) = std::env::var_os("NUTORCH_TEST_OPENSSL") {
+        vec![PathBuf::from(path)]
+    } else {
+        vec![
+            PathBuf::from("openssl"),
+            PathBuf::from("/opt/homebrew/opt/openssl@3/bin/openssl"),
+            PathBuf::from("/usr/local/opt/openssl@3/bin/openssl"),
+        ]
+    };
+    for path in &candidates {
+        if let Ok(version) = Command::new(path).arg("version").output()
+            && version.status.success()
+            && String::from_utf8_lossy(&version.stdout).starts_with("OpenSSL 3.")
+        {
+            return path.clone();
+        }
+    }
+    panic!(
+        "TLS tests require OpenSSL 3. Set NUTORCH_TEST_OPENSSL to its executable. Checked: {candidates:?}"
+    );
+}
+
 struct Shell {
     home: tempfile::TempDir,
 }
@@ -169,7 +192,10 @@ fn complete_inventory_matches_pinned_default_reference() {
         assert!(missing.is_empty(), "{key}: missing {missing:?}");
         assert_eq!(
             extra,
-            vec![&json!({"name":"nutorch sync","type":"built-in"})],
+            vec![
+                &json!({"name":"nutorch sync","type":"built-in"}),
+                &json!({"name":"nutorch tip","type":"built-in"}),
+            ],
             "{key}"
         );
     }
@@ -177,11 +203,12 @@ fn complete_inventory_matches_pinned_default_reference() {
 
 #[test]
 fn https_rejects_untrusted_local_certificate() {
+    let openssl = test_openssl();
     let shell = Shell::new();
     let cert = shell.home.path().join("cert.pem");
     let key = shell.home.path().join("key.pem");
     let generated = output(
-        Command::new("openssl")
+        Command::new(&openssl)
             .args([
                 "req",
                 "-x509",
@@ -212,7 +239,7 @@ fn https_rejects_untrusted_local_certificate() {
         .port();
     let tls_log = shell.home.path().join("tls-server.log");
     let mut server = Process(
-        Command::new("openssl")
+        Command::new(&openssl)
             .args(["s_server", "-accept", &format!("127.0.0.1:{port}"), "-cert"])
             .arg(&cert)
             .arg("-key")
@@ -226,7 +253,11 @@ fn https_rejects_untrusted_local_certificate() {
     );
     let start = Instant::now();
     while std::net::TcpStream::connect(("127.0.0.1", port)).is_err() {
-        assert!(server.0.try_wait().unwrap().is_none(), "TLS fixture exited");
+        assert!(
+            server.0.try_wait().unwrap().is_none(),
+            "TLS fixture exited: {}",
+            std::fs::read_to_string(&tls_log).unwrap()
+        );
         assert!(
             start.elapsed() < Duration::from_secs(5),
             "TLS fixture failed to listen"
@@ -257,7 +288,7 @@ fn https_rejects_untrusted_local_certificate() {
         "{log}"
     );
     let trusted = output(
-        Command::new("openssl")
+        Command::new(&openssl)
             .args([
                 "s_client",
                 "-connect",
@@ -284,6 +315,7 @@ fn https_rejects_untrusted_local_certificate() {
 #[test]
 #[ignore = "requires public HTTPS services; run explicitly for release qualification"]
 fn public_https_hostname_validation_and_version_check() {
+    let openssl = test_openssl();
     let shell = Shell::new();
     // Independent HTTPS response prevents version check's upstream fallback on
     // network failure from being mistaken for successful update verification.
@@ -304,12 +336,15 @@ fn public_https_hostname_validation_and_version_check() {
             .collect::<Vec<_>>()
     };
     let newer = parts(tag) > parts(embedded);
-    assert_eq!(version["latest"], if newer { tag } else { embedded });
+    assert_eq!(
+        version["latest"].as_str().unwrap().trim_start_matches('v'),
+        if newer { tag } else { embedded }
+    );
     assert_eq!(version["current"], !newer);
     let identity = output(shell.command().arg("--version"));
     assert!(String::from_utf8_lossy(&identity.stdout).starts_with("nutorch "));
     let mismatch = output(
-        Command::new("openssl")
+        Command::new(&openssl)
             .args([
                 "s_client",
                 "-connect",
