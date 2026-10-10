@@ -26,7 +26,6 @@ use nu_protocol::{
     ByteStream, Config, IntoValue, PipelineData, ShellError, Span, Spanned, Type, Value,
     engine::{EngineState, Stack},
     record, report_shell_error,
-    shell_error::generic::GenericError,
 };
 use nu_std::load_standard_library;
 use nu_utils::perf;
@@ -85,7 +84,8 @@ fn main() -> Result<()> {
         miette_hook(x);
     }));
 
-    let engine_state = EngineState::new();
+    let mut engine_state = EngineState::new();
+    engine_state.set_startup_start(entire_start_time);
 
     // Parse commandline args very early and load experimental options to allow loading different
     // commands based on experimental options.
@@ -166,17 +166,6 @@ fn main() -> Result<()> {
             );
             (nu_config::NushellConfigDirs::empty(), vec![])
         }
-        Err(ConfigError::NoHomeDir) => {
-            report_shell_error(
-                None,
-                &engine_state,
-                &ShellError::Generic(GenericError::new_internal(
-                    "Config path resolution failed",
-                    ConfigError::NoHomeDir.to_string(),
-                )),
-            );
-            (nu_config::NushellConfigDirs::empty(), vec![])
-        }
     };
 
     for w in &warnings {
@@ -224,15 +213,9 @@ fn main() -> Result<()> {
     engine_state.merge_delta(working_set.render())?;
     // End: Default NU_LIB_DIRS, NU_PLUGIN_DIRS
 
-    // This is the real secret sauce to having an in-memory sqlite db. You must
-    // start a connection to the memory database in main so it will exist for the
-    // lifetime of the program. If it's created with how MEMORY_DB is defined
-    // you'll be able to access this open connection from anywhere in the program
-    // by using the identical connection string.
+    // Initialize the upstream process-wide shared SQLite connection.
     #[cfg(feature = "sqlite")]
-    let db = nu_command::open_connection_in_memory_custom()?;
-    #[cfg(feature = "sqlite")]
-    db.last_insert_rowid();
+    nu_command::init_shared_memory_db()?;
 
     // keep this condition in sync with the branches at the end
     engine_state.is_interactive = parsed_nu_cli_args.interactive_shell.is_some()
@@ -574,7 +557,6 @@ fn main() -> Result<()> {
             &commands,
             input,
             args_to_script,
-            entire_start_time,
         );
 
         cleanup_exit(0, &engine_state, 0);

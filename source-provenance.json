@@ -5,59 +5,66 @@
       "name": "nushell",
       "checkout": "forks/nushell",
       "upstream": "https://github.com/nushell/nushell.git",
-      "base": "b6e6562a9a385df439ae864714c609c60314fde9",
-      "branch": "issue-26091523132966-exp1-environment-sync",
-      "expected_head": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
-      "expected_tree": "0551fcb838a83036853148db4df5a4e19aa78452",
+      "base": "251b39276970c015fb6d97d9ee750fe14788f62c",
+      "branch": "issue-26101014540995-exp1-upstream-update",
+      "expected_head": "6e615d022235279bc4a020219626c94858ce9907",
+      "expected_tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
       "patch_directories": [
-        "patches/nushell/patches/issue-26091316465368",
-        "patches/nushell/patches/issue-26091523132966"
+        "patches/nushell/patches/issue-26101014540995"
       ],
       "patch_count": 20,
-      "archive_sha256": "8d98f785481956e2461f330ee0df922fc16daa4bb08e2f6ac7aea841e67e69f4",
-      "allowed_untracked": []
+      "archive_sha256": "b8baae5999f6ca85d8b3b590ac9b0f255a53654d138bee78b1db9ddfc9687d33",
+      "allowed_untracked": [],
+      "update": {
+        "kind": "branch",
+        "ref": "main"
+      }
     },
     {
       "name": "reedline",
       "checkout": "forks/reedline",
       "upstream": "https://github.com/nushell/reedline.git",
-      "base": "d9db2f7979471b70eb3c3901a2eba3ef5197b656",
-      "branch": "issue-26091316465368-exp1-upstream-update",
-      "expected_head": "4acac3aeba448c0ce5274d048335846fad36d627",
-      "expected_tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
+      "base": "b5d93522d1a6db3909313944d9cf7fd70773ff79",
+      "branch": "issue-26101014540995-exp1-upstream-update",
+      "expected_head": "ab8626403cd9dc8d2211818e2050910c25044b75",
+      "expected_tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
       "patch_directories": [
-        "patches/reedline/patches/issue-26091316465368"
+        "patches/reedline/patches/issue-26101014540995"
       ],
       "patch_count": 4,
-      "archive_sha256": "1d40621bf620a04f1fd1fddc99c3955e891fedae8e5f48bb5b4d55234623a13f",
-      "allowed_untracked": []
+      "archive_sha256": "4a953e25464b121e2673dfe32269bbcc3901e2a6854d3704499631665f39f284",
+      "allowed_untracked": [],
+      "update": {
+        "kind": "branch",
+        "ref": "main"
+      }
     }
   ],
   "verified": [
     {
       "name": "nushell",
-      "head": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
-      "tree": "0551fcb838a83036853148db4df5a4e19aa78452",
-      "branch": "issue-26091523132966-exp1-environment-sync",
+      "head": "6e615d022235279bc4a020219626c94858ce9907",
+      "tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
+      "branch": "issue-26101014540995-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
       "prefix_count": 20,
       "patch_count": 20,
-      "archive_sha256": "8d98f785481956e2461f330ee0df922fc16daa4bb08e2f6ac7aea841e67e69f4",
-      "expected_tree": "0551fcb838a83036853148db4df5a4e19aa78452",
+      "archive_sha256": "b8baae5999f6ca85d8b3b590ac9b0f255a53654d138bee78b1db9ddfc9687d33",
+      "expected_tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
       "action": "already-ready"
     },
     {
       "name": "reedline",
-      "head": "4acac3aeba448c0ce5274d048335846fad36d627",
-      "tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
-      "branch": "issue-26091316465368-exp1-upstream-update",
+      "head": "ab8626403cd9dc8d2211818e2050910c25044b75",
+      "tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
+      "branch": "issue-26101014540995-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
       "prefix_count": 4,
       "patch_count": 4,
-      "archive_sha256": "1d40621bf620a04f1fd1fddc99c3955e891fedae8e5f48bb5b4d55234623a13f",
-      "expected_tree": "2292d9479f5a00d6c7709ab408749530c93efce4",
+      "archive_sha256": "4a953e25464b121e2673dfe32269bbcc3901e2a6854d3704499631665f39f284",
+      "expected_tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
       "action": "already-ready"
     }
   ],

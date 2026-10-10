@@ -24,7 +24,6 @@ pub(crate) fn run_commands(
     commands: &Spanned<String>,
     input: PipelineData,
     args_to_script: Vec<String>,
-    entire_start_time: nu_utils::time::Instant,
 ) {
     trace!("run_commands");
 
@@ -83,8 +82,7 @@ pub(crate) fn run_commands(
         perf!("read login.nu", start_time, use_color);
     }
 
-    engine_state.set_startup_time(entire_start_time.elapsed().as_nanos() as i64);
-    engine_state.generate_nu_constant();
+    engine_state.finish_startup();
 
     let start_time = Instant::now();
     let result = evaluate_commands(
@@ -162,7 +160,7 @@ pub(crate) fn run_file(
         perf!("read config.nu", start_time, use_color);
     }
 
-    engine_state.generate_nu_constant();
+    engine_state.finish_startup();
 
     let start_time = Instant::now();
     let result = evaluate_file(
@@ -332,7 +330,6 @@ pub(crate) fn run_repl(
         stack,
         parsed_nu_cli_args.execute,
         parsed_nu_cli_args.no_std_lib,
-        entire_start_time,
         Some(dispatcher),
     );
     perf!("evaluate_repl", start_time, use_color);

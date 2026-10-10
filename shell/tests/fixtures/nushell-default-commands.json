@@ -1,22 +1,22 @@
 {
-  "fork_commit": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+  "fork_commit": "6e615d022235279bc4a020219626c94858ce9907",
   "platform": "aarch64-apple-darwin",
   "version": {
-    "version": "0.115.2",
+    "version": "0.116.2",
     "major": 0,
-    "minor": 115,
+    "minor": 116,
     "patch": 2,
-    "branch": "issue-26091523132966-exp1-environment-sync",
-    "commit_hash": "9b381cb3bb3f325ae898e7dc5cd788af4f99f2b0",
+    "branch": "issue-26101014540995-exp1-upstream-update",
+    "commit_hash": "1045f6e02209545ef652b9658579e4286697e4b5",
     "build_os": "macos-aarch64",
     "build_target": "aarch64-apple-darwin",
-    "rust_version": "rustc 1.96.1 (31fca3adb 2026-06-26)",
-    "rust_channel": "1.96.1-aarch64-apple-darwin",
-    "cargo_version": "cargo 1.96.1 (356927216 2026-06-26)",
-    "build_time": "2026-09-17 17:54:16 -05:00",
+    "rust_version": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "rust_channel": "1.97.1-aarch64-apple-darwin",
+    "cargo_version": "cargo 1.97.1 (c980f4866 2026-06-30)",
+    "build_time": "2026-10-10 10:05:17 -05:00",
     "build_rust_channel": "debug",
     "allocator": "standard",
-    "features": "default, lsp, mcp, network, plugin, rustls-tls, sqlite, trash-support",
+    "features": "dap, default, lsp, mcp, network, plugin, rustls-tls, sqlite, trash-support",
     "installed_plugins": "",
     "experimental_options": "example=false, dc-glob=false, reorder-cell-paths=true, pipefail=true, enforce-runtime-annotations=true, native-clip=false, cell-path-types=false"
   },
@@ -667,6 +667,10 @@
     },
     {
       "name": "hash sha256",
+      "type": "built-in"
+    },
+    {
+      "name": "hash sha512",
       "type": "built-in"
     },
     {
@@ -1450,6 +1454,26 @@
       "type": "built-in"
     },
     {
+      "name": "record",
+      "type": "built-in"
+    },
+    {
+      "name": "record apply",
+      "type": "built-in"
+    },
+    {
+      "name": "record each",
+      "type": "built-in"
+    },
+    {
+      "name": "record walk",
+      "type": "built-in"
+    },
+    {
+      "name": "record where",
+      "type": "built-in"
+    },
+    {
       "name": "reduce",
       "type": "built-in"
     },
@@ -1924,6 +1948,78 @@
     {
       "name": "try",
       "type": "keyword"
+    },
+    {
+      "name": "tui",
+      "type": "built-in"
+    },
+    {
+      "name": "tui bind",
+      "type": "built-in"
+    },
+    {
+      "name": "tui box",
+      "type": "built-in"
+    },
+    {
+      "name": "tui button",
+      "type": "built-in"
+    },
+    {
+      "name": "tui debug",
+      "type": "built-in"
+    },
+    {
+      "name": "tui label",
+      "type": "built-in"
+    },
+    {
+      "name": "tui log",
+      "type": "built-in"
+    },
+    {
+      "name": "tui menu",
+      "type": "built-in"
+    },
+    {
+      "name": "tui preview",
+      "type": "built-in"
+    },
+    {
+      "name": "tui progress",
+      "type": "built-in"
+    },
+    {
+      "name": "tui run",
+      "type": "built-in"
+    },
+    {
+      "name": "tui search",
+      "type": "built-in"
+    },
+    {
+      "name": "tui select",
+      "type": "built-in"
+    },
+    {
+      "name": "tui split",
+      "type": "built-in"
+    },
+    {
+      "name": "tui tab",
+      "type": "built-in"
+    },
+    {
+      "name": "tui table",
+      "type": "built-in"
+    },
+    {
+      "name": "tui textbox",
+      "type": "built-in"
+    },
+    {
+      "name": "tui tree",
+      "type": "built-in"
     },
     {
       "name": "tutor",
@@ -2724,6 +2820,10 @@
       "type": "built-in"
     },
     {
+      "name": "hash sha512",
+      "type": "built-in"
+    },
+    {
       "name": "headers",
       "type": "built-in"
     },
@@ -3504,6 +3604,26 @@
       "type": "built-in"
     },
     {
+      "name": "record",
+      "type": "built-in"
+    },
+    {
+      "name": "record apply",
+      "type": "built-in"
+    },
+    {
+      "name": "record each",
+      "type": "built-in"
+    },
+    {
+      "name": "record walk",
+      "type": "built-in"
+    },
+    {
+      "name": "record where",
+      "type": "built-in"
+    },
+    {
       "name": "reduce",
       "type": "built-in"
     },
@@ -3978,6 +4098,78 @@
     {
       "name": "try",
       "type": "keyword"
+    },
+    {
+      "name": "tui",
+      "type": "built-in"
+    },
+    {
+      "name": "tui bind",
+      "type": "built-in"
+    },
+    {
+      "name": "tui box",
+      "type": "built-in"
+    },
+    {
+      "name": "tui button",
+      "type": "built-in"
+    },
+    {
+      "name": "tui debug",
+      "type": "built-in"
+    },
+    {
+      "name": "tui label",
+      "type": "built-in"
+    },
+    {
+      "name": "tui log",
+      "type": "built-in"
+    },
+    {
+      "name": "tui menu",
+      "type": "built-in"
+    },
+    {
+      "name": "tui preview",
+      "type": "built-in"
+    },
+    {
+      "name": "tui progress",
+      "type": "built-in"
+    },
+    {
+      "name": "tui run",
+      "type": "built-in"
+    },
+    {
+      "name": "tui search",
+      "type": "built-in"
+    },
+    {
+      "name": "tui select",
+      "type": "built-in"
+    },
+    {
+      "name": "tui split",
+      "type": "built-in"
+    },
+    {
+      "name": "tui tab",
+      "type": "built-in"
+    },
+    {
+      "name": "tui table",
+      "type": "built-in"
+    },
+    {
+      "name": "tui textbox",
+      "type": "built-in"
+    },
+    {
+      "name": "tui tree",
+      "type": "built-in"
     },
     {
       "name": "tutor",

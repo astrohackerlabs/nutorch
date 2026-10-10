@@ -1056,6 +1056,36 @@ fn interactive_completer_on_a_shorter_head_argument_runs_inline() {
     );
 }
 
+/// A cancelled picker answers empty; the next Tab on the same line must run it again
+/// rather than reuse that answer. A non-empty answer is still reused for the repeated
+/// asks of one keystroke.
+#[test]
+fn interactive_completer_reruns_after_an_empty_answer() {
+    let (_, _, mut engine, mut stack) = new_engine();
+    let dir = tempfile::tempdir().expect("tempdir");
+    let marker = dir.path().join("asked");
+    let command = format!(
+        "@interactive\n\
+         def comp [] {{ if ('{m}' | path exists) {{ [alpha] }} else {{ touch '{m}'; [] }} }}\n\
+         def my-command [arg: string@comp] {{}}",
+        m = marker.display()
+    );
+    assert!(support::merge_input(command.as_bytes(), &mut engine, &mut stack).is_ok());
+
+    let mut completer = NuCompleter::new(Arc::new(engine), Arc::new(stack));
+    let line = "my-command ";
+    let first = completer.complete(line, line.len());
+    assert!(first.suggestions().is_empty(), "got {first:?}");
+
+    let second = completer.complete(line, line.len());
+    match_suggestions(&vec!["alpha"], second.suggestions());
+
+    // Without the marker a rerun would answer empty again, so `alpha` is the kept answer.
+    std::fs::remove_file(&marker).expect("remove marker");
+    let third = completer.complete(line, line.len());
+    match_suggestions(&vec!["alpha"], third.suggestions());
+}
+
 /// Detection sees through aliases as execution does: an alias of an `@interactive`
 /// completer routes inline.
 #[test]
@@ -1912,6 +1942,56 @@ fn command_wide_completion_flag_completion() {
     let span = suggestions[0].span;
     assert_eq!(span.start, input_for_flag_value.len() - 2);
     assert_eq!(span.end, input_for_flag_value.len());
+}
+
+/// A `def --wrapped` rest parameter receives unknown `--x` tokens, so its completer
+/// answers for them next to the declared flags (#19097).
+#[test]
+fn wrapped_rest_completer_completes_flag_tokens() {
+    let mut completer = custom_completer();
+
+    let sample = /* lang=nu */ r#"
+        def "nu-complete what" [] { ["aaa", "--bbb"] }
+        def --wrapped what [--verbose, ...args: string@"nu-complete what"] {}
+        what --"#;
+
+    let suggestions = completer.complete_blocking(sample, sample.len());
+    match_suggestions(&vec!["--verbose", "--bbb"], &suggestions);
+
+    let span = suggestions[1].span;
+    assert_eq!(span.start, sample.len() - 2);
+    assert_eq!(span.end, sample.len());
+
+    // Past a leading positional, and with the flag partly typed.
+    let partial = format!("{} aaa --b", sample.trim_end_matches(" --"));
+    let suggestions = completer.complete_blocking(&partial, partial.len());
+    match_suggestions(&vec!["--bbb"], &suggestions);
+}
+
+/// A wrapped `--x` token binds to the rest parameter, so it follows the positional chain:
+/// the rest completer overrides `@complete` unless it declines (`null`) or contributes
+/// (`fallback: true`).
+#[rstest]
+#[case::answers("[aaa --bbb]", vec!["--bbb"])]
+#[case::contributes("{completions: [aaa --bbb], fallback: true}", vec!["--bbb", "--wide"])]
+#[case::declines("null", vec!["--wide"])]
+fn wrapped_rest_completer_chains_to_command_wide_on_flag_tokens(
+    #[case] rest_output: &str,
+    #[case] expected: Vec<&str>,
+) {
+    let mut completer = custom_completer();
+
+    let sample = format!(
+        r#"
+        def "nu-complete rest" [] {{ {rest_output} }}
+        def "nu-complete wide" [] {{ ["--wide"] }}
+        @complete "nu-complete wide"
+        def --wrapped both [...args: string@"nu-complete rest"] {{}}
+        both --"#
+    );
+
+    let suggestions = completer.complete_blocking(&sample, sample.len());
+    match_suggestions(&expected, &suggestions);
 }
 
 #[test]
@@ -3157,6 +3237,7 @@ fn variables_completions() {
         "history-enabled",
         "history-path",
         "home-dir",
+        "is-dap",
         "is-interactive",
         "is-login",
         "is-lsp",
@@ -4389,7 +4470,7 @@ fn legacy_zoxide_style_parameter_completer_receives_context_and_pos() {
 }
 
 /// Legacy compat: a command-wide completer declaring `[spans]` receives the flattened
-/// tokens, plus `""` for a trailing empty slot.
+/// tokens of the command being completed, plus `""` for a trailing empty slot.
 #[test]
 fn legacy_command_wide_completer_receives_spans() {
     let mut completer = custom_completer();
@@ -4435,4 +4516,15 @@ fn legacy_fzf_style_external_completer_receives_spans() {
     // Trailing empty slot is visible, exactly as before.
     let suggestions = run_external_completion("{|spans| $spans}", "gh alias ");
     match_suggestions(&vec!["gh", "alias", ""], &suggestions);
+}
+
+/// `place.command` names the call the cursor is in, after pipes, closures, and `;` (#19016).
+#[rstest]
+#[case::after_a_pipe("ls | cargo bld")]
+#[case::in_a_subexpression("echo (cargo bld")]
+#[case::in_a_closure("do { cargo bld")]
+#[case::after_a_semicolon("ls; cargo bld")]
+fn external_completer_place_command_is_the_command_being_completed(#[case] input: &str) {
+    let suggestions = run_external_completion("{|place| $place.command}", input);
+    match_suggestions(&vec!["cargo", "bld"], &suggestions);
 }

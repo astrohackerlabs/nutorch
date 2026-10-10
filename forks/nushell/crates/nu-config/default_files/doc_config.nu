@@ -3,7 +3,7 @@
 # Warning: This file is intended for documentation purposes only and
 # is not intended to be used as an actual configuration file as-is.
 #
-# version = "0.115.2"
+# version = "0.116.2"
 #
 # A `config.nu` file is used to override default Nushell settings,
 # define (or import) custom commands, or run any other startup tasks.
@@ -190,6 +190,12 @@ $env.config.cursor_shape.vi_insert = "inherit"
 # Default: "inherit"
 $env.config.cursor_shape.vi_normal = "inherit"
 
+# cursor_shape.vi_visual (string): Cursor shape when in vi visual mode.
+# One of: "block", "underscore", "line", "blink_block", "blink_underscore", "blink_line", or "inherit".
+# "inherit" follows `cursor_shape.vi_normal`, so a config that only sets that one keeps its shape in visual mode.
+# Default: "inherit"
+$env.config.cursor_shape.vi_visual = "inherit"
+
 # cursor_shape.helix_normal (string): Cursor shape when in helix normal mode.
 # One of: "block", "underscore", "line", "blink_block", "blink_underscore", "blink_line", or "inherit".
 # Default: "inherit"
@@ -332,14 +338,17 @@ $env.config.completions.external.max_results = 100
 #                    ({start, end}, the range a suggestion replaces), plus the resolution
 #                    (`kind`, plus `flag`/`index`). Read `target` rather than `token.span`:
 #                    they differ wherever a completion spans several tokens, such as a
-#                    multiword command head or a cell path.
+#                    multiword command head or a cell path. `command` is the token list of the
+#                    command being completed -- the element the cursor is in, plus `""` for a
+#                    fresh empty argument slot. Unlike `buffer`, it is the command after a
+#                    pipe, inside a closure, or after a `;`, so `$place.command.0` is the
+#                    command name a completer like Carapace needs.
 #   buffer: string   the whole command line up to the cursor, across pipes and closures, for
-#                    completers that need more than the current token -- an external completer
-#                    like Carapace reads this. `std/util structure` turns it into a
-#                    {text, kind, span} table. Prefer it over calling `commandline` from inside
-#                    a completer: `buffer` is always the line being completed, whereas
-#                    `commandline` reads editor state and can come back empty depending on how
-#                    completion was triggered (e.g. after a `;`).
+#                    completers that need more than the current token. `std/util structure`
+#                    turns it into a {text, kind, span} table. Prefer it over calling
+#                    `commandline` from inside a completer: `buffer` is always the line being
+#                    completed, whereas `commandline` reads editor state and can come back
+#                    empty depending on how completion was triggered (e.g. after a `;`).
 # `commandline complete --input` returns all three at once, for inspecting a completer.
 # A completer never sees text past the cursor.
 #
@@ -350,10 +359,10 @@ $env.config.completions.external.max_results = 100
 $env.config.completions.external.completer = null
 
 # Example: A simplified Carapace completer (use the official one from Carapace docs).
-# The whole line is wanted, so it declares `buffer` and splits it into words:
-# $env.config.completions.external.completer = {|buffer|
-#   let words = $buffer | split row " "
-#   carapace ($words | first) nushell ...$words | from json
+# It reads `$place.command`, so the command being completed is the first token even after a
+# pipe, inside a closure, or after a `;`:
+# $env.config.completions.external.completer = {|place|
+#   carapace $place.command.0 nushell ...$place.command | from json
 # }
 #
 # Example: branch off the resolved cursor instead of re-parsing the line, by declaring
@@ -380,13 +389,12 @@ $env.config.completions.external.completer = null
 # `external.completer` is a plain closure, which cannot carry an attribute. To make it run
 # inline (the picker-driving case), have it call an `@interactive` command: interactivity is
 # seen through the closure to that command, so there is no separate switch. The command
-# usually declares `buffer` to feed the whole line to its picker:
+# usually reads `$place.command` to feed the command being completed to its picker:
 # @interactive
-# def carapace-fzf [buffer] {
-#   let words = $buffer | split row ' '
-#   carapace ($words | first) nushell ...$words | from json | ^fzf | lines
+# def carapace-fzf [place] {
+#   carapace $place.command.0 nushell ...$place.command | from json | get value | to text | ^fzf | lines
 # }
-# $env.config.completions.external.completer = {|buffer| carapace-fzf $buffer }
+# $env.config.completions.external.completer = {|place| carapace-fzf $place }
 # A closure that does not reach an `@interactive` command stays on the background worker:
 # non-blocking, and cached.
 
@@ -712,9 +720,10 @@ $env.config.hooks.command_not_found = null
 #   }
 # ]
 
-# Example: Bind Ctrl+g to leave insert mode. A mode event only applies to its own
-# state machine and reports itself inapplicable elsewhere, so `until` hands the
-# key on and one binding covers both editors:
+# Example: Bind Ctrl+g to leave insert mode. `SwitchMode` names the mode to land
+# in, with the same names `mode` takes above. It only reaches the modes of the
+# editor `edit_mode` selects and reports itself inapplicable elsewhere, so
+# `until` hands the key on and one binding covers both editors:
 # $env.config.keybindings ++= [
 #   {
 #     name: leave_insert_mode
@@ -723,15 +732,18 @@ $env.config.hooks.command_not_found = null
 #     mode: [vi_insert helix_insert]
 #     event: {
 #       until: [
-#         { send: ViChangeMode, mode: normal }
-#         { send: HelixChangeMode, mode: normal }
+#         { send: SwitchMode, mode: vi_normal }
+#         { send: SwitchMode, mode: helix_normal }
 #       ]
 #     }
 #   }
 # ]
-# `ViChangeMode` takes "normal", "insert" or "visual"; `HelixChangeMode` takes
-# "normal", "insert" or "select". An unknown
-# mode name leaves the mode alone rather than erroring.
+# A `SwitchMode` into the mode already active does nothing and reports itself
+# inapplicable, so an `until` list of `vi_normal` then `vi_insert` toggles
+# between the two.
+# The older `ViChangeMode` (mode: "normal", "insert" or "visual") and
+# `HelixChangeMode` (mode: "normal", "insert" or "select") still parse and mean
+# the same as the `SwitchMode` above. An unknown mode name is a config error.
 
 # -------------
 # Abbreviations
@@ -748,7 +760,7 @@ $env.config.abbreviations = {}
 # $env.config.abbreviations = {
 #   gs: "git status",
 #   ll: "ls -l",
-#   ptop: "ps | sort-by -r cpu | first 10"
+#   ptop: "ps | compact cpu | sort-by -r cpu | first 10"
 # }
 
 # -----
@@ -1349,6 +1361,76 @@ $env.config.explore.try.reactive = false
 #     }
 #     try: { reactive: false }
 # }
+
+# --------------------
+# TUI Command Settings
+# --------------------
+# `$env.config.tui` styles the `tui` command family (`tui table`, `tui split`, `tui run`, ...).
+# It is read by `Theme::from_config` in `crates/nu-tui/src/theme.rs`. Every key except
+# `border_type` is a color value in the same forms as `color_config`: a color name, `#RRGGBB`,
+# or `{ fg?, bg?, attr? }`.
+# When `use_ansi_coloring` is off the TUI draws without colors.
+
+# tui.title_bar (color): The one-line title bar from `tui label --titlebar`.
+# Default: { fg: white, bg: blue, attr: b }
+$env.config.tui.title_bar = { fg: white, bg: blue, attr: b }
+
+# tui.status_bar (color): The bottom status bar from `tui label --status`.
+# Default: { fg: white, bg: dark_gray }
+$env.config.tui.status_bar = { fg: white, bg: dark_gray }
+
+# tui.border / tui.border_focused (color): Widget borders, and the border of the focused widget.
+# Defaults: { fg: dark_gray } / { fg: cyan }
+$env.config.tui.border = { fg: dark_gray }
+$env.config.tui.border_focused = { fg: cyan }
+
+# tui.border_type (string): The lines of every widget border, named like `table --theme`.
+# A widget's own `--border` flag overrides it. A tui border always takes one cell, so `none`
+# is an error, and so is `default`. Each name draws the closest outline of that table theme:
+#   single, thin: ┌─┐ │ └─┘       rounded: ╭─╮ │ ╰─╯        double: ╔═╗ ║ ╚═╝
+#   heavy: ┏━┓ ┃ ┗━┛              reinforced: ┏─┓ │ ┗─┛
+#   basic, basic_compact: +-+ | +-+                  ascii_rounded: .-. | '-'
+#   dots: .... : : :..:            with_love: ❤ lines, no sides
+#   compact: ─ lines, no sides     compact_double: ═ lines, no sides
+#   restructured: = lines, no sides                  markdown: | sides, no lines
+#   frameless, light, psql: blank
+# Default: "single"
+$env.config.tui.border_type = "single"
+
+# tui.selected (color): The highlighted row in tables, trees, selects, and menus.
+# Default: { attr: r }
+$env.config.tui.selected = { attr: r }
+
+# tui.header (color): Table column headers.
+# Default: { fg: green, attr: b }
+$env.config.tui.header = { fg: green, attr: b }
+
+# tui.muted (color): Placeholders and empty-state text.
+# Default: { fg: dark_gray }
+$env.config.tui.muted = { fg: dark_gray }
+
+# tui.highlight (color): Search query text and check marks.
+# Default: { fg: yellow, attr: b }
+$env.config.tui.highlight = { fg: yellow, attr: b }
+
+# tui.tab_active / tui.tab_inactive (color): Entries in the tab bar.
+# Defaults: { fg: cyan, attr: bu } / { fg: dark_gray }
+$env.config.tui.tab_active = { fg: cyan, attr: bu }
+$env.config.tui.tab_inactive = { fg: dark_gray }
+
+# tui.progress (color): The filled part of `tui progress`.
+# Default: { fg: green }
+$env.config.tui.progress = { fg: green }
+
+# tui.button (color): `tui button` labels.
+# Default: { fg: white, bg: blue }
+$env.config.tui.button = { fg: white, bg: blue }
+
+# tui.surface / tui.backdrop (color): Background fill behind widgets, and behind a `--dialog`.
+# Only the `bg` of the value is used.
+# Defaults: unset (a near-black fill)
+# $env.config.tui.surface = { bg: "#121216" }
+# $env.config.tui.backdrop = { bg: "#08080c" }
 
 # ---------------------------------------------------------------------------------------
 # Environment Variables

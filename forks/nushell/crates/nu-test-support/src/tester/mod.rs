@@ -62,6 +62,8 @@ static INITIAL_ENGINE_STATES: KeyedLazyLock<GroupKey, EngineState> = KeyedLazyLo
     #[cfg(feature = "os")]
     let engine_state = nu_cli::add_cli_context(engine_state);
     // let engine_state = nu_explore::add_explore_context(engine_state);
+    #[cfg(feature = "os")]
+    let engine_state = nu_tui::add_tui_context(engine_state);
 
     // Make `engine_state` mutable without fiddling with features
     let mut engine_state = engine_state;
@@ -101,6 +103,32 @@ pub static PATH_ENV_AUTO_LOAD: RwLock<Vec<PathBuf>> = const_rwlock(Vec::new());
 /// Plugins to be automatically loaded into a [`NuTester`].
 #[cfg(feature = "plugin")]
 pub static PLUGIN_AUTO_LOAD: RwLock<Vec<PluginAutoLoader>> = const_rwlock(Vec::new());
+
+/// Parse `source` as the contents of the file at `path`, the way `source` parses a file: the path
+/// is pushed on the working set's file stack while it parses, so that relative `use` and `source`
+/// resolve next to it. `lex_once` turns the lexer's bracket tables
+/// ([`StateWorkingSet::lex_once`]) on or off.
+pub fn parse_file<'a>(
+    engine_state: &'a EngineState,
+    path: &Path,
+    source: &[u8],
+    lex_once: bool,
+) -> (StateWorkingSet<'a>, Arc<Block>) {
+    let mut working_set = StateWorkingSet::new(engine_state);
+    working_set.lex_once = lex_once;
+    working_set
+        .files
+        .push(path.to_path_buf(), Span::unknown())
+        .expect("a single file cannot be a circular import");
+    let block = nu_parser::parse(
+        &mut working_set,
+        Some(&path.to_string_lossy()),
+        source,
+        false,
+    );
+    working_set.files.pop();
+    (working_set, block)
+}
 
 /// Create a [`NuTester`] for running Nushell snippets in tests.
 ///
@@ -936,7 +964,7 @@ pub trait ShellErrorExt {
     fn into_labeled(self) -> Result<LabeledError>;
 
     /// Extract the iterator on the sources of the [`ChainedError`] from
-    /// [`ShellError::ChainedError`], it it is one.
+    /// [`ShellError::ChainedError`], if it is one.
     fn into_chained_iter(self) -> Result<impl Iterator<Item = ShellError>>;
 
     /// Extract the error field from [`ShellError::Generic`], if it is one.

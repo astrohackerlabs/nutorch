@@ -43,6 +43,7 @@ use reedline::{
     HistorySessionId, MouseClickMode, Osc133ClickEventsMarkers, Osc633Markers, Reedline,
     SemanticPromptMarkers, Vi,
 };
+use std::ffi::OsStr;
 use std::sync::atomic::Ordering;
 use std::{
     collections::HashMap,
@@ -105,7 +106,6 @@ pub fn evaluate_repl(
     stack: Stack,
     prerun_command: Option<Spanned<String>>,
     load_std_lib: Option<Spanned<String>>,
-    entire_start_time: Instant,
     mode_dispatcher: Option<std::sync::Arc<std::sync::Mutex<Box<dyn crate::ModeDispatcher>>>>,
 ) -> Result<()> {
     // throughout this code, we hold this stack uniquely.
@@ -186,36 +186,30 @@ pub fn evaluate_repl(
         );
     }
 
-    engine_state.set_startup_time(entire_start_time.elapsed().as_nanos() as i64);
-
-    // Regenerate the $nu constant to contain the startup time and any other potential updates
+    // Refresh `$nu`, so the hooks and prompt closures that run before the first prompt see the
+    // startup time so far. The final value is stored right before the first prompt is drawn: see
+    // `finish_startup`.
     engine_state.generate_nu_constant();
 
-    if load_std_lib.is_none() {
-        match engine_state.get_config().show_banner {
-            BannerKind::None => {}
-            BannerKind::Short => {
-                eval_source(
-                    engine_state,
-                    &mut unique_stack,
-                    "banner --short".as_bytes(),
-                    "show short banner",
-                    PipelineData::empty(),
-                    false,
-                );
-            }
-            BannerKind::Full => {
-                eval_source(
-                    engine_state,
-                    &mut unique_stack,
-                    "banner".as_bytes(),
-                    "show_banner",
-                    PipelineData::empty(),
-                    false,
-                );
-            }
-        }
+    // The banner is defined by the standard library. Its welcome message goes out now, before
+    // the startup hooks; its startup time line follows the hooks and the prompt evaluation,
+    // right before the first prompt, once the value is final.
+    let banner = if load_std_lib.is_none() {
+        engine_state.get_config().show_banner
+    } else {
+        BannerKind::None
+    };
+    if matches!(banner, BannerKind::Full) {
+        eval_source(
+            engine_state,
+            &mut unique_stack,
+            "banner --no-startup-time".as_bytes(),
+            "show_banner",
+            PipelineData::empty(),
+            false,
+        );
     }
+    let mut first_prompt = Some(FirstPrompt { banner });
 
     kitty_protocol_healthcheck(engine_state);
 
@@ -246,6 +240,7 @@ pub fn evaluate_repl(
                 hostname: hostname.as_deref(),
                 is_hostcommand: &mut is_hostcommand,
                 completion_cache: current_completion_cache,
+                first_prompt: first_prompt.take(),
                 mode_dispatcher: mode_dispatcher.clone(),
             });
 
@@ -364,6 +359,51 @@ struct LoopContext<'a> {
     /// Completion cache carried across prompts (survives the per-prompt completer rebuild).
     completion_cache: NarrowingCache,
     mode_dispatcher: Option<std::sync::Arc<std::sync::Mutex<Box<dyn crate::ModeDispatcher>>>>,
+    /// Set for the iteration that draws the first prompt; `None` afterwards.
+    first_prompt: Option<FirstPrompt>,
+}
+
+/// Work deferred until the REPL is about to draw its first prompt.
+struct FirstPrompt {
+    /// Which banner to show; `None` when the standard library (which defines it) is not loaded.
+    banner: BannerKind,
+}
+
+/// Record the final `$nu.startup-time` and print the banner's startup time line, right before
+/// the first prompt is drawn.
+///
+/// Everything up to this point is startup: config files, plugins, the `env_change` and
+/// `pre_prompt` hooks, the prompt closures and the line editor setup all run before the user can
+/// type. The line is printed here so the startup time it shows is the final one.
+fn finish_startup(
+    engine_state: &mut EngineState,
+    stack: &Arc<Stack>,
+    first_prompt: FirstPrompt,
+    use_color: bool,
+) {
+    let startup_time = engine_state.finish_startup();
+    perf!(
+        "startup (main to first prompt)",
+        elapsed: startup_time,
+        use_color
+    );
+
+    let banner_source = match first_prompt.banner {
+        BannerKind::None => return,
+        BannerKind::Short => "banner --short",
+        // The welcome message went out before the hooks; keep the blank line that separated the
+        // two parts of the full banner.
+        BannerKind::Full => r#"$"(char nl)(banner --short)""#,
+    };
+    // The banner only reads state, so evaluate it on a child stack and leave the REPL's alone.
+    eval_source(
+        engine_state,
+        &mut Stack::with_parent(stack.clone()),
+        banner_source.as_bytes(),
+        "show_banner",
+        PipelineData::empty(),
+        false,
+    );
 }
 
 struct RunContext<'a> {
@@ -588,6 +628,21 @@ fn run_command(ctx: RunContext) -> Reedline {
     line_editor
 }
 
+/// Check whether `cmd` exists in the current directory or in `$env.PATH`
+fn editor_is_resolved(engine_state: &EngineState, stack: &Stack, cmd: &str) -> bool {
+    let paths = nu_engine::env::path_str(engine_state, stack, Span::unknown()).ok();
+    let cmd_os = OsStr::new(cmd);
+    let paths_os = paths.as_deref().map(OsStr::new);
+    if let Ok(cwd) = engine_state.cwd(Some(stack)) {
+        which::which_in(cmd_os, paths_os, cwd).is_ok()
+    } else {
+        which::which_in_global(cmd_os, paths_os)
+            .ok()
+            .and_then(|mut i| i.next())
+            .is_some()
+    }
+}
+
 /// Perform one iteration of the REPL loop
 /// Result is bool: continue loop, current reedline
 #[inline]
@@ -606,6 +661,7 @@ fn loop_iteration(ctx: LoopContext) -> (bool, Stack, Reedline) {
         hostname,
         is_hostcommand,
         completion_cache,
+        first_prompt,
         mode_dispatcher,
     } = ctx;
 
@@ -662,6 +718,7 @@ fn loop_iteration(ctx: LoopContext) -> (bool, Stack, Reedline) {
     let cursor_config = CursorConfig {
         vi_insert: map_nucursorshape_to_cursorshape(config.cursor_shape.vi_insert),
         vi_normal: map_nucursorshape_to_cursorshape(config.cursor_shape.vi_normal),
+        vi_visual: map_nucursorshape_to_cursorshape(config.cursor_shape.vi_visual),
         emacs: map_nucursorshape_to_cursorshape(config.cursor_shape.emacs),
         hx_insert: map_nucursorshape_to_cursorshape(config.cursor_shape.helix_insert),
         hx_normal: map_nucursorshape_to_cursorshape(config.cursor_shape.helix_normal),
@@ -789,7 +846,9 @@ fn loop_iteration(ctx: LoopContext) -> (bool, Stack, Reedline) {
     // No call span available in the REPL loop for editor lookup
     let buffer_editor = get_editor(engine_state, &stack_arc, Span::unknown());
 
-    line_editor = if let Ok((cmd, args)) = buffer_editor {
+    line_editor = if let Ok((cmd, args)) = buffer_editor
+        && editor_is_resolved(engine_state, &stack_arc, &cmd)
+    {
         let mut command = std::process::Command::new(cmd);
         let envs = env_to_strings(engine_state, &stack_arc).unwrap_or_else(|e| {
             warn!("Couldn't convert environment variable values to strings: {e}");
@@ -851,6 +910,10 @@ fn loop_iteration(ctx: LoopContext) -> (bool, Stack, Reedline) {
     *is_hostcommand = false;
 
     *entry_num += 1;
+
+    if let Some(first_prompt) = first_prompt {
+        finish_startup(engine_state, &stack_arc, first_prompt, use_color);
+    }
 
     start_time = Instant::now();
     line_editor = line_editor.with_transient_prompt(transient_prompt);
@@ -1486,12 +1549,15 @@ pub(crate) fn build_product_keybindings(config: &Config) -> Result<KeybindingsMo
         KeybindingsMode::Vi {
             mut insert_keybindings,
             mut normal_keybindings,
+            mut visual_keybindings,
         } => {
             apply_astrohacker_product_keybinding_overrides(&mut insert_keybindings);
             apply_astrohacker_product_keybinding_overrides(&mut normal_keybindings);
+            apply_astrohacker_product_keybinding_overrides(&mut visual_keybindings);
             Ok(KeybindingsMode::Vi {
                 insert_keybindings,
                 normal_keybindings,
+                visual_keybindings,
             })
         }
         KeybindingsMode::Helix {
@@ -1524,8 +1590,13 @@ fn setup_keybindings(engine_state: &EngineState, line_editor: Reedline) -> Reedl
             KeybindingsMode::Vi {
                 insert_keybindings,
                 normal_keybindings,
+                visual_keybindings,
             } => {
-                let edit_mode = Box::new(Vi::new(insert_keybindings, normal_keybindings));
+                let edit_mode = Box::new(Vi::new(
+                    insert_keybindings,
+                    normal_keybindings,
+                    visual_keybindings,
+                ));
                 line_editor.with_edit_mode(edit_mode)
             }
             KeybindingsMode::Helix {
@@ -1552,8 +1623,15 @@ fn setup_keybindings(engine_state: &EngineState, line_editor: Reedline) -> Reedl
 ///
 /// Make sure that the terminal supports the kitty protocol if the config is asking for it
 ///
+/// Warn (in the log) when `use_kitty_protocol` is on but the terminal lacks support.
+///
+/// The probe is a terminal round trip, and reedline runs its own cached probe before enabling
+/// the protocol, so only pay for this one when the warning could actually be seen.
 fn kitty_protocol_healthcheck(engine_state: &EngineState) {
-    if engine_state.get_config().use_kitty_protocol && !reedline::kitty_protocol_available() {
+    if log::log_enabled!(log::Level::Warn)
+        && engine_state.get_config().use_kitty_protocol
+        && !reedline::kitty_protocol_available()
+    {
         warn!("Terminal doesn't support use_kitty_protocol config");
     }
 }
@@ -2275,9 +2353,11 @@ mod product_keybinding_tests {
             KeybindingsMode::Vi {
                 insert_keybindings,
                 normal_keybindings,
+                visual_keybindings,
             } => {
                 assert_baseline_has_clear_screen(&insert_keybindings, "vi insert baseline");
                 assert_baseline_has_clear_screen(&normal_keybindings, "vi normal baseline");
+                assert_baseline_has_clear_screen(&visual_keybindings, "vi visual baseline");
             }
             _other => panic!("expected vi baseline"),
         }
@@ -2286,11 +2366,14 @@ mod product_keybinding_tests {
             KeybindingsMode::Vi {
                 insert_keybindings,
                 normal_keybindings,
+                visual_keybindings,
             } => {
                 assert_ctrl_l_unbound(&insert_keybindings, "vi insert product");
                 assert_ctrl_l_unbound(&normal_keybindings, "vi normal product");
+                assert_ctrl_l_unbound(&visual_keybindings, "vi visual product");
                 assert_hash_not_host_command(&insert_keybindings, "vi insert product");
                 assert_hash_not_host_command(&normal_keybindings, "vi normal product");
+                assert_hash_not_host_command(&visual_keybindings, "vi visual product");
             }
             _other => panic!("expected vi product maps"),
         }
