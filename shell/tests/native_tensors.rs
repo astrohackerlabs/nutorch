@@ -436,8 +436,8 @@ fn tensor_metadata_roundtrips_integer_boolean_and_nonfinite_data() {
         {integers: ($round | torch value), booleans: ($boolean | torch value --meta | torch tensor | torch value),
          shape: ($round | torch shape), dtype: ($round | torch value --meta).dtype,
          finite: ($nonfinite | torch value --meta | torch tensor | torch isfinite | torch value),
-         large_literal_kind: (18446744073709551615 | describe),
-         large_literal: (torch tensor [18446744073709551615] | torch value),
+         large_literal_kind: (18446744073709551615.0 | describe),
+         large_literal: (torch tensor [18446744073709551615.0] | torch value),
          ops: (torch ops | length)} | to json --raw
     "#, true);
     let v: serde_json::Value = serde_json::from_str(&output).unwrap();

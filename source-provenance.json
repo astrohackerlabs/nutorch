@@ -5,15 +5,15 @@
       "name": "nushell",
       "checkout": "forks/nushell",
       "upstream": "https://github.com/nushell/nushell.git",
-      "base": "251b39276970c015fb6d97d9ee750fe14788f62c",
-      "branch": "issue-26101014540995-exp1-upstream-update",
-      "expected_head": "6e615d022235279bc4a020219626c94858ce9907",
-      "expected_tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
+      "base": "de7d7584cbbff6623e046f25af412d2182d01525",
+      "branch": "issue-26102310572050-exp1-upstream-update",
+      "expected_head": "4c13781f948167d91d7551f9c028f85b46711a52",
+      "expected_tree": "29d6d882ac65dca81e65d892b308021e13a282a4",
       "patch_directories": [
-        "patches/nushell/patches/issue-26101014540995"
+        "patches/nushell/patches/issue-26102310572050"
       ],
       "patch_count": 20,
-      "archive_sha256": "b8baae5999f6ca85d8b3b590ac9b0f255a53654d138bee78b1db9ddfc9687d33",
+      "archive_sha256": "f5c83ea86198273fc332f125c8a03454f0d5f47344f108ecfd2093a06c8db016",
       "allowed_untracked": [],
       "update": {
         "kind": "branch",
@@ -24,15 +24,15 @@
       "name": "reedline",
       "checkout": "forks/reedline",
       "upstream": "https://github.com/nushell/reedline.git",
-      "base": "b5d93522d1a6db3909313944d9cf7fd70773ff79",
-      "branch": "issue-26101014540995-exp1-upstream-update",
-      "expected_head": "ab8626403cd9dc8d2211818e2050910c25044b75",
-      "expected_tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
+      "base": "7701cb0bfbd2196173b26e0670c3f12bd47d1a36",
+      "branch": "issue-26102310572050-exp1-upstream-update",
+      "expected_head": "4132174e07da3db12860288cba6fd1aa393e8fd2",
+      "expected_tree": "1a361bc9a7abcfeeedbb389965911107bf7ce97f",
       "patch_directories": [
-        "patches/reedline/patches/issue-26101014540995"
+        "patches/reedline/patches/issue-26102310572050"
       ],
-      "patch_count": 4,
-      "archive_sha256": "4a953e25464b121e2673dfe32269bbcc3901e2a6854d3704499631665f39f284",
+      "patch_count": 5,
+      "archive_sha256": "2a5672e8fc6fc6b88874519be0197a35b8fc2c2d607c357cf3b9645be6a6d7f7",
       "allowed_untracked": [],
       "update": {
         "kind": "branch",
@@ -43,28 +43,28 @@
   "verified": [
     {
       "name": "nushell",
-      "head": "6e615d022235279bc4a020219626c94858ce9907",
-      "tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
-      "branch": "issue-26101014540995-exp1-upstream-update",
+      "head": "4c13781f948167d91d7551f9c028f85b46711a52",
+      "tree": "29d6d882ac65dca81e65d892b308021e13a282a4",
+      "branch": "issue-26102310572050-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
       "prefix_count": 20,
       "patch_count": 20,
-      "archive_sha256": "b8baae5999f6ca85d8b3b590ac9b0f255a53654d138bee78b1db9ddfc9687d33",
-      "expected_tree": "953cc2efe910d7c19c79c24203cc99d1890c15b2",
+      "archive_sha256": "f5c83ea86198273fc332f125c8a03454f0d5f47344f108ecfd2093a06c8db016",
+      "expected_tree": "29d6d882ac65dca81e65d892b308021e13a282a4",
       "action": "already-ready"
     },
     {
       "name": "reedline",
-      "head": "ab8626403cd9dc8d2211818e2050910c25044b75",
-      "tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
-      "branch": "issue-26101014540995-exp1-upstream-update",
+      "head": "4132174e07da3db12860288cba6fd1aa393e8fd2",
+      "tree": "1a361bc9a7abcfeeedbb389965911107bf7ce97f",
+      "branch": "issue-26102310572050-exp1-upstream-update",
       "ready": true,
       "canonical_exists": true,
-      "prefix_count": 4,
-      "patch_count": 4,
-      "archive_sha256": "4a953e25464b121e2673dfe32269bbcc3901e2a6854d3704499631665f39f284",
-      "expected_tree": "e5c7db940c4d6b11a5a61fd535418db67b7edd98",
+      "prefix_count": 5,
+      "patch_count": 5,
+      "archive_sha256": "2a5672e8fc6fc6b88874519be0197a35b8fc2c2d607c357cf3b9645be6a6d7f7",
+      "expected_tree": "1a361bc9a7abcfeeedbb389965911107bf7ce97f",
       "action": "already-ready"
     }
   ],

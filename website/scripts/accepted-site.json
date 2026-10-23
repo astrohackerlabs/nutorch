@@ -1950,9 +1950,6 @@
     "experiment": 1,
     "design_commit": "33b95650c",
     "scope": "Append catalog tips to the existing topic page for each category. Update the shell page pointer and the autograd concept link.",
-    "changed_sources": [
-      "content/docs/nushell.md",
-      "content/docs/autograd.md"
-    ]
+    "changed_sources": ["content/docs/nushell.md", "content/docs/autograd.md"]
   }
 }
